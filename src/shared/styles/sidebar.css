@@ -1,0 +1,46 @@
+/* ── Sidebar Extended Styles ── */
+
+        @keyframes onlinePulse {
+          0%,100% { opacity: 1; transform: scale(1); }
+          50%      { opacity: 0.6; transform: scale(0.85); }
+        }
+        .sb-user-inner { position: relative; }
+        .bottom-nav {
+          display: none;
+          position: fixed; bottom: 0; left: 0; right: 0;
+          height: 64px;
+          background: rgba(12,12,11,0.96);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border-top: 1px solid rgba(255,255,255,0.06);
+          z-index: 300;
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+        .bottom-nav-inner {
+          display: flex; height: 100%;
+          align-items: center; justify-content: space-around;
+        }
+        .bn-tab {
+          display: flex; flex-direction: column; align-items: center;
+          gap: 3px; padding: 8px 12px; cursor: pointer;
+          border: none; background: none;
+          color: rgba(255,255,255,0.3);
+          text-decoration: none;
+          transition: color 0.2s;
+          position: relative;
+        }
+        .bn-tab.active { color: var(--c-lime); }
+        .bn-tab.active .bn-icon { transform: scale(1.2); }
+        .bn-icon { font-size: 20px; display: block; transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1); }
+        .bn-label { font-size: 9px; font-family: var(--fm); letter-spacing: 0.5px; text-transform: uppercase; font-weight: 600; }
+        .bn-badge {
+          position: absolute; top: 6px; right: 6px;
+          width: 8px; height: 8px;
+          background: var(--c-coral); border-radius: 50%;
+          border: 2px solid rgba(12,12,11,0.96);
+        }
+        @media (max-width: 768px) {
+          .bottom-nav { display: flex; }
+          #content { padding-bottom: 72px !important; }
+        }
+      

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 80" fill="none">
+  <defs>
+    <linearGradient id="lg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#c5f135"><animate attributeName="stop-color" values="#c5f135;#1a56ff;#ff4d1c;#c5f135" dur="4s" repeatCount="indefinite"/></stop>
+      <stop offset="100%" stop-color="#1a56ff"><animate attributeName="stop-color" values="#1a56ff;#ff4d1c;#c5f135;#1a56ff" dur="4s" repeatCount="indefinite"/></stop>
+    </linearGradient>
+  </defs>
+  <text x="150" y="55" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="60" font-weight="900" fill="url(#lg)" letter-spacing="8">FORJA</text>
+  <rect x="20" y="68" width="260" height="2" rx="1" fill="url(#lg)" opacity="0.4">
+    <animate attributeName="width" values="0;260;0" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="x" values="150;20;150" dur="3s" repeatCount="indefinite"/>
+  </rect>
+</svg>

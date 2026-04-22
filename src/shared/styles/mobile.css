@@ -1,0 +1,243 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   FORJA MOBILE RESPONSIVE — fixes for all pages on phones
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── DM PAGE — sidebar + chat layout ────────────────────────────────── */
+@media (max-width: 768px) {
+  /* DM two-column layout → stack */
+  .dm-layout {
+    flex-direction: column !important;
+  }
+  .dm-sidebar {
+    width: 100% !important;
+    max-height: 35vh !important;
+    overflow-y: auto !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--c-border) !important;
+  }
+  .dm-chat-area {
+    flex: 1 !important;
+    min-height: 0 !important;
+  }
+
+  /* Chat page — msgs area */
+  .chat-wrap {
+    flex-direction: column !important;
+  }
+  .chat-sidebar {
+    display: none !important;
+  }
+  .chat-main {
+    width: 100% !important;
+  }
+  .msgs-area {
+    height: calc(100vh - 180px) !important;
+  }
+
+  /* KPI grid → 2 columns */
+  .ov-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Overview bottom grid → stack */
+  .ov-bottom,
+  .ov-main {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Nutrition layout → stack */
+  .nut-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Sleep layout → stack */
+  .sleep-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Profile layout → stack */
+  .prof-layout {
+    grid-template-columns: 1fr !important;
+  }
+  .prof-left-card {
+    position: static !important;
+  }
+
+  /* Teams grid → 1 column */
+  .teams-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Coach/Admin overview grids */
+  .ov-kpis {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .ov-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Workout grid → 1 column */
+  .wk-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Admin table → scroll horizontal */
+  .admin-table-wrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hero sections → reduce padding */
+  .forja-hero {
+    padding: 20px 16px !important;
+    min-height: 120px !important;
+    border-radius: 14px !important;
+    margin-bottom: 16px !important;
+  }
+
+  /* Hide clock on mobile */
+  .tb-clock {
+    display: none !important;
+  }
+
+  /* Recharts responsive */
+  .recharts-wrapper {
+    font-size: 10px !important;
+  }
+
+  /* Fix content padding for bottom nav */
+  #content {
+    padding-bottom: 80px !important;
+  }
+
+  /* Fix stat cards grid */
+  .stat-cards-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* ── Extra small phones ─────────────────────────────────────────────── */
+@media (max-width: 400px) {
+  .ov-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .ov-kpis {
+    grid-template-columns: 1fr !important;
+  }
+  .forja-hero {
+    padding: 16px 12px !important;
+  }
+  .kpi-val {
+    font-size: 32px !important;
+  }
+  .tb-title {
+    font-size: 15px !important;
+  }
+}
+
+/* ── Bottom nav styles (for Coach + Nut layouts) ────────────────────── */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 64px;
+  background: rgba(12,12,11,0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  z-index: 300;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.bottom-nav-inner {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: space-around;
+}
+.bn-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: rgba(255,255,255,0.3);
+  text-decoration: none;
+  transition: color 0.2s;
+  position: relative;
+}
+.bn-tab.active { color: var(--c-lime); }
+.bn-tab.active .bn-icon { transform: scale(1.15); }
+.bn-icon {
+  font-size: 18px;
+  display: block;
+  transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+}
+.bn-label {
+  font-size: 9px;
+  font-family: var(--fm);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .bottom-nav { display: flex; }
+}
+
+/* ── Sidebar overlay + mobile sidebar ───────────────────────────────── */
+.sidebar-overlay {
+  display: none;
+}
+@media (max-width: 768px) {
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 399;
+  }
+  #sidebar {
+    position: fixed !important;
+    left: -280px;
+    top: 0;
+    bottom: 0;
+    z-index: 400;
+    transition: left 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
+    width: 260px !important;
+    min-width: 260px !important;
+  }
+  #sidebar.open {
+    left: 0;
+  }
+}
+
+/* ── Hamburger button visibility ────────────────────────────────────── */
+.hamburger {
+  display: none;
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--c-border);
+  background: var(--c-surface);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.hamburger:hover { background: var(--c-bg); }
+.hamburger span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--c-ink);
+  border-radius: 2px;
+  transition: all 0.25s;
+}
+@media (max-width: 768px) {
+  .hamburger { display: flex; }
+}

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <circle cx="100" cy="100" r="90" fill="rgba(245,197,24,0.04)"/>
+  <defs><filter id="tg"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+  <g filter="url(#tg)" transform="translate(100,95)">
+    <path d="M-25,-30 L25,-30 L20,10 C18,25 10,35 0,38 C-10,35 -18,25 -20,10 Z" fill="none" stroke="#f5c518" stroke-width="2.5">
+      <animate attributeName="stroke-opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+    </path>
+    <line x1="0" y1="38" x2="0" y2="52" stroke="#f5c518" stroke-width="2.5"/>
+    <rect x="-18" y="52" width="36" height="6" rx="3" fill="none" stroke="#f5c518" stroke-width="2"/>
+    <path d="M-25,-30 C-25,-30 -45,-25 -45,-10 C-45,5 -30,10 -20,10" fill="none" stroke="#f5c518" stroke-width="2" opacity="0.5"/>
+    <path d="M25,-30 C25,-30 45,-25 45,-10 C45,5 30,10 20,10" fill="none" stroke="#f5c518" stroke-width="2" opacity="0.5"/>
+    <text x="0" y="-2" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#f5c518" opacity="0.8">★</text>
+  </g>
+  <circle cx="100" cy="95" r="50" fill="none" stroke="#f5c518" stroke-width="0.5" opacity="0.15">
+    <animate attributeName="r" values="50;70;50" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.2;0;0.2" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="60" cy="40" r="2" fill="#f5c518" opacity="0.3"><animate attributeName="opacity" values="0;0.6;0" dur="1.5s" repeatCount="indefinite"/></circle>
+  <circle cx="145" cy="55" r="1.5" fill="#f5c518" opacity="0.2"><animate attributeName="opacity" values="0.1;0.5;0.1" dur="2s" repeatCount="indefinite"/></circle>
+  <circle cx="50" cy="140" r="1" fill="#f5c518" opacity="0.4"><animate attributeName="opacity" values="0.2;0.7;0.2" dur="2.5s" repeatCount="indefinite"/></circle>
+</svg>

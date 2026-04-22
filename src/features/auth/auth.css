@@ -1,0 +1,608 @@
+/* ── FORJA Auth Pages (Login / Register / Demo) ── */
+
+        .forja-auth-page {
+          min-height: 100vh;
+          background: #05070b;
+          color: #fff;
+          font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+        }
+        .forja-auth-shell {
+          min-height: 100vh;
+          display: grid;
+          grid-template-columns: minmax(0, 1.08fr) minmax(380px, 0.92fr);
+        }
+        .forja-auth-left {
+          position: relative;
+          overflow: hidden;
+          min-height: 100vh;
+        }
+        .forja-auth-left::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          background:
+            linear-gradient(130deg, rgba(4,7,12,0.92) 0%, rgba(4,7,12,0.56) 44%, rgba(4,7,12,0.88) 100%),
+            radial-gradient(circle at 18% 24%, rgba(215,255,69,0.16), transparent 28%),
+            radial-gradient(circle at 82% 75%, rgba(108,152,255,0.18), transparent 24%);
+        }
+        .forja-auth-cover {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          filter: saturate(0.92) brightness(0.92);
+        }
+        .forja-auth-left-content {
+          position: relative;
+          z-index: 2;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          min-height: 100vh;
+          padding: 28px 32px 32px;
+        }
+        .forja-kicker {
+          font-size: 11px;
+          line-height: 1;
+          text-transform: uppercase;
+          letter-spacing: 0.42em;
+          color: rgba(255,255,255,0.45);
+        }
+        .forja-logo {
+          margin-top: 14px;
+          font-size: 28px;
+          font-weight: 700;
+          letter-spacing: 0.3em;
+        }
+        .forja-ghost-btn,
+        .forja-tab-btn,
+        .forja-primary-btn,
+        .forja-link-btn,
+        .forja-role-chip,
+        .forja-plan-card,
+        .forja-demo-card,
+        .forja-inline-btn,
+        .forja-eye-btn {
+          font: inherit;
+        }
+        .forja-ghost-btn {
+          border: 1px solid rgba(255,255,255,0.15);
+          background: rgba(255,255,255,0.05);
+          color: rgba(255,255,255,0.85);
+          border-radius: 999px;
+          padding: 11px 18px;
+          cursor: pointer;
+          transition: 180ms ease;
+          text-decoration: none;
+        }
+        .forja-ghost-btn:hover {
+          background: rgba(255,255,255,0.1);
+          transform: translateY(-1px);
+        }
+        .forja-chip-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+          margin-top: 34px;
+        }
+        .forja-chip {
+          border: 1px solid rgba(255,255,255,0.09);
+          background: rgba(255,255,255,0.055);
+          backdrop-filter: blur(16px);
+          box-shadow: 0 24px 80px rgba(0,0,0,0.28);
+          border-radius: 999px;
+          padding: 12px 16px;
+          font-size: 14px;
+          color: rgba(255,255,255,0.82);
+        }
+        .forja-left-stats {
+          display: grid;
+          gap: 16px;
+          max-width: 780px;
+          grid-template-columns: repeat(var(--forja-tab-count, 3), minmax(0, 1fr));
+        }
+        .forja-glass-card {
+          background: rgba(255,255,255,0.055);
+          border: 1px solid rgba(255,255,255,0.09);
+          backdrop-filter: blur(16px);
+          box-shadow: 0 24px 80px rgba(0,0,0,0.28);
+        }
+        .forja-stat-card {
+          border-radius: 22px;
+          padding: 16px;
+        }
+        .forja-stat-title {
+          font-size: 11px;
+          line-height: 1.2;
+          text-transform: uppercase;
+          letter-spacing: 0.22em;
+          color: rgba(255,255,255,0.42);
+        }
+        .forja-stat-copy {
+          margin-top: 10px;
+          font-size: 14px;
+          line-height: 1.6;
+          color: rgba(255,255,255,0.78);
+        }
+        .forja-headline {
+          margin: 0;
+          font-size: clamp(2.7rem, 4vw, 5.2rem);
+          line-height: 0.98;
+          letter-spacing: -0.04em;
+          font-weight: 700;
+          max-width: 880px;
+        }
+        .forja-body-copy {
+          margin-top: 26px;
+          max-width: 600px;
+          font-size: 18px;
+          line-height: 1.8;
+          color: rgba(255,255,255,0.72);
+        }
+        .forja-auth-right {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          padding: 28px;
+          background: #06080d;
+        }
+        .forja-auth-right::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background:
+            radial-gradient(circle at top, rgba(215,255,69,0.1), transparent 24%),
+            radial-gradient(circle at bottom right, rgba(108,152,255,0.12), transparent 28%);
+        }
+        .forja-auth-panel {
+          position: relative;
+          z-index: 1;
+          width: 100%;
+          max-width: 560px;
+          border-radius: 34px;
+          padding: 24px 24px 22px;
+        }
+        .forja-auth-panel h2 {
+          margin: 12px 0 0;
+          font-size: clamp(2rem, 4vw, 2.2rem);
+          line-height: 1.05;
+          letter-spacing: -0.03em;
+        }
+        .forja-mini-label {
+          font-size: 11px;
+          line-height: 1.2;
+          text-transform: uppercase;
+          letter-spacing: 0.32em;
+          color: rgba(255,255,255,0.4);
+        }
+        .forja-panel-copy {
+          margin: 14px 0 0;
+          font-size: 15px;
+          line-height: 1.85;
+          color: rgba(255,255,255,0.62);
+        }
+        .forja-status-banner {
+          margin-top: 16px;
+          border-radius: 22px;
+          padding: 16px 18px;
+          border: 1px solid rgba(255,255,255,0.1);
+          background: rgba(255,255,255,0.04);
+        }
+        .forja-status-banner strong {
+          display: block;
+          margin-bottom: 6px;
+          font-size: 14px;
+        }
+        .forja-status-banner p {
+          margin: 0;
+          font-size: 13px;
+          line-height: 1.7;
+          color: rgba(255,255,255,0.65);
+        }
+        .forja-tab-row {
+          margin-top: 22px;
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 8px;
+          border-radius: 20px;
+          border: 1px solid rgba(255,255,255,0.1);
+          background: rgba(255,255,255,0.05);
+          padding: 6px;
+        }
+        .forja-tab-btn {
+          border: 1px solid transparent;
+          border-radius: 16px;
+          padding: 13px 10px;
+          background: transparent;
+          color: rgba(255,255,255,0.72);
+          cursor: pointer;
+          transition: 180ms ease;
+          font-size: 14px;
+          font-weight: 600;
+        }
+        .forja-tab-btn:hover {
+          background: rgba(255,255,255,0.06);
+        }
+        .forja-tab-btn.active {
+          background: #fff;
+          color: #05070b;
+        }
+        .forja-section {
+          margin-top: 24px;
+        }
+        .forja-form-grid {
+          display: grid;
+          gap: 16px;
+        }
+        .forja-field-wrap label {
+          display: block;
+          margin-bottom: 10px;
+          font-size: 14px;
+          color: rgba(255,255,255,0.74);
+        }
+        .forja-field,
+        .forja-field-wrap input {
+          width: 100%;
+          height: 54px;
+          border-radius: 18px;
+          padding: 0 16px;
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.09);
+          color: #fff;
+          transition: 180ms ease;
+          box-sizing: border-box;
+        }
+        .forja-field-wrap input:focus {
+          outline: none;
+          border-color: rgba(215,255,69,0.58);
+          box-shadow: 0 0 0 4px rgba(215,255,69,0.1);
+          background: rgba(255,255,255,0.07);
+        }
+        .forja-password-field {
+          position: relative;
+        }
+        .forja-password-field input {
+          padding-right: 52px;
+        }
+        .forja-eye-btn {
+          position: absolute;
+          right: 16px;
+          top: 50%;
+          transform: translateY(-50%);
+          border: 0;
+          padding: 0;
+          width: 24px;
+          height: 24px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          color: rgba(255,255,255,0.52);
+          background: transparent;
+          cursor: pointer;
+        }
+        .forja-eye-btn:hover {
+          color: #fff;
+        }
+        .forja-row-between {
+          margin-top: 14px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 14px;
+          font-size: 14px;
+          color: rgba(255,255,255,0.56);
+        }
+        .forja-checkbox {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          cursor: pointer;
+          user-select: none;
+        }
+        .forja-checkbox input {
+          width: 16px;
+          height: 16px;
+          accent-color: #d7ff45;
+        }
+        .forja-link-btn {
+          border: 0;
+          padding: 0;
+          color: rgba(255,255,255,0.76);
+          background: transparent;
+          cursor: pointer;
+          transition: color 160ms ease;
+        }
+        .forja-link-btn:hover {
+          color: #fff;
+        }
+        .forja-primary-btn,
+        .forja-inline-btn {
+          border: 0;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          cursor: pointer;
+          transition: 180ms ease;
+          font-weight: 700;
+        }
+        .forja-primary-btn {
+          width: 100%;
+          height: 56px;
+          margin-top: 22px;
+          border-radius: 20px;
+          background: #d7ff45;
+          color: #05070b;
+          box-shadow: 0 12px 34px rgba(215,255,69,0.18);
+        }
+        .forja-primary-btn:hover:not(:disabled),
+        .forja-inline-btn:hover:not(:disabled) {
+          transform: translateY(-1px);
+        }
+        .forja-primary-btn:disabled,
+        .forja-inline-btn:disabled {
+          cursor: not-allowed;
+          opacity: 0.7;
+          transform: none;
+        }
+        .forja-alert {
+          margin-top: 18px;
+          border-radius: 18px;
+          padding: 14px 16px;
+          border: 1px solid rgba(255,255,255,0.1);
+          font-size: 14px;
+          line-height: 1.7;
+        }
+        .forja-alert.error {
+          background: rgba(255, 94, 94, 0.08);
+          border-color: rgba(255, 94, 94, 0.18);
+          color: #ffb8b8;
+        }
+        .forja-alert.success {
+          background: rgba(122, 226, 144, 0.08);
+          border-color: rgba(122, 226, 144, 0.18);
+          color: #c8ffd1;
+        }
+        .forja-plan-grid,
+        .forja-role-grid {
+          display: grid;
+          gap: 12px;
+        }
+        .forja-plan-grid {
+          margin-top: 16px;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .forja-role-grid {
+          margin-top: 12px;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .forja-plan-card,
+        .forja-role-chip,
+        .forja-demo-card {
+          border: 1px solid rgba(255,255,255,0.1);
+          background: rgba(255,255,255,0.04);
+          color: #fff;
+          border-radius: 22px;
+          cursor: pointer;
+          transition: 220ms ease;
+        }
+        .forja-plan-card:hover:not(:disabled),
+        .forja-role-chip:hover:not(:disabled),
+        .forja-demo-card:hover {
+          transform: translateY(-2px);
+          border-color: rgba(255,255,255,0.2);
+          background: rgba(255,255,255,0.06);
+        }
+        .forja-plan-card:disabled,
+        .forja-role-chip:disabled {
+          cursor: not-allowed;
+          opacity: 0.78;
+        }
+        .forja-plan-card {
+          padding: 16px;
+          text-align: left;
+        }
+        .forja-plan-card.active {
+          border-color: rgba(215,255,69,0.42);
+          box-shadow: inset 0 0 0 1px rgba(215,255,69,0.18);
+          background: rgba(215,255,69,0.1);
+        }
+        .forja-plan-card-title,
+        .forja-role-chip-title,
+        .forja-demo-title {
+          font-weight: 600;
+        }
+        .forja-plan-card-title {
+          margin-top: 8px;
+          font-size: 18px;
+        }
+        .forja-plan-card-copy {
+          margin-top: 10px;
+          font-size: 13px;
+          line-height: 1.65;
+          color: rgba(255,255,255,0.62);
+        }
+        .forja-role-chip {
+          padding: 0;
+          text-align: left;
+          overflow: hidden;
+        }
+        .forja-role-chip.active {
+          border-color: rgba(215,255,69,0.42);
+          box-shadow: inset 0 0 0 1px rgba(215,255,69,0.18);
+        }
+        .forja-role-chip img {
+          width: 100%;
+          height: 108px;
+          object-fit: cover;
+          display: block;
+        }
+        .forja-role-chip-content {
+          padding: 12px 14px 14px;
+        }
+        .forja-role-chip-title {
+          margin-top: 8px;
+          font-size: 15px;
+        }
+        .forja-inline-label {
+          font-size: 11px;
+          line-height: 1.2;
+          text-transform: uppercase;
+          letter-spacing: 0.24em;
+          color: rgba(255,255,255,0.42);
+        }
+        .forja-locked-note {
+          margin-top: 12px;
+          font-size: 13px;
+          line-height: 1.7;
+          color: rgba(255,255,255,0.55);
+        }
+        .forja-demo-list {
+          display: grid;
+          gap: 12px;
+        }
+        .forja-demo-card {
+          padding: 12px;
+          text-align: left;
+        }
+        .forja-demo-card.active {
+          border-color: rgba(215,255,69,0.42);
+          box-shadow: inset 0 0 0 1px rgba(215,255,69,0.18);
+        }
+        .forja-demo-grid {
+          display: grid;
+          min-height: 162px;
+          grid-template-columns: 132px minmax(0, 1fr);
+          gap: 16px;
+        }
+        .forja-demo-image {
+          width: 100%;
+          height: 100%;
+          min-height: 162px;
+          border-radius: 18px;
+          object-fit: cover;
+        }
+        .forja-demo-content {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          gap: 14px;
+          min-width: 0;
+          padding: 4px 0;
+        }
+        .forja-demo-title {
+          margin-top: 8px;
+          font-size: 22px;
+        }
+        .forja-demo-copy {
+          margin: 10px 0 0;
+          font-size: 14px;
+          line-height: 1.75;
+          color: rgba(255,255,255,0.62);
+        }
+        .forja-demo-footer {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+        .forja-demo-email {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 14px;
+          color: rgba(255,255,255,0.72);
+        }
+        .forja-inline-btn {
+          min-width: 132px;
+          height: 40px;
+          padding: 0 16px;
+          border-radius: 999px;
+          color: #05070b;
+        }
+        .forja-footer-strip {
+          margin-top: 22px;
+          padding-top: 18px;
+          border-top: 1px solid rgba(255,255,255,0.08);
+          display: flex;
+          flex-wrap: wrap;
+          gap: 14px 18px;
+          font-size: 14px;
+          color: rgba(255,255,255,0.54);
+        }
+        .forja-footer-strip span {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .forja-mobile-only {
+          display: none;
+        }
+        @media (max-width: 960px) {
+          .forja-auth-shell {
+            grid-template-columns: 1fr;
+          }
+          .forja-auth-left {
+            min-height: 54vh;
+          }
+          .forja-auth-left-content {
+            min-height: 54vh;
+          }
+        }
+        @media (max-width: 760px) {
+          .forja-auth-panel {
+            padding: 20px;
+            border-radius: 28px;
+          }
+          .forja-left-stats,
+          .forja-plan-grid,
+          .forja-role-grid {
+            grid-template-columns: 1fr;
+          }
+          .forja-demo-grid {
+            grid-template-columns: 1fr;
+          }
+          .forja-demo-image {
+            min-height: 210px;
+          }
+          .forja-row-between,
+          .forja-demo-footer {
+            align-items: flex-start;
+            flex-direction: column;
+          }
+          .forja-chip-row {
+            margin-top: 24px;
+          }
+        }
+        @media (max-width: 640px) {
+          .forja-auth-left-content {
+            padding: 22px 20px 20px;
+          }
+          .forja-auth-right {
+            padding: 20px 14px;
+          }
+          .forja-tab-row {
+            gap: 6px;
+            padding: 5px;
+          }
+          .forja-tab-btn {
+            padding: 12px 8px;
+            font-size: 13px;
+          }
+          .forja-headline {
+            font-size: 2.35rem;
+          }
+          .forja-panel-copy,
+          .forja-body-copy {
+            font-size: 15px;
+          }
+          .forja-mobile-only {
+            display: inline;
+          }
+        }
+      

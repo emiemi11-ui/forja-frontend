@@ -1,0 +1,246 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   FORJA DARK MODE
+   Toggle via [data-theme="dark"] on <html>
+   ═══════════════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] {
+  --c-bg:       #0C0C0B;
+  --c-surface:  #161614;
+  --c-surface2: #1C1C1A;
+  --c-border:   #2A2A27;
+  --c-border2:  #3A3A36;
+  --c-ink:      #F0ECE6;
+  --c-ink2:     #B0AAA0;
+  --c-ink3:     #706A60;
+  --c-lime:     #C5F135;
+  --c-lime-d:   #A0CC00;
+  --c-lime-bg:  rgba(197,241,53,.10);
+  --c-coral:    #FF5533;
+  --c-coral-bg: rgba(255,85,51,.10);
+  --c-blue:     #3B6FFF;
+  --c-blue-bg:  rgba(59,111,255,.10);
+  --c-purple:   #9B4FDE;
+  --c-purple-bg:rgba(155,79,222,.10);
+  --c-green:    #22C55E;
+  --c-green-bg: rgba(34,197,94,.10);
+  --c-amber:    #D97706;
+  --c-amber-bg: rgba(217,119,6,.10);
+  --c-sidebar:  #080807;
+  --c-sidebar2: #0F0F0E;
+  --shadow-sm:  0 2px 8px rgba(0,0,0,.25), 0 1px 2px rgba(0,0,0,.15);
+  --shadow:     0 6px 24px rgba(0,0,0,.35), 0 2px 6px rgba(0,0,0,.2);
+  --shadow-lg:  0 16px 56px rgba(0,0,0,.45), 0 6px 16px rgba(0,0,0,.25);
+  /* Hero — darker in dark mode */
+  --hero-bg:      linear-gradient(135deg, #080807 0%, #0e0e0d 50%, #080807 100%);
+  --hero-text:    #F0ECE6;
+  --hero-text2:   rgba(240,236,230,0.55);
+  --hero-text3:   rgba(240,236,230,0.25);
+  --hero-border:  rgba(255,255,255,0.04);
+  --hero-card-bg: rgba(255,255,255,0.04);
+  --hero-card-bd: rgba(255,255,255,0.06);
+  --hero-overlay: linear-gradient(90deg, rgba(8,8,7,0.96) 0%, rgba(8,8,7,0.75) 55%, rgba(8,8,7,0.45) 100%);
+  --hero-shadow:  0 12px 40px rgba(0,0,0,0.4);
+  --hero-img-opacity: 0.1;
+}
+
+/* ── Body & main ────────────────────────────────────────────────────── */
+[data-theme="dark"] body {
+  background: var(--c-bg);
+  color: var(--c-ink);
+}
+
+/* ── Sidebar already dark — reduce further ──────────────────────────── */
+[data-theme="dark"] #sidebar {
+  background: linear-gradient(180deg, #060605 0%, #0a0a09 60%, #050504 100%);
+  border-right-color: rgba(255,255,255,.03);
+}
+
+/* ── Topbar ──────────────────────────────────────────────────────────── */
+[data-theme="dark"] #topbar {
+  background: linear-gradient(180deg, var(--c-surface) 0%, rgba(22,22,20,0.95) 100%) !important;
+  border-bottom-color: var(--c-border);
+}
+
+/* ── Cards ───────────────────────────────────────────────────────────── */
+[data-theme="dark"] .card,
+[data-theme="dark"] .meal-sec,
+[data-theme="dark"] .n-side-card,
+[data-theme="dark"] .log-card,
+[data-theme="dark"] .mixer-card,
+[data-theme="dark"] .lib-card,
+[data-theme="dark"] .tc {
+  background: var(--c-surface);
+  border-color: var(--c-border);
+}
+
+[data-theme="dark"] .card:hover {
+  box-shadow: 0 16px 40px rgba(0,0,0,0.3), 0 0 0 1px var(--c-border) !important;
+}
+
+/* ── Inputs ──────────────────────────────────────────────────────────── */
+[data-theme="dark"] .inp,
+[data-theme="dark"] .time-inp,
+[data-theme="dark"] .mk-inp,
+[data-theme="dark"] .chat-inp {
+  background: var(--c-bg);
+  border-color: var(--c-border);
+  color: var(--c-ink);
+}
+[data-theme="dark"] .inp:focus,
+[data-theme="dark"] .time-inp:focus {
+  border-color: var(--c-lime);
+  box-shadow: 0 0 0 3px rgba(197,241,53,.08);
+}
+
+/* ── Chips ───────────────────────────────────────────────────────────── */
+[data-theme="dark"] .chip {
+  background: var(--c-surface);
+  border-color: var(--c-border);
+  color: var(--c-ink2);
+}
+[data-theme="dark"] .chip.on {
+  background: var(--c-lime-bg);
+  border-color: rgba(197,241,53,.3);
+  color: var(--c-lime);
+}
+
+/* ── Tags ────────────────────────────────────────────────────────────── */
+[data-theme="dark"] .tag-lime { background: var(--c-lime-bg); color: var(--c-lime); }
+[data-theme="dark"] .tag-coral { background: var(--c-coral-bg); color: var(--c-coral); }
+[data-theme="dark"] .tag-blue { background: var(--c-blue-bg); color: var(--c-blue); }
+
+/* ── Buttons ─────────────────────────────────────────────────────────── */
+[data-theme="dark"] .btn-outline {
+  background: var(--c-surface);
+  border-color: var(--c-border);
+  color: var(--c-ink2);
+}
+[data-theme="dark"] .btn-outline:hover {
+  border-color: var(--c-border2);
+  color: var(--c-ink);
+  background: var(--c-bg);
+}
+
+/* ── Progress bars ───────────────────────────────────────────────────── */
+[data-theme="dark"] .prog {
+  background: var(--c-border);
+}
+
+/* ── Food / exercise rows ────────────────────────────────────────────── */
+[data-theme="dark"] .food-row:hover,
+[data-theme="dark"] .fr-item:hover,
+[data-theme="dark"] .ath-row:hover,
+[data-theme="dark"] .pex-row:hover,
+[data-theme="dark"] .hist-row:hover {
+  background: var(--c-surface2) !important;
+}
+
+/* ── Meal section headers ────────────────────────────────────────────── */
+[data-theme="dark"] .ms-header {
+  background: var(--c-bg);
+  border-bottom-color: var(--c-border);
+}
+
+/* ── Modal ───────────────────────────────────────────────────────────── */
+[data-theme="dark"] .modal-bg {
+  background: rgba(0,0,0,.7);
+}
+[data-theme="dark"] .modal {
+  background: var(--c-surface);
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
+[data-theme="dark"] .modal-close {
+  background: var(--c-bg);
+  border-color: var(--c-border);
+}
+
+/* ── Content area ambient ────────────────────────────────────────────── */
+[data-theme="dark"] #content {
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(197,241,53,0.02) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 90%, rgba(59,111,255,0.015) 0%, transparent 50%),
+    var(--c-bg) !important;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────────────── */
+[data-theme="dark"] #content::-webkit-scrollbar-thumb {
+  background: var(--c-border);
+}
+[data-theme="dark"] #content::-webkit-scrollbar-thumb:hover {
+  background: var(--c-border2);
+}
+
+/* ── Skeleton shimmer dark ───────────────────────────────────────────── */
+[data-theme="dark"] .forja-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--c-border) 25%,
+    var(--c-surface2) 50%,
+    var(--c-border) 75%
+  );
+  background-size: 200% 100%;
+}
+
+/* ── Glass card dark ─────────────────────────────────────────────────── */
+[data-theme="dark"] .glass-card {
+  background: rgba(22,22,20,0.7);
+  border-color: rgba(255,255,255,0.06);
+}
+
+/* ── Toast ───────────────────────────────────────────────────────────── */
+[data-theme="dark"] .toast {
+  background: var(--c-surface);
+  color: var(--c-ink);
+  border: 1px solid var(--c-border);
+}
+
+/* ── Card gradient line on hover ─────────────────────────────────────── */
+[data-theme="dark"] .card-glow::before {
+  background: linear-gradient(90deg, var(--c-lime), var(--c-blue), var(--c-coral));
+}
+
+/* ── Card inner glow dark ────────────────────────────────────────────── */
+[data-theme="dark"] .card-inner-glow:hover::after {
+  box-shadow: inset 0 0 30px rgba(197,241,53,0.02);
+}
+
+/* ── Bottom nav ──────────────────────────────────────────────────────── */
+[data-theme="dark"] .bottom-nav {
+  background: rgba(8,8,7,0.9) !important;
+}
+
+/* ── Profile header already dark ─────────────────────────────────────── */
+/* No changes needed */
+
+/* ── Water cups ──────────────────────────────────────────────────────── */
+[data-theme="dark"] .wcup,
+[data-theme="dark"] .cup {
+  background: var(--c-surface);
+  border-color: var(--c-border);
+}
+
+/* ── Search bar ──────────────────────────────────────────────────────── */
+[data-theme="dark"] .tb-search {
+  background: var(--c-bg);
+  border-color: var(--c-border);
+}
+[data-theme="dark"] .tb-search input {
+  color: var(--c-ink);
+}
+[data-theme="dark"] .tb-btn {
+  background: var(--c-surface);
+  border-color: var(--c-border);
+}
+
+/* ── Login page override (keep its own dark theme) ───────────────────── */
+[data-theme="dark"] .forja-login-wrap {
+  /* Login is already dark */
+}
+
+/* ── Smooth transition between themes ────────────────────────────────── */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+body, #sidebar, #topbar, #content, .card, .inp, .btn, .chip, .toast, .modal {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}

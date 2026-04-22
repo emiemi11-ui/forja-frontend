@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 80" fill="none">
+  <path d="M30,5 C30,5 5,40 5,55 A25,25 0 0,0 55,55 C55,40 30,5 30,5Z" fill="rgba(26,82,255,0.15)" stroke="#1a56ff" stroke-width="2">
+    <animate attributeName="d" values="M30,5 C30,5 5,40 5,55 A25,25 0 0,0 55,55 C55,40 30,5 30,5Z;M30,8 C30,8 8,42 8,55 A22,22 0 0,0 52,55 C52,42 30,8 30,8Z;M30,5 C30,5 5,40 5,55 A25,25 0 0,0 55,55 C55,40 30,5 30,5Z" dur="3s" repeatCount="indefinite"/>
+  </path>
+  <ellipse cx="20" cy="48" rx="4" ry="6" fill="rgba(26,82,255,0.2)" transform="rotate(-15 20 48)"/>
+</svg>

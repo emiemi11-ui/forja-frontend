@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FORJA — Train. Eat. Win Together.</title>
+<meta name="description" content="FORJA — platformă de fitness & wellness cu coach personal, planuri de nutriție, tracking antrenamente și comunitate activă. Antrenează-te, mănâncă smart, câștigă în echipă.">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700;1,900&family=Outfit:wght@300;400;500;600;700&family=Syne+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="landing.css">
+</head>
+<body class="grain-overlay">
+
+<!-- SCROLL PROGRESS -->
+<div id="scrollProgress"></div>
+
+<div class="cursor" id="cursor"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">F<em>O</em>RJA</a>
+  <div class="nav-mid">
+    <a href="#features">Ecosistem</a>
+    <a href="#plans">Planuri</a>
+    <a href="#marketplace">Echipe</a>
+    <a href="mobile.html">Mobile App</a>
+    <a href="#roles">Demo Roluri</a>
+    <a href="#faq-section">FAQ</a>
+    <a href="/contact">Contact</a>
+  </div>
+  <div class="nav-right">
+    <button class="btn-nav-ghost" onclick="location.href='/login'">Autentificare</button>
+    <a href="/login?tab=register" class="btn-nav-cta" style="text-decoration:none">Register →</a>
+  </div>
+  <button class="landing-hamburger" onclick="document.getElementById('mobileMenu').classList.toggle('open')" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile menu overlay -->
+<div id="mobileMenu" class="mobile-menu">
+  <div class="mobile-menu-inner">
+    <a href="#features" onclick="closeMobileMenu()">Ecosistem</a>
+    <a href="#plans" onclick="closeMobileMenu()">Planuri</a>
+    <a href="#marketplace" onclick="closeMobileMenu()">Echipe</a>
+    <a href="mobile.html" onclick="closeMobileMenu()">Mobile App</a>
+    <a href="#roles" onclick="closeMobileMenu()">Demo Roluri</a>
+    <a href="#faq-section" onclick="closeMobileMenu()">FAQ</a>
+    <a href="/contact" onclick="closeMobileMenu()">Contact</a>
+    <div style="border-top:1px solid rgba(0,0,0,0.08);padding-top:16px;margin-top:8px;display:flex;flex-direction:column;gap:10px;">
+      <button class="btn-nav-ghost" style="width:100%" onclick="location.href='/login'">Autentificare</button>
+      <a href="/login?tab=register" class="btn-nav-cta" style="text-decoration:none;text-align:center;display:block;width:100%">Register →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+function closeMobileMenu(){ document.getElementById('mobileMenu').classList.remove('open'); }
+</script>
+
+<main>
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker" id="ticker">
+    <span>Train smarter</span><span class="accent">✦</span>
+    <span>Eat with purpose</span><span class="accent">✦</span>
+    <span>Win together</span><span class="accent">✦</span>
+    <span>Track everything</span><span class="accent">✦</span>
+    <span>Join your team</span><span class="accent">✦</span>
+    <span>Coach-led programs</span><span class="accent">✦</span>
+    <span>AI nutrition</span><span class="accent">✦</span>
+    <span class="accent">pentru forțele tale</span><span class="accent">✦</span>
+    <span>Train smarter</span><span class="accent">✦</span>
+    <span>Eat with purpose</span><span class="accent">✦</span>
+    <span>Win together</span><span class="accent">✦</span>
+    <span>Track everything</span><span class="accent">✦</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<header id="hero" role="banner">
+  <!-- PARTICLE NETWORK -->
+  <canvas id="particleCanvas"></canvas>
+  <!-- FLOATING ORBS -->
+  <div class="orb orb-lime"></div>
+  <div class="orb orb-coral"></div>
+  <div class="orb orb-blue"></div>
+
+  <div class="hero-left">
+
+    <div class="hero-eyebrow gradient-text" style="font-size:13px;font-weight:800;">Platformă fitness & wellness</div>
+    <h1 class="hero-h1">
+      <span class="glitch" data-text="ANTRENEAZĂ-TE.">ANTRENEAZĂ-TE.</span><br>
+      <span class="underline-lime gradient-text">MĂNÂNCĂ</span> SMART.<br>
+      <span class="strike">SINGUR</span> ÎN <span style="color:var(--lime)">ECHIPĂ</span>.
+    </h1>
+    <p class="hero-sub">Coach personal, planuri de antrenament, nutriție de la specialiști și o comunitate care te ține responsabil — totul într-un singur loc.</p>
+    <div class="hero-ctas">
+      <button class="btn-lime" onclick="document.getElementById('plans').scrollIntoView({behavior:'smooth'})">Alege planul tău →</button>
+      <button class="btn-outline" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">Cum funcționează →</button>
+    </div>
+    <div class="hero-trust">
+      <div class="trust-avatars-photos">
+        <div class="trust-av-wrap"><img src="/img/ext/u-c6d7e4298d.jpg" alt=""></div>
+        <div class="trust-av-wrap"><img src="/img/ext/u-57b20d13a9.jpg" alt=""></div>
+        <div class="trust-av-wrap"><img src="/img/ext/u-fd0f664ab9.jpg" alt=""></div>
+        <div class="trust-av-wrap"><img src="/img/ext/u-17963b0684.jpg" alt=""></div>
+        <div class="trust-av-wrap" style="background:var(--black);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:10px;color:var(--white)">+</div>
+      </div>
+      <div class="trust-text">
+        <strong>Comunitate activă de fitness</strong>
+        ★★★★★ &nbsp;Coachi & nutriționiști verificați
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="hero-right-bg"></div>
+  <!-- VIDEO BACKGROUND -->
+  <!-- Real athlete photo as background -->
+    <div style="position:absolute;inset:0;overflow:hidden;">
+      <img src="/img/ext/u-59b6fca6dc.jpg" alt="Athlete" style="width:100%;height:100%;object-fit:cover;object-position:center top;opacity:0.18;filter:grayscale(0.3);">
+      <div style="position:absolute;inset:0;background:linear-gradient(to right, rgba(10,10,10,0.6) 0%, transparent 60%);"></div>
+    </div>
+    <div class="hero-right-content">
+      <h2>Tot ce ai nevoie,<br><span>într-un singur loc</span></h2>
+      <div class="app-cards-stack stagger">
+        <div class="app-card card-3d">
+          <div class="app-card-top">
+            <span class="app-card-label">// Antrenament</span>
+            <span class="app-card-icon">💪</span>
+          </div>
+          <div class="app-card-title">Plan zilnic personalizat</div>
+          <div class="app-card-desc">Coach-led programs cu video, progresie automată și tracking complet.</div>
+          <div class="app-card-bar"><div class="app-card-bar-fill bar-lime"></div></div>
+        </div>
+        <div class="app-card">
+          <div class="app-card-top">
+            <span class="app-card-label">// Nutriție AI</span>
+            <span class="app-card-icon">📷</span>
+          </div>
+          <div class="app-card-title">Scanezi. AI calculează.</div>
+          <div class="app-card-desc">Fotografiezi mâncarea — macros, calorii, totul instant fără calcule manuale.</div>
+          <div class="app-card-bar"><div class="app-card-bar-fill bar-coral"></div></div>
+        </div>
+        <div class="app-card">
+          <div class="app-card-top">
+            <span class="app-card-label">// Comunitate</span>
+            <span class="app-card-icon">🏆</span>
+          </div>
+          <div class="app-card-title">Echipa te ține în priză</div>
+          <div class="app-card-desc">Chat integrat, statistici grup, clasamente. Accountability real, nu promisiuni.</div>
+          <div class="app-card-bar"><div class="app-card-bar-fill bar-blue"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- PROBLEM -->
+<div id="problem">
+  <div class="problem-inner">
+    <div class="reveal">
+      <div class="s-label">// De ce eșuăm</div>
+      <h2 class="s-title">RECUNOȘTI<br>VREUNA?</h2>
+      <p class="s-sub">Motivele pentru care 80% din oameni renunță la fitness după primele 3 săptămâni.</p>
+    </div>
+    <div class="problem-grid">
+      <div class="prob-card reveal">
+        <div class="prob-num">01</div>
+        <div class="prob-cross">✕</div>
+        <div class="prob-title">Fără plan, fără progres</div>
+        <p class="prob-desc">Mergi la sală, faci ce știi tu, te plafonezi. Fără progresie structurată, corpul se adaptează și rezultatele se opresc.</p>
+      </div>
+      <div class="prob-card reveal" style="transition-delay:.12s">
+        <div class="prob-num">02</div>
+        <div class="prob-cross">✕</div>
+        <div class="prob-title">Nutriție la ghici</div>
+        <p class="prob-desc">Mănânci "sănătos" dar nu știi câte calorii consumi, ce macros ai nevoie sau dacă dieta susține antrenamentul.</p>
+      </div>
+      <div class="prob-card reveal" style="transition-delay:.24s">
+        <div class="prob-num">03</div>
+        <div class="prob-cross">✕</div>
+        <div class="prob-title">Voința are limite</div>
+        <p class="prob-desc">Te antrenezi singur. Fără cineva care să te vadă, să te susțină sau să te tragă la răspundere, renunți când devine greu.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TRANSITION -->
+<div class="transition-banner">
+  <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none;">
+    <img src="/img/ext/u-7ab5d3bd6b.jpg" alt="" style="width:100%;height:100%;object-fit:cover;opacity:0.12;filter:grayscale(1);transform:scale(1.05);" loading="lazy">
+  </div>
+  <p style="position:relative;z-index:1;">EXISTĂ O <span>VARIANTĂ</span> MAI BUNĂ.</p>
+</div>
+
+<!-- FEATURES -->
+<section id="features" role="region" aria-label="Funcționalități">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(197,241,53,0.04) 0%,transparent 50%),radial-gradient(ellipse at 70% 80%,rgba(26,82,255,0.04) 0%,transparent 50%);pointer-events:none"></div>
+  <div style="max-width:1200px;margin:0 auto;position:relative;z-index:1;">
+
+    <!-- Section Header -->
+    <div style="text-align:center;margin-bottom:80px;" class="reveal">
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(197,241,53,0.1);border:1px solid rgba(197,241,53,0.25);border-radius:100px;padding:5px 14px;margin-bottom:20px;">
+        <span style="font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--lime)">⚡ ECOSISTEMUL FORJA</span>
+      </div>
+      <h2 style="font-family:var(--font-display);font-size:clamp(24px,5vw,72px);font-weight:900;line-height:0.95;margin-bottom:16px;letter-spacing:-1px;">
+        TREI ROLURI.<br><span style="color:var(--lime)">UN SINGUR SCOP.</span>
+      </h2>
+      <p style="font-size:17px;color:var(--text3);max-width:600px;margin:0 auto;line-height:1.7;font-family:var(--font-body);">
+        Atlet, Coach, Nutriționist — fiecare cu instrumentele sale, conectați în timp real printr-un ecosistem inteligent.
+      </p>
+    </div>
+
+    <!-- ═══ ROLE CARDS — 3 columns ═══ -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-bottom:80px;" class="reveal">
+
+      <!-- ATHLETE CARD -->
+      <div style="background:var(--surface);border-radius:24px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);transition:transform 0.3s,box-shadow 0.3s;" onmouseenter="this.style.transform='translateY(-8px)';this.style.boxShadow='0 30px 60px rgba(0,0,0,0.15)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
+        <div style="height:200px;background:linear-gradient(135deg,#0a0a09 0%,#1a1a18 100%);position:relative;overflow:hidden;">
+          <img src="/img/ext/u-ef4a8e3869.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.15;filter:grayscale(0.5);" loading="lazy">
+          <div style="position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(0,0,0,0.8))"></div>
+          <div style="position:absolute;top:16px;left:16px;width:48px;height:48px;border-radius:14px;background:var(--lime);display:flex;align-items:center;justify-content:center;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          </div>
+          <div style="position:absolute;bottom:16px;left:16px;right:16px;">
+            <div style="font-family:var(--font-display);font-size:28px;font-weight:900;color:#fff;letter-spacing:-0.5px;">ATLETUL</div>
+            <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:2px;color:var(--lime);margin-top:2px;">ANTRENAMENT · NUTRIȚIE · PROGRES</div>
+          </div>
+        </div>
+        <div style="padding:24px;">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:rgba(197,241,53,0.06);border:1px solid rgba(197,241,53,0.1);">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(197,241,53,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">🏋️</div>
+              <div><div style="font-weight:700;font-size:13px;">Antrenament ghidat</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">Planuri de la coach cu animații SVG per exercițiu</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:rgba(26,82,255,0.06);border:1px solid rgba(26,82,255,0.1);">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(26,82,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">🥗</div>
+              <div><div style="font-weight:700;font-size:13px;">Nutriție inteligentă</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">Tracking macros, plan de la nutriționist, rețete</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:rgba(255,68,34,0.06);border:1px solid rgba(255,68,34,0.1);">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,68,34,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">🔥</div>
+              <div><div style="font-weight:700;font-size:13px;">Streak & Achievements</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">Streak-uri zilnice, badge-uri, XP, nivel, clasamente</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">😴</div>
+              <div><div style="font-weight:700;font-size:13px;">Somn & Recovery</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">Tracking somn, scor odihnă, recomandări AI</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COACH CARD -->
+      <div style="background:var(--surface);border-radius:24px;overflow:hidden;border:1px solid rgba(26,82,255,0.15);transition:transform 0.3s,box-shadow 0.3s;transform:translateY(-12px);" onmouseenter="this.style.transform='translateY(-20px)';this.style.boxShadow='0 30px 60px rgba(26,82,255,0.1)'" onmouseleave="this.style.transform='translateY(-12px)';this.style.boxShadow=''">
+        <div style="height:200px;background:linear-gradient(135deg,#0a0e1a 0%,#0d1529 100%);position:relative;overflow:hidden;">
+          <img src="/img/ext/u-b785e74a20.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.12;filter:grayscale(0.5);" loading="lazy">
+          <div style="position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(0,0,0,0.8))"></div>
+          <div style="position:absolute;top:16px;left:16px;width:48px;height:48px;border-radius:14px;background:#1A52FF;display:flex;align-items:center;justify-content:center;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          
+          <div style="position:absolute;bottom:16px;left:16px;right:16px;">
+            <div style="font-family:var(--font-display);font-size:28px;font-weight:900;color:#fff;letter-spacing:-0.5px;">COACH-UL</div>
+            <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:2px;color:#5B8FFF;margin-top:2px;">PLANURI · ATLEȚI · PERFORMANȚĂ</div>
+          </div>
+        </div>
+        <div style="padding:24px;">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:rgba(26,82,255,0.08);border:1px solid rgba(26,82,255,0.12);">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(26,82,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">📋</div>
+              <div><div style="font-weight:700;font-size:13px;">Plan Builder</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">Creează planuri cu exerciții, seturi, rest, animații</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:rgba(197,241,53,0.06);border:1px solid rgba(197,241,53,0.1);">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(197,241,53,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">📊</div>
+              <div><div style="font-weight:700;font-size:13px;">Dashboard live</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">Vezi în timp real ce face fiecare atlet: exerciții, mese, apă</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">👥</div>
+              <div><div style="font-weight:700;font-size:13px;">Echipe & Comunitate</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">Administrează echipe, postează, invită, promovează</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">💰</div>
+              <div><div style="font-weight:700;font-size:13px;">Monetizare</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">Setează prețuri, primește clienți, profil Instagram-style</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NUTRITIONIST CARD -->
+      <div style="background:var(--surface);border-radius:24px;overflow:hidden;border:1px solid rgba(123,47,190,0.15);transition:transform 0.3s,box-shadow 0.3s;" onmouseenter="this.style.transform='translateY(-8px)';this.style.boxShadow='0 30px 60px rgba(123,47,190,0.08)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
+        <div style="height:200px;background:linear-gradient(135deg,#0a0a14 0%,#150d20 100%);position:relative;overflow:hidden;">
+          <img src="/img/ext/u-f04207a360.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.12;filter:grayscale(0.5);" loading="lazy">
+          <div style="position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(0,0,0,0.8))"></div>
+          <div style="position:absolute;top:16px;left:16px;width:48px;height:48px;border-radius:14px;background:#7B2FBE;display:flex;align-items:center;justify-content:center;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <div style="position:absolute;bottom:16px;left:16px;right:16px;">
+            <div style="font-family:var(--font-display);font-size:28px;font-weight:900;color:#fff;letter-spacing:-0.5px;">NUTRIȚIONISTUL</div>
+            <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:2px;color:#B388FF;margin-top:2px;">PLANURI · REȚETE · COMPLIANCE</div>
+          </div>
+        </div>
+        <div style="padding:24px;">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:rgba(123,47,190,0.08);border:1px solid rgba(123,47,190,0.12);">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(123,47,190,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">🍽️</div>
+              <div><div style="font-weight:700;font-size:13px;">Meal Plan Builder</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">Template-uri cu mese, rețete, macros auto-calculate</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:rgba(197,241,53,0.06);border:1px solid rgba(197,241,53,0.1);">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(197,241,53,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">📈</div>
+              <div><div style="font-weight:700;font-size:13px;">Tracking compliance</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">Vezi ce mănâncă fiecare client, macros, hidratare</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">📚</div>
+              <div><div style="font-weight:700;font-size:13px;">Bază de date alimente</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">Caută, adaugă, creează alimente custom cu nutrienți</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">✏️</div>
+              <div><div style="font-weight:700;font-size:13px;">Profil public</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">Bio, preț, postări, beneficii — ca pe Instagram</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SYNC VISUALIZATION ═══ -->
+    <div style="text-align:center;margin-bottom:60px;position:relative;" class="reveal">
+      <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--lime);margin-bottom:12px;">SINCRONIZARE ÎN TIMP REAL</div>
+      <h3 style="font-family:var(--font-display);font-size:clamp(28px,3.5vw,48px);font-weight:900;margin-bottom:20px;">Totul se <span style="color:var(--lime)">conectează</span></h3>
+      <div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:0;align-items:center;max-width:900px;margin:0 auto;">
+        <!-- Athlete node -->
+        <div style="text-align:center;">
+          <div style="width:80px;height:80px;border-radius:20px;background:linear-gradient(135deg,rgba(197,241,53,0.15),rgba(197,241,53,0.05));border:2px solid rgba(197,241,53,0.3);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:32px;">🏃</div>
+          <div style="font-family:var(--font-display);font-size:16px;font-weight:800;">Atletul</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px;">Bifează exerciții<br>Loghează mese<br>Bea apă</div>
+        </div>
+        <!-- Arrow -->
+        <div style="text-align:center;padding:0 8px;">
+          <div style="font-size:28px;color:var(--lime);animation:pulse 2s infinite;">⟷</div>
+          <div style="font-size:9px;color:var(--text3);font-family:var(--font-mono);">SYNC</div>
+        </div>
+        <!-- Coach node -->
+        <div style="text-align:center;">
+          <div style="width:80px;height:80px;border-radius:20px;background:linear-gradient(135deg,rgba(26,82,255,0.15),rgba(26,82,255,0.05));border:2px solid rgba(26,82,255,0.3);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:32px;">🧑‍🏫</div>
+          <div style="font-family:var(--font-display);font-size:16px;font-weight:800;">Coach-ul</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px;">Vede progresul live<br>Creează planuri<br>Trimite feedback</div>
+        </div>
+        <!-- Arrow -->
+        <div style="text-align:center;padding:0 8px;">
+          <div style="font-size:28px;color:#7B2FBE;animation:pulse 2s infinite 0.5s;">⟷</div>
+          <div style="font-size:9px;color:var(--text3);font-family:var(--font-mono);">SYNC</div>
+        </div>
+        <!-- Nutritionist node -->
+        <div style="text-align:center;">
+          <div style="width:80px;height:80px;border-radius:20px;background:linear-gradient(135deg,rgba(123,47,190,0.15),rgba(123,47,190,0.05));border:2px solid rgba(123,47,190,0.3);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:32px;">🥗</div>
+          <div style="font-family:var(--font-display);font-size:16px;font-weight:800;">Nutriționistul</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px;">Vede mesele live<br>Creează rețete<br>Monitorizează macros</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PLANS SECTION -->
+<section id="plans" role="region" aria-label="Planuri">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(197,241,53,0.06) 0%,transparent 50%);pointer-events:none"></div>
+  <div style="max-width:1100px;margin:0 auto;position:relative;z-index:1;">
+    <div style="text-align:center;margin-bottom:60px;">
+      <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--lime);margin-bottom:12px;">ALEGE PLANUL TĂU</div>
+      <h2 style="font-family:var(--font-display);font-size:clamp(22px,4vw,60px);font-weight:900;color:#fff;line-height:0.95;margin-bottom:16px;">UN PLAN PENTRU<br>FIECARE <span style="color:var(--lime)">OBIECTIV</span></h2>
+      <p style="color:rgba(255,255,255,0.4);font-size:15px;max-width:500px;margin:0 auto;">De la acces gratuit la ecosistemul complet cu coach și nutriționist.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;align-items:start;">
+      <!-- FREE -->
+      <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:36px 28px;transition:transform 0.3s,border-color 0.3s;" onmouseenter="this.style.transform='translateY(-6px)';this.style.borderColor='rgba(255,255,255,0.15)'" onmouseleave="this.style.transform='';this.style.borderColor='rgba(255,255,255,0.08)'">
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.3);margin-bottom:8px;">FREE</div>
+        <div style="font-family:var(--font-display);font-size:36px;font-weight:900;color:#fff;margin-bottom:4px;">0 <span style="font-size:16px;color:rgba(255,255,255,0.3);">lei/lună</span></div>
+        <div style="font-family:var(--font-display);font-size:18px;font-weight:800;color:rgba(255,255,255,0.6);margin-bottom:20px;">solo access</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px;">
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.7);"><span style="color:var(--lime)">✓</span> Antrenament solo</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.7);"><span style="color:var(--lime)">✓</span> Tracking nutriție basic</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.7);"><span style="color:var(--lime)">✓</span> Tracking somn & recovery</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.7);"><span style="color:var(--lime)">✓</span> Bază de date exerciții</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.3);"><span>—</span> Acces profesioniști</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.3);"><span>—</span> Echipe & comunitate</div>
+        </div>
+        <a href="/login?plan=free&tab=register" class="plan-btn plan-btn-outline">Începe gratuit →</a>
+      </div>
+
+      <!-- PRO (highlighted) -->
+      <div style="background:linear-gradient(135deg,rgba(197,241,53,0.08),rgba(197,241,53,0.02));border:2px solid rgba(197,241,53,0.3);border-radius:24px;padding:36px 28px;transform:translateY(-12px);position:relative;transition:transform 0.3s;" onmouseenter="this.style.transform='translateY(-18px)'" onmouseleave="this.style.transform='translateY(-12px)'">
+        
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:2px;color:var(--lime);margin-bottom:8px;">PRO</div>
+        <div style="font-family:var(--font-display);font-size:36px;font-weight:900;color:#fff;margin-bottom:4px;">29 <span style="font-size:16px;color:rgba(255,255,255,0.4);">lei/lună</span></div>
+        <div style="font-family:var(--font-display);font-size:18px;font-weight:800;color:var(--lime);margin-bottom:20px;">system flow</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px;">
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.8);"><span style="color:var(--lime)">✓</span> Tot ce include FREE</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.8);"><span style="color:var(--lime)">✓</span> Caută coachi & nutriționiști</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.8);"><span style="color:var(--lime)">✓</span> Primești planuri personalizate</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.8);"><span style="color:var(--lime)">✓</span> Chat direct cu profesioniștii</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.8);"><span style="color:var(--lime)">✓</span> GPS tracking & Sound Mixer</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.3);"><span>—</span> Echipe & comunitate</div>
+        </div>
+        <a href="/login?plan=pro&tab=register" class="plan-btn plan-btn-lime">Alege PRO →</a>
+      </div>
+
+      <!-- TEAM -->
+      <div style="background:rgba(26,82,255,0.04);border:1px solid rgba(26,82,255,0.15);border-radius:24px;padding:36px 28px;transition:transform 0.3s,border-color 0.3s;" onmouseenter="this.style.transform='translateY(-6px)';this.style.borderColor='rgba(26,82,255,0.3)'" onmouseleave="this.style.transform='';this.style.borderColor='rgba(26,82,255,0.15)'">
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:2px;color:rgba(26,82,255,0.8);margin-bottom:8px;">TEAM</div>
+        <div style="font-family:var(--font-display);font-size:36px;font-weight:900;color:#fff;margin-bottom:4px;">49+ <span style="font-size:16px;color:rgba(255,255,255,0.3);">lei/lună</span></div>
+        <div style="font-family:var(--font-display);font-size:18px;font-weight:800;color:rgba(26,82,255,0.8);margin-bottom:20px;">teams + coach</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px;">
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.8);"><span style="color:var(--lime)">✓</span> Tot ce include PRO</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.8);"><span style="color:var(--lime)">✓</span> Acces la toate echipele</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.8);"><span style="color:var(--lime)">✓</span> Chat grup în echipă</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.8);"><span style="color:var(--lime)">✓</span> Challenge-uri & clasamente</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.8);"><span style="color:var(--lime)">✓</span> Postări în comunitate</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.8);"><span style="color:var(--lime)">✓</span> Achievements & XP</div>
+        </div>
+        <a href="/login?plan=team&tab=register" class="plan-btn plan-btn-blue">Alege TEAM →</a>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:40px;">
+      <p style="color:rgba(255,255,255,0.3);font-size:13px;">Toate planurile includ 7 zile gratuit. Fără angajament. Anulezi oricând.</p>
+    </div>
+  </div>
+</section>
+
+<!-- MOBILE APP CTA -->
+<div class="mobile-app-cta" role="region">
+  <div style="max-width:800px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap;">
+    <div style="text-align:left;">
+      <div style="font-family:var(--font-display);font-size:clamp(28px,3vw,44px);font-weight:900;color:#fff;line-height:1;">DU-O ÎN <span style="color:var(--lime)">BUZUNAR</span></div>
+      <p style="color:rgba(255,255,255,0.4);font-size:14px;margin-top:8px;">Aplicația Android vine în curând. Antrenament, nutriție, echipă — de pe telefon.</p>
+    </div>
+    <a href="mobile.html" style="display:inline-flex;align-items:center;gap:10px;background:var(--lime);color:#000;padding:14px 32px;border-radius:12px;font-family:var(--font-display);font-size:18px;font-weight:800;text-decoration:none;letter-spacing:0.5px;white-space:nowrap;">📱 Află mai multe →</a>
+  </div>
+</div>
+
+<section id="marketplace">
+  <div class="market-inner">
+    <div class="market-top reveal">
+      <div>
+        <div class="s-label">// Marketplace</div>
+        <h2 class="s-title" style="font-size:clamp(24px,5vw,72px)">GĂSEȘTE<br>ECHIPA TA</h2>
+      </div>
+      <div class="market-search">
+        <span>🔍</span>
+        <input type="text" placeholder="Caută echipă sau coach..." id="mkSearch" oninput="filterMK()">
+      </div>
+    </div>
+    <div class="mktabs reveal">
+      <button class="mktab on" onclick="setMK(this,'all')">Toate</button>
+      <button class="mktab" onclick="setMK(this,'forta')">💪 Forță</button>
+      <button class="mktab" onclick="setMK(this,'cardio')">🏃 Cardio</button>
+      <button class="mktab" onclick="setMK(this,'nutritie')">🥗 Nutriție</button>
+      <button class="mktab" onclick="setMK(this,'tactical')">⚔️ Tactical</button>
+    </div>
+    <div class="teams-grid reveal" id="mkGrid">
+      <div class="t-card" data-c="forta tactical">
+        <div class="t-cover-photo">
+          <img src="/img/ext/u-66866c4931.jpg" alt="War Ready" loading="lazy">
+          <span class="t-bdg bdg-pop">🔥 TOP</span>
+          <div class="t-coach-av-photo"><img src="/img/ext/u-13f30aff89.jpg" alt="Coach Mihai" loading="lazy"></div>
+        </div>
+        <div class="t-body">
+          <div class="t-name">War Ready</div>
+          <div class="t-coach">Coach Mihai Ionescu · ⭐ 4.9</div>
+          <div class="t-meta"><span>👥 87 membri</span><span>💪 Forță & Tactical</span></div>
+          <div class="t-footer"><div class="t-price" style="color:var(--lime)">Inclus<span> în TEAM</span></div><button class="btn-join" onclick="location.href='/login?plan=team&tab=register'">7 zile free</button></div>
+        </div>
+      </div>
+      <div class="t-card" data-c="cardio">
+        <div class="t-cover-photo">
+          <img src="/img/ext/u-54760f8afe.jpg" alt="Run Club BUC" loading="lazy">
+          <span class="t-bdg bdg-new">✨ NOU</span>
+          <div class="t-coach-av-photo"><img src="/img/ext/u-68fc3ffb8a.jpg" alt="Coach Andrei" loading="lazy"></div>
+        </div>
+        <div class="t-body">
+          <div class="t-name">Run Club BUC</div>
+          <div class="t-coach">Coach Andrei Popa · ⭐ 4.8</div>
+          <div class="t-meta"><span>👥 124 membri</span><span>🏃 Cardio & Running</span></div>
+          <div class="t-footer"><div class="t-price" style="color:var(--lime)">Inclus<span> în TEAM</span></div><button class="btn-join" onclick="location.href='/login?plan=team&tab=register'">7 zile free</button></div>
+        </div>
+      </div>
+      <div class="t-card" data-c="forta nutritie">
+        <div class="t-cover-photo">
+          <img src="/img/ext/u-088bb3cd4a.jpg" alt="Body Recomp Pro" loading="lazy">
+          <span class="t-bdg bdg-top">💎 PREMIUM</span>
+          <div class="t-coach-av-photo"><img src="/img/ext/u-85da2af29d.jpg" alt="Coach Radu" loading="lazy"></div>
+        </div>
+        <div class="t-body">
+          <div class="t-name">Body Recomp Pro</div>
+          <div class="t-coach">Coach Radu Filip · ⭐ 5.0</div>
+          <div class="t-meta"><span>👥 52 membri</span><span>🔬 Recomp</span></div>
+          <div class="t-footer"><div class="t-price" style="color:var(--lime)">Inclus<span> în TEAM</span></div><button class="btn-join" onclick="location.href='/login?plan=team&tab=register'">7 zile free</button></div>
+        </div>
+      </div>
+      <div class="t-card" data-c="nutritie">
+        <div class="t-cover-photo">
+          <img src="/img/ext/u-6691f23897.jpg" alt="Eat Smart Daily" loading="lazy">
+          <div class="t-coach-av-photo"><img src="/img/ext/u-41824a63aa.jpg" alt="Diana Marin" loading="lazy"></div>
+        </div>
+        <div class="t-body">
+          <div class="t-name">Eat Smart Daily</div>
+          <div class="t-coach">Nutriț. Diana Marin · ⭐ 4.7</div>
+          <div class="t-meta"><span>👥 203 membri</span><span>🥗 Nutriție</span></div>
+          <div class="t-footer"><div class="t-price" style="color:var(--lime)">Inclus<span> în TEAM</span></div><button class="btn-join" onclick="location.href='/login?plan=team&tab=register'">7 zile free</button></div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:40px" class="reveal">
+      <button class="btn-outline" style="border:2px solid var(--black)" onclick="location.href='/login?plan=team&tab=register'">Explorează toate echipele →</button>
+      <button class="btn-lime" style="margin-left:12px" onclick="location.href='/login?tab=register'">Descoperă profesioniștii →</button>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO ROLURI -->
+<section id="roles" role="region" aria-label="Demo roluri">
+  <div style="position:absolute;inset:0;background:radial-gradient(circle at 20% 50%,rgba(197,241,53,0.08) 0%,transparent 55%),radial-gradient(circle at 80% 50%,rgba(255,77,28,0.06) 0%,transparent 55%);pointer-events:none"></div>
+  <div style="max-width:1120px;margin:0 auto;position:relative;z-index:1;">
+    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(197,241,53,0.12);border:1px solid rgba(197,241,53,0.3);border-radius:100px;padding:5px 14px;margin-bottom:28px;">
+      <span style="width:7px;height:7px;background:var(--lime);border-radius:50%;display:inline-block;animation:pulse 2s infinite"></span>
+      <span style="font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--lime)">Demo Live · Încearcă acum</span>
+    </div>
+    <h2 style="font-family:var(--font-display);font-size:clamp(28px,6vw,88px);font-weight:900;line-height:0.92;color:#fff;margin-bottom:16px;letter-spacing:-1px;">
+      3 ROLURI.<br><span style="color:var(--lime)">O PLATFORMĂ.</span><br><span style="color:rgba(255,255,255,0.3)">TESTEAZĂ GRATUIT.</span>
+    </h2>
+    <p style="font-size:16px;color:rgba(255,255,255,0.45);line-height:1.7;max-width:480px;margin-bottom:56px;font-family:var(--font-body);">Fiecare rol are propriul dashboard complet funcțional. Apasă pe oricare card și ești direct în aplicație — fără înregistrare, fără card.</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+      <!-- USER -->
+      <a role="button" tabindex="0" href="#" onclick="event.preventDefault();quickDemoLogin('user@forja.ro')" style="text-decoration:none;display:block;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;" onmouseover="this.style.background='rgba(255,255,255,0.08)';this.style.borderColor='rgba(255,68,34,0.5)';this.style.transform='translateY(-4px)'" onmouseout="this.style.background='rgba(255,255,255,0.04)';this.style.borderColor='rgba(255,255,255,0.1)';this.style.transform=''">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--coral);border-radius:20px 20px 0 0"></div>
+        <div style="width:60px;height:60px;border-radius:16px;background:rgba(255,68,34,0.15);border:1px solid rgba(255,68,34,0.3);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:20px;">🏃</div>
+        <div style="font-family:var(--font-display);font-size:28px;font-weight:900;color:#fff;letter-spacing:1px;margin-bottom:8px;">SPORTIV</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.45);line-height:1.65;margin-bottom:24px;font-family:var(--font-body);">Dashboard personal, antrenamente, nutriție, somn, marketplace echipe și gamification cu XP &amp; streaks.</div>
+        <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:24px;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.5);font-family:var(--font-body)"><span style="color:var(--coral)">✓</span> Tracking calorii &amp; macros live</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.5);font-family:var(--font-body)"><span style="color:var(--coral)">✓</span> Timer antrenament integrat</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.5);font-family:var(--font-body)"><span style="color:var(--coral)">✓</span> Sound Mixer somn + chat echipă</div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,0.25);letter-spacing:1px;">user@forja.ro</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--coral);font-family:var(--font-body)">Demo <span>→</span></div>
+        </div>
+      </a>
+      <!-- COACH -->
+      <a role="button" tabindex="0" href="#" onclick="event.preventDefault();quickDemoLogin('coach@forja.ro')" style="text-decoration:none;display:block;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;" onmouseover="this.style.background='rgba(255,255,255,0.08)';this.style.borderColor='rgba(197,241,53,0.5)';this.style.transform='translateY(-4px)'" onmouseout="this.style.background='rgba(255,255,255,0.04)';this.style.borderColor='rgba(255,255,255,0.1)';this.style.transform=''">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--lime);border-radius:20px 20px 0 0"></div>
+        <div style="width:60px;height:60px;border-radius:16px;background:rgba(197,241,53,0.12);border:1px solid rgba(197,241,53,0.3);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:20px;">🏋️</div>
+        <div style="font-family:var(--font-display);font-size:28px;font-weight:900;color:#fff;letter-spacing:1px;margin-bottom:8px;">COACH</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.45);line-height:1.65;margin-bottom:24px;font-family:var(--font-body);">Gestionezi echipa, creezi planuri de antrenament, monitorizezi compliance-ul și comunici cu sportivii.</div>
+        <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:24px;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.5);font-family:var(--font-body)"><span style="color:var(--lime)">✓</span> Tabel sportivi cu compliance %</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.5);font-family:var(--font-body)"><span style="color:var(--lime)">✓</span> Creare &amp; atribuire workout plans</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.5);font-family:var(--font-body)"><span style="color:var(--lime)">✓</span> Chat privat + revenue tracking</div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,0.25);letter-spacing:1px;">coach@forja.ro</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--lime);font-family:var(--font-body)">Demo <span>→</span></div>
+        </div>
+      </a>
+      <!-- NUTRITIONIST -->
+      <a role="button" tabindex="0" href="#" onclick="event.preventDefault();quickDemoLogin('nutritionist@forja.ro')" style="text-decoration:none;display:block;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;" onmouseover="this.style.background='rgba(255,255,255,0.08)';this.style.borderColor='rgba(26,86,255,0.5)';this.style.transform='translateY(-4px)'" onmouseout="this.style.background='rgba(255,255,255,0.04)';this.style.borderColor='rgba(255,255,255,0.1)';this.style.transform=''">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--blue);border-radius:20px 20px 0 0"></div>
+        <div style="width:60px;height:60px;border-radius:16px;background:rgba(26,86,255,0.15);border:1px solid rgba(26,86,255,0.3);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:20px;">🥗</div>
+        <div style="font-family:var(--font-display);font-size:28px;font-weight:900;color:#fff;letter-spacing:1px;margin-bottom:8px;">NUTRIȚIONIST</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.45);line-height:1.65;margin-bottom:24px;font-family:var(--font-body);">Urmărești 34 de clienți activi, creezi planuri macro personalizate și monitorizezi aderența zilnică.</div>
+        <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:24px;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.5);font-family:var(--font-body)"><span style="color:var(--blue)">✓</span> Planuri macro per client</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.5);font-family:var(--font-body)"><span style="color:var(--blue)">✓</span> Compliance zilnic cu progress bars</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.5);font-family:var(--font-body)"><span style="color:var(--blue)">✓</span> Template-uri nutriționale reutilizabile</div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,0.25);letter-spacing:1px;">nutritionist@forja.ro</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--blue);font-family:var(--font-body)">Demo <span>→</span></div>
+        </div>
+      </a>
+    </div>
+    <div style="margin-top:32px;text-align:center;font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,0.25);letter-spacing:1px;">PAROLĂ DEMO → demo1234 · Datele se resetează automat</div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS WITH PHOTOS -->
+<section id="testimonials" role="region" aria-label="Testimoniale">
+  <div class="orb" style="width:300px;height:300px;background:rgba(197,241,53,0.04);top:-80px;right:10%;filter:blur(80px);position:absolute;"></div>
+  <div style="max-width:1200px;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:56px;">
+      <div style="font-family:var(--font-body);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--lime);font-weight:700;margin-bottom:8px;" class="reveal">ce spun utilizatorii</div>
+      <h2 style="font-family:var(--font);font-size:clamp(32px,5vw,52px);font-weight:900;color:#fff;line-height:1;" class="reveal">REZULTATE REALE</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;">
+      <!-- Testimonial 1 -->
+      <div class="reveal-3d" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:28px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#c5f135,transparent);"></div>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+          <img src="/img/ext/u-4e0b7e9275.jpg" alt="" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid rgba(197,241,53,0.3);" loading="lazy">
+          <div>
+            <div style="font-family:var(--font);font-size:16px;font-weight:800;color:#fff;">Andrei M.</div>
+            <div style="font-family:var(--font-body);font-size:11px;color:rgba(255,255,255,0.4);">Powerlifter · Iron Wolves</div>
+          </div>
+          <div style="margin-left:auto;color:var(--lime);font-size:13px;">★★★★★</div>
+        </div>
+        <p style="font-family:var(--font-body);font-size:14px;color:rgba(255,255,255,0.65);line-height:1.7;margin:0;">Am câștigat 8kg masă musculară în 4 luni. Tracking-ul de nutriție + planurile de la coach m-au ținut pe drumul cel bun. <strong style="color:#c5f135;">Squat PR: 180kg.</strong></p>
+        <div style="display:flex;gap:8px;margin-top:16px;">
+          <img src="/img/ext/u-97e0bbf9a7.jpg" alt="" style="width:80px;height:60px;border-radius:10px;object-fit:cover;opacity:0.7;" loading="lazy">
+          <img src="/img/ext/u-514242d75b.jpg" alt="" style="width:80px;height:60px;border-radius:10px;object-fit:cover;opacity:0.7;" loading="lazy">
+        </div>
+      </div>
+      <!-- Testimonial 2 -->
+      <div class="reveal-3d" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:28px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#1a56ff,transparent);"></div>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+          <img src="/img/ext/u-7096bebd89.jpg" alt="" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid rgba(26,86,255,0.3);" loading="lazy">
+          <div>
+            <div style="font-family:var(--font);font-size:16px;font-weight:800;color:#fff;">Maria S.</div>
+            <div style="font-family:var(--font-body);font-size:11px;color:rgba(255,255,255,0.4);">Runner · Cardio Crew</div>
+          </div>
+          <div style="margin-left:auto;color:var(--lime);font-size:13px;">★★★★★</div>
+        </div>
+        <p style="font-family:var(--font-body);font-size:14px;color:rgba(255,255,255,0.65);line-height:1.7;margin:0;">De la 0 alergare la semi-maraton în 6 luni. Comunitatea e incredibilă — te motivează zilnic. <strong style="color:#1a56ff;">Scor somn: 92/100.</strong></p>
+        <div style="display:flex;gap:8px;margin-top:16px;">
+          <img src="/img/ext/u-569d47c2ed.jpg" alt="" style="width:80px;height:60px;border-radius:10px;object-fit:cover;opacity:0.7;" loading="lazy">
+          <img src="/img/ext/u-e665395bbb.jpg" alt="" style="width:80px;height:60px;border-radius:10px;object-fit:cover;opacity:0.7;" loading="lazy">
+        </div>
+      </div>
+      <!-- Testimonial 3 -->
+      <div class="reveal-3d" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:28px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#ff4d1c,transparent);"></div>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+          <img src="/img/ext/u-a70a3df3fd.jpg" alt="" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,77,28,0.3);" loading="lazy">
+          <div>
+            <div style="font-family:var(--font);font-size:16px;font-weight:800;color:#fff;">Radu P.</div>
+            <div style="font-family:var(--font-body);font-size:11px;color:rgba(255,255,255,0.4);">Coach · Flex Nation</div>
+          </div>
+          <div style="margin-left:auto;color:var(--lime);font-size:13px;">★★★★★</div>
+        </div>
+        <p style="font-family:var(--font-body);font-size:14px;color:rgba(255,255,255,0.65);line-height:1.7;margin:0;">Ca coach, am trecut de la Excel la FORJA. Acum gestionez 19 sportivi fără haos. <strong style="color:#ff4d1c;">Compliance echipă: 91%.</strong></p>
+        <div style="display:flex;gap:8px;margin-top:16px;">
+          <img src="/img/ext/u-7ae049abe6.jpg" alt="" style="width:80px;height:60px;border-radius:10px;object-fit:cover;opacity:0.7;" loading="lazy">
+          <img src="/img/ext/u-c6cd53a785.jpg" alt="" style="width:80px;height:60px;border-radius:10px;object-fit:cover;opacity:0.7;" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- APP SCREENSHOTS SHOWCASE -->
+<div class="app-screenshots" role="region">
+  <div style="max-width:1200px;margin:0 auto;text-align:center;">
+    <div style="font-family:var(--font-body);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--lime);font-weight:700;margin-bottom:8px;" class="reveal">interfață</div>
+    <h2 style="font-family:var(--font);font-size:clamp(28px,5vw,48px);font-weight:900;color:#fff;line-height:1;margin-bottom:12px;" class="reveal">DESIGN PREMIUM</h2>
+    <p style="font-family:var(--font-body);font-size:15px;color:rgba(255,255,255,0.4);max-width:600px;margin:0 auto 48px;" class="reveal">Fiecare pixel este gândit pentru experiența ta. Exerciții animate, vizualizări de progres și tracking intuitiv.</p>
+    <!-- Exercise SVG showcase -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:40px;">
+      <div class="reveal-scale" style="border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);"><img src="/img/ex-bench.svg" alt="Bench Press" style="width:100%;display:block;" loading="lazy"></div>
+      <div class="reveal-scale" style="border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);"><img src="/img/ex-squat.svg" alt="Squat" style="width:100%;display:block;" loading="lazy"></div>
+      <div class="reveal-scale" style="border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);"><img src="/img/ex-deadlift.svg" alt="Deadlift" style="width:100%;display:block;" loading="lazy"></div>
+      <div class="reveal-scale" style="border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);"><img src="/img/ex-running.svg" alt="Running" style="width:100%;display:block;" loading="lazy"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:40px;">
+      <div class="reveal-scale" style="border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);"><img src="/img/ex-pushup.svg" alt="Push-up" style="width:100%;display:block;" loading="lazy"></div>
+      <div class="reveal-scale" style="border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);"><img src="/img/ex-plank.svg" alt="Plank" style="width:100%;display:block;" loading="lazy"></div>
+      <div class="reveal-scale" style="border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);"><img src="/img/ex-pullup.svg" alt="Pull-up" style="width:100%;display:block;" loading="lazy"></div>
+      <div class="reveal-scale" style="border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);"><img src="/img/ex-lunge.svg" alt="Lunge" style="width:100%;display:block;" loading="lazy"></div>
+    </div>
+    <!-- Badges showcase -->
+    <div style="margin-top:48px;">
+      <div style="font-family:var(--font);font-size:20px;font-weight:800;color:#fff;margin-bottom:20px;" class="reveal">SISTEM DE REALIZĂRI</div>
+      <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+        <div class="reveal-scale" style="width:100px;"><img src="/img/badge-streak-7.svg" alt="" style="width:100%;" loading="lazy"></div>
+        <div class="reveal-scale" style="width:100px;"><img src="/img/badge-streak-30.svg" alt="" style="width:100%;" loading="lazy"></div>
+        <div class="reveal-scale" style="width:100px;"><img src="/img/badge-first-workout.svg" alt="" style="width:100%;" loading="lazy"></div>
+        <div class="reveal-scale" style="width:100px;"><img src="/img/badge-100-exercises.svg" alt="" style="width:100%;" loading="lazy"></div>
+        <div class="reveal-scale" style="width:100px;"><img src="/img/badge-team-leader.svg" alt="" style="width:100%;" loading="lazy"></div>
+        <div class="reveal-scale" style="width:100px;"><img src="/img/badge-nutrition-master.svg" alt="" style="width:100%;" loading="lazy"></div>
+        <div class="reveal-scale" style="width:100px;"><img src="/img/badge-sleep-pro.svg" alt="" style="width:100%;" loading="lazy"></div>
+        <div class="reveal-scale" style="width:100px;"><img src="/img/badge-marathon.svg" alt="" style="width:100%;" loading="lazy"></div>
+      </div>
+    </div>
+    <!-- Visual elements row -->
+    <div style="display:flex;justify-content:center;gap:24px;margin-top:48px;flex-wrap:wrap;">
+      <div class="reveal-scale" style="width:120px;"><img src="/img/trophy.svg" alt="" style="width:100%;" loading="lazy"></div>
+      <div class="reveal-scale" style="width:120px;"><img src="/img/macro-rings.svg" alt="" style="width:100%;" loading="lazy"></div>
+      <div class="reveal-scale" style="width:120px;"><img src="/img/heartbeat.svg" alt="" style="width:100%;border-radius:12px;" loading="lazy"></div>
+      <div class="reveal-scale" style="width:120px;"><img src="/img/dumbbell-anim.svg" alt="" style="width:100%;" loading="lazy"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SOCIAL PROOF -->
+<section id="proof">
+  <div class="proof-inner">
+    <div class="reveal">
+      <div class="s-label">// Ce spun utilizatorii</div>
+      <h2 class="s-title">OAMENI REALI.<br>REZULTATE REALE.</h2>
+    </div>
+    <div class="proof-grid">
+      <div class="proof-card reveal">
+        <div class="proof-quote">"</div>
+        <p class="proof-text">Prima dată în viața mea am ținut un plan mai mult de 3 săptămâni. Grupul m-a ținut. Nu voința mea — echipa.</p>
+        <div class="proof-author">
+          <div class="proof-av-wrap"><img src="/img/ext/u-43795d5e49.jpg" alt="Mihai D." loading="lazy"></div>
+          <div><div class="proof-name">Mihai D., 32 ani</div><div class="proof-role">Polițist, București</div><div class="proof-stars">★★★★★</div></div>
+        </div>
+      </div>
+      <div class="proof-card reveal" style="transition-delay:.1s">
+        <div class="proof-quote">"</div>
+        <p class="proof-text">Scanez mâncarea cu telefonul, calculează singur macros. Am slăbit 8 kg în 3 luni fără să număr manual niciodată.</p>
+        <div class="proof-author">
+          <div class="proof-av-wrap"><img src="/img/ext/u-d150a0994a.jpg" alt="Ana R." loading="lazy"></div>
+          <div><div class="proof-name">Ana R., 28 ani</div><div class="proof-role">Profesoară, Cluj</div><div class="proof-stars">★★★★★</div></div>
+        </div>
+      </div>
+      <div class="proof-card reveal" style="transition-delay:.2s">
+        <div class="proof-quote">"</div>
+        <p class="proof-text">Am luat planul instituțional pentru secția noastră. 40 de oameni, un dashboard, raport lunar automat pentru conducere.</p>
+        <div class="proof-author">
+          <div class="proof-av-wrap"><img src="/img/ext/u-ff3ba16c16.jpg" alt="Col. Cristian V." loading="lazy"></div>
+          <div><div class="proof-name">Col. Cristian V.</div><div class="proof-role">Jandarmerie, Iași</div><div class="proof-stars">★★★★★</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq-section">
+  <div class="faq-inner">
+    <div class="faq-left">
+      <div class="s-label">// FAQ</div>
+      <h2 class="s-title" style="font-size:clamp(24px,4vw,64px)">ÎNTREBĂRI<br>FRECVENTE</h2>
+      <p class="s-sub">Dacă nu găsești răspunsul, scrie-ne direct.</p>
+      <br>
+      <button class="btn-lime" style="width:fit-content" onclick="location.href='/contact'">Contactează-ne →</button>
+    </div>
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <div class="faq-q" onclick="tFaq(this)">Ce pot face ca athlete?<span class="faq-ico">+</span></div>
+        <div class="faq-a">Îți loghezi antrenamentele, mâncarea, apa și somnul. Ai un dashboard cu streak, XP și progres zilnic. Dacă ai un coach, el îți vede activitatea și poate ajusta planul.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="tFaq(this)">Ce face un coach pe platformă?<span class="faq-ico">+</span></div>
+        <div class="faq-a">Creează workout-uri, le atribuie sportivilor și urmărește execuția. Poate invita sportivi prin link și comunica prin chat-ul integrat. <a href="/login?role=coach&tab=demo" style="color:var(--lime);text-decoration:underline">Încearcă demo coach →</a></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="tFaq(this)">Ce face un nutriționist?<span class="faq-ico">+</span></div>
+        <div class="faq-a">Creează template-uri de nutriție și le atribuie clienților. Poate monitoriza compliance-ul și ajusta planurile. <a href="/login?role=nutritionist&tab=demo" style="color:var(--lime);text-decoration:underline">Încearcă demo nutriționist →</a></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="tFaq(this)">Pot testa fără să-mi fac cont?<span class="faq-ico">+</span></div>
+        <div class="faq-a">Da. Pagina de login are un tab "Try demo" cu patru conturi gata configurate — athlete, coach, nutriționist și admin. Intri instant fără înregistrare. <a href="/login?tab=demo" style="color:var(--lime);text-decoration:underline">Mergi la demo →</a></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="tFaq(this)">E gratis?<span class="faq-ico">+</span></div>
+        <div class="faq-a">Platforma are un plan gratuit cu funcționalități de bază. Planurile PRO și Team adaugă mai multe features. Vezi secțiunea de planuri de mai sus pentru detalii.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="tFaq(this)">Cum creez un cont?<span class="faq-ico">+</span></div>
+        <div class="faq-a">Alegi un plan, ești redirecționat pe pagina de register cu planul preselectat. Completezi nume, email, parolă și alegi rolul. <a href="/login?tab=register" style="color:var(--lime);text-decoration:underline">Creează cont →</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── GALERIE IMAGINI ──────────────────────────────────────────────────── -->
+<section id="gallery-section" role="region" aria-label="Galerie">
+  <div class="orb orb-lime" style="top:-100px;left:30%;width:300px;height:300px;"></div>
+  <div class="gallery-container">
+    <div class="gallery-kicker reveal">galerie</div>
+    <h2 class="gallery-title reveal"><span class="gradient-text">FORJA ÎN ACȚIUNE</span></h2>
+    <p class="gallery-subtitle reveal">Antrenament, nutriție, echipă — vezi cum arată performanța reală.</p>
+  </div>
+
+  <!-- Full-width carousel -->
+  <div id="galleryCarousel" class="gallery-carousel">
+    <div id="galleryTrack" class="gallery-track">
+      <div class="gslide"><img src="/img/ext/gallery-gym-functional.jpg" alt="Gym" / loading="lazy"><div class="gcap"><span class="gcap-tag">ANTRENAMENT</span><span class="gcap-title">Antrenament funcțional în sală</span></div></div>
+      <div class="gslide"><img src="/img/ext/gallery-nutrition-mealprep.jpg" alt="Nutrition" / loading="lazy"><div class="gcap"><span class="gcap-tag">NUTRIȚIE</span><span class="gcap-title">Meal prep — nutriție optimizată</span></div></div>
+      <div class="gslide"><img src="/img/ext/gallery-athlete-strength.jpg" alt="Athlete" / loading="lazy"><div class="gcap"><span class="gcap-tag">FORȚĂ</span><span class="gcap-title">Performanță la nivel profesionist</span></div></div>
+      <div class="gslide"><img src="/img/ext/gallery-coaching-session.jpg" alt="Coach" / loading="lazy"><div class="gcap"><span class="gcap-tag">COACHING</span><span class="gcap-title">Coaching personalizat 1:1</span></div></div>
+      <div class="gslide"><img src="/img/ext/gallery-cardio-running.jpg" alt="Running" / loading="lazy"><div class="gcap"><span class="gcap-tag">CARDIO</span><span class="gcap-title">Cardio și rezistență</span></div></div>
+      <div class="gslide"><img src="/img/ext/gallery-team-training.jpg" alt="Team" / loading="lazy"><div class="gcap"><span class="gcap-tag">ECHIPĂ</span><span class="gcap-title">Antrenament de echipă</span></div></div>
+      <div class="gslide"><img src="/img/ext/gallery-recovery-stretching.jpg" alt="Stretching" / loading="lazy"><div class="gcap"><span class="gcap-tag">RECOVERY</span><span class="gcap-title">Recovery și mobilitate</span></div></div>
+      <div class="gslide"><img src="/img/ext/gallery-nutrition-balanced.jpg" alt="Food" / loading="lazy"><div class="gcap"><span class="gcap-tag">NUTRIȚIE</span><span class="gcap-title">Nutriție echilibrată zilnic</span></div></div>
+    </div>
+    <!-- Arrows -->
+    <button onclick="galPrev()" class="gal-arrow gal-arrow-l">‹</button>
+    <button onclick="galNext()" class="gal-arrow gal-arrow-r">›</button>
+    <!-- Progress bar -->
+    <div class="gallery-progress-wrap">
+      <div id="galProgress" class="gallery-progress-bar"></div>
+    </div>
+  </div>
+
+  <!-- Dots + counter -->
+  <div class="gallery-dots" id="galleryDots"></div>
+  <div class="gallery-counter"><span id="galIdx">1</span> / <span id="galTotal">8</span></div>
+</section>
+<section id="final-cta">
+  <div class="cta-grid-bg"></div>
+  <!-- Human photo collage row above CTA text -->
+  <div class="collage-row">
+    <div class="collage-avatar">
+      <img src="/img/ext/u-9fa6587f5f.jpg" alt="Utilizator FORJA" loading="lazy">
+    </div>
+    <div class="collage-avatar">
+      <img src="/img/ext/u-8aa789dd17.jpg" alt="Utilizator FORJA" loading="lazy">
+    </div>
+    <div class="collage-avatar">
+      <img src="/img/ext/u-c9ed5466fc.jpg" alt="Utilizator FORJA" loading="lazy">
+    </div>
+    <div class="collage-avatar">
+      <img src="/img/ext/u-6fa09e8317.jpg" alt="Utilizator FORJA" loading="lazy">
+    </div>
+    <div class="collage-avatar">
+      <img src="/img/ext/u-d5d908b0e4.jpg" alt="Utilizator FORJA" loading="lazy">
+    </div>
+    <div class="collage-avatar">
+      <img src="/img/ext/u-b5273b65d6.jpg" alt="Utilizator FORJA" loading="lazy">
+    </div>
+    <div style="width:56px;height:56px;border-radius:50%;overflow:hidden;border:3px solid rgba(197,241,53,0.4);margin:0 -8px;background:rgba(197,241,53,0.1);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:14px;font-weight:900;color:var(--lime);">
+      +3.2K
+    </div>
+  </div>
+  <h2 class="cta-h reveal">
+    PRIMA<br>
+    <span class="lime-txt">ECHIPĂ</span><br>
+    <span class="outline-txt">TE AȘTEAPTĂ</span>
+  </h2>
+  <p class="cta-sub reveal">Prima săptămână e pe noi. Fără card bancar. Anulezi oricând.</p>
+  <div class="cta-btns reveal">
+    <button class="btn-lime" style="font-size:15px;padding:17px 40px" onclick="scrollTo('#plans')">🏆 Alege planul tău →</button>
+    <button class="btn-outline" style="font-size:15px;padding:17px 40px;border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.7)" onclick="document.getElementById('marketplace').scrollIntoView({behavior:'smooth'})">Explorează echipe</button>
+  </div>
+  <p class="cta-note reveal">Fără card bancar · GDPR complet · Anulezi oricând</p>
+</section>
+
+<!-- FOOTER -->
+</main>
+<footer>
+  <div class="footer-logo">F<em>O</em>RJA</div>
+  <div class="footer-links">
+    <a role="button" tabindex="0" href="#" onclick="event.preventDefault();openInfoModal('about')">Despre noi</a><a role="button" tabindex="0" href="#" onclick="event.preventDefault();openInfoModal('reviews')">Recenzii</a><a role="button" tabindex="0" href="#" onclick="event.preventDefault();openInfoModal('terms')">Termeni</a>
+    <a role="button" tabindex="0" href="#" onclick="event.preventDefault();openInfoModal('privacy')">Confidențialitate</a><a href="/contact">Contact</a><a href="/login?tab=demo">Testează demo</a>
+  </div>
+  <div class="footer-copy">© 2026 FORJA SRL · Toate drepturile rezervate</div>
+</footer>
+
+<div id="infoModal" class="site-modal" aria-hidden="true">
+  <div class="site-modal-backdrop" onclick="closeSiteModal('infoModal')"></div>
+  <div class="site-modal-card">
+    <div class="site-modal-head">
+      <div>
+        <div class="site-modal-kicker">FORJA · Informații</div>
+        <div class="site-modal-title" id="infoModalTitle">FORJA</div>
+        <div class="site-modal-sub" id="infoModalSub">Detalii utile despre produs și companie.</div>
+      </div>
+      <button class="site-close" onclick="closeSiteModal('infoModal')">✕</button>
+    </div>
+    <div class="site-info-body">
+      <div class="site-info-copy" id="infoModalBody"></div>
+      <div class="site-info-list" id="infoModalAside"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Contact Modal (fallback — pagina principală de contact este /contact) -->
+<div id="contactModal" class="site-modal" aria-hidden="true">
+  <div class="site-modal-backdrop" onclick="closeSiteModal('contactModal')"></div>
+  <div class="site-modal-card">
+    <div class="site-modal-head">
+      <div>
+        <div class="site-modal-kicker">FORJA · Contact</div>
+        <div class="site-modal-title">Hai să vorbim</div>
+        <div class="site-modal-sub">Scrie-ne și primești un punct de intrare clar: demo, ofertă business, parteneriat sau onboarding coach.</div>
+      </div>
+      <button class="site-close" onclick="closeSiteModal('contactModal')">✕</button>
+    </div>
+    <form class="site-form" onsubmit="return submitContact(event)" novalidate>
+      <label class="site-field">
+        <span class="site-label">Nume</span>
+        <input id="contactName" class="site-input" placeholder="Numele tău" required minlength="2" autocomplete="name" />
+      </label>
+      <label class="site-field">
+        <span class="site-label">Email</span>
+        <input id="contactEmail" type="email" class="site-input" placeholder="email@companie.ro" required autocomplete="email" />
+      </label>
+      <label class="site-field full">
+        <span class="site-label">Subiect</span>
+        <select id="contactTopic" class="site-select">
+          <option value="general">Întrebare generală</option>
+          <option value="business">Business team / ofertă</option>
+          <option value="coach">Onboarding coach</option>
+          <option value="partnership">Parteneriat</option>
+          <option value="demo">Cerere demo</option>
+        </select>
+      </label>
+      <label class="site-field full">
+        <span class="site-label">Mesaj</span>
+        <textarea id="contactMessage" class="site-textarea" placeholder="Spune-ne pe scurt ce vrei să obții cu FORJA." required minlength="10"></textarea>
+      </label>
+      <div class="site-actions">
+        <button type="button" class="site-btn ghost" onclick="closeSiteModal('contactModal')">Închide</button>
+        <button type="submit" class="site-btn lime">Trimite mesajul</button>
+      </div>
+    </form>
+    <div id="contactFeedback" class="site-feedback">✓ Mesajul a fost înregistrat.</div>
+
+    <!-- MAP -->
+    <div style="margin-top:20px;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2848.8444388087937!2d26.1025!3d44.4268!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDTCsDI1JzM2LjUiTiAyNsKwMDYnMDkuMCJF!5e0!3m2!1sro!2sro!4v1700000000000!5m2!1sro!2sro" width="100%" height="180" style="border:0;display:block;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+
+    <!-- SOCIAL MEDIA -->
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:16px;">
+      <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="social-link">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        Facebook
+      </a>
+      <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="social-link">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        Instagram
+      </a>
+      <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="social-link">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        X / Twitter
+      </a>
+    </div>
+
+    <!-- CONTACT INFO -->
+    <div style="text-align:center;margin-top:12px;font-family:'Barlow Condensed',sans-serif;font-size:12px;color:rgba(255,255,255,0.4);letter-spacing:0.5px;">
+      📍 București, România &nbsp;·&nbsp; 📧 contact@forja.ro &nbsp;·&nbsp; 📞 +40 700 000 000
+    </div>
+  </div>
+</div>
+
+
+
+<script src="landing.js"></script>
+</body>
+</html>

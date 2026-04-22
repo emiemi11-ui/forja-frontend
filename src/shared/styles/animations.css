@@ -1,0 +1,361 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   FORJA ENHANCED VISUAL EFFECTS v2
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── SKELETON SHIMMER ──────────────────────────────────────────────── */
+.forja-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--c-border) 25%,
+    var(--c-bg) 50%,
+    var(--c-border) 75%
+  );
+  background-size: 200% 100%;
+  animation: forja-shimmer 1.5s ease-in-out infinite;
+}
+@keyframes forja-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── GRADIENT MESH BACKGROUND ─────────────────────────────────────── */
+.forja-gradient-mesh {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.forja-mesh-blob {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  filter: blur(120px);
+  animation: meshFloat 20s ease-in-out infinite;
+}
+.forja-mesh-blob-1 {
+  top: -10%;
+  left: 10%;
+  animation-delay: 0s;
+}
+.forja-mesh-blob-2 {
+  bottom: -10%;
+  right: 10%;
+  animation-delay: -7s;
+}
+.forja-mesh-blob-3 {
+  top: 40%;
+  left: 50%;
+  animation-delay: -14s;
+}
+@keyframes meshFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25%      { transform: translate(30px, -20px) scale(1.05); }
+  50%      { transform: translate(-20px, 30px) scale(0.95); }
+  75%      { transform: translate(20px, 20px) scale(1.03); }
+}
+
+/* ── ENHANCED PAGE TRANSITIONS ────────────────────────────────────── */
+.view.active {
+  animation: none !important; /* let framer-motion handle it */
+}
+
+/* ── CARD RAINBOW BORDER ON HOVER ─────────────────────────────────── */
+.card-glow {
+  position: relative;
+  overflow: hidden;
+}
+.card-glow::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--c-lime), var(--c-blue), var(--c-coral));
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.card-glow:hover::before {
+  opacity: 1;
+}
+
+/* ── GLASS CARD ───────────────────────────────────────────────────── */
+.glass-card {
+  background: rgba(254, 253, 251, 0.7);
+  backdrop-filter: blur(20px) saturate(1.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  border-radius: var(--r-lg);
+}
+
+/* ── HERO IMAGE MASK ──────────────────────────────────────────────── */
+.forja-hero-img {
+  opacity: var(--hero-img-opacity, 0.15);
+  transition: opacity 0.3s ease;
+}
+
+/* ── HERO internal text helpers ──────────────────────────────────── */
+.forja-hero { color: var(--hero-text); }
+.forja-hero .hero-label { color: var(--hero-text3); }
+.forja-hero .hero-sub { color: var(--hero-text2); }
+.forja-hero .hero-stat-card {
+  background: var(--hero-card-bg);
+  border: 1px solid var(--hero-card-bd);
+  border-radius: 10px;
+  padding: 12px;
+}
+.forja-hero .hero-stat-val {
+  font-family: var(--fd);
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--hero-text);
+  line-height: 1;
+}
+.forja-hero .hero-stat-lbl {
+  font-size: 8px;
+  color: var(--hero-text3);
+  font-family: var(--fm);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+
+/* ── BADGE UNLOCK GLOW ────────────────────────────────────────────── */
+.badge-glow {
+  position: relative;
+}
+.badge-glow::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 0deg,
+    var(--c-lime),
+    var(--c-blue),
+    var(--c-coral),
+    var(--c-purple),
+    var(--c-lime)
+  );
+  z-index: -1;
+  filter: blur(10px);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.badge-glow:hover::after,
+.badge-glow.earned::after {
+  opacity: 0.4;
+  animation: badgeRotate 4s linear infinite;
+}
+@keyframes badgeRotate {
+  to { filter: blur(10px) hue-rotate(360deg); }
+}
+
+/* ── RIPPLE BUTTON EFFECT ─────────────────────────────────────────── */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(0);
+  pointer-events: none;
+}
+.btn-ripple:active::after {
+  animation: rippleOut 0.5s ease-out;
+}
+@keyframes rippleOut {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* ── SPARKLINE CONTAINER ──────────────────────────────────────────── */
+.sparkline-wrap {
+  position: absolute;
+  bottom: 12px;
+  right: 14px;
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+.kpi:hover .sparkline-wrap {
+  opacity: 1;
+}
+
+/* ── FLOATING STATS ANIMATION ─────────────────────────────────────── */
+.stat-float {
+  animation: statFloat 3s ease-in-out infinite;
+}
+@keyframes statFloat {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-4px); }
+}
+
+/* ── EXERCISE CARD BORDER PULSE ───────────────────────────────────── */
+.ex-active {
+  position: relative;
+}
+.ex-active::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 12px;
+  border: 2px solid var(--c-lime);
+  animation: exPulse 2s ease-in-out infinite;
+}
+@keyframes exPulse {
+  0%, 100% { opacity: 0.3; }
+  50%      { opacity: 0.8; }
+}
+
+/* ── TYPING DOTS ENHANCED ─────────────────────────────────────────── */
+.forja-dots span {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: dotBounce 1.4s ease-in-out infinite;
+}
+.forja-dots span:nth-child(2) { animation-delay: 0.15s; }
+.forja-dots span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40%           { transform: scale(1); }
+}
+
+/* ── NOTIFICATION BADGE PULSE ─────────────────────────────────────── */
+.notif-badge {
+  position: relative;
+}
+.notif-badge::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: var(--c-coral);
+  animation: notifPulse 2s ease infinite;
+  z-index: -1;
+}
+@keyframes notifPulse {
+  0%, 100% { transform: scale(1); opacity: 0; }
+  50%      { transform: scale(1.8); opacity: 0.25; }
+}
+
+/* ── IMAGE LAZY LOAD FADE IN ──────────────────────────────────────── */
+.img-reveal {
+  opacity: 0;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: scale(1.02);
+}
+.img-reveal.loaded {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ── BROKEN IMAGE FALLBACK ───────────────────────────────────────── */
+img {
+  image-rendering: auto;
+}
+img[src=""],
+img:not([src]) {
+  visibility: hidden;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* ── STREAK FIRE ANIMATION ────────────────────────────────────────── */
+.fire-anim {
+  animation: fireFlicker 1.5s ease-in-out infinite;
+}
+@keyframes fireFlicker {
+  0%, 100% { filter: brightness(1) hue-rotate(0deg); transform: scale(1); }
+  25%      { filter: brightness(1.2) hue-rotate(-5deg); transform: scale(1.05); }
+  50%      { filter: brightness(1.1) hue-rotate(5deg); transform: scale(1); }
+  75%      { filter: brightness(1.3) hue-rotate(-3deg); transform: scale(1.03); }
+}
+
+/* ── WATER CUP FILL ANIMATION ─────────────────────────────────────── */
+.water-fill-anim {
+  position: relative;
+  overflow: hidden;
+}
+.water-fill-anim::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--c-blue-bg);
+  border-radius: inherit;
+  transition: height 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.water-fill-anim.f::before {
+  height: 100%;
+}
+
+/* ── EXERCISE COMPLETION CHECKMARK ────────────────────────────────── */
+@keyframes checkPop {
+  0%   { transform: scale(0) rotate(-45deg); }
+  50%  { transform: scale(1.2) rotate(0deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.check-pop {
+  animation: checkPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── SCORE COUNTER GLOW ───────────────────────────────────────────── */
+.score-glow {
+  text-shadow:
+    0 0 20px currentColor,
+    0 0 40px rgba(184, 237, 0, 0.3);
+}
+
+/* ── SECTION DIVIDER GRADIENT ─────────────────────────────────────── */
+.divider-gradient {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--c-border) 20%,
+    var(--c-border) 80%,
+    transparent
+  );
+  margin: 20px 0;
+}
+
+/* ── SMOOTH KPI VALUE TRANSITION ──────────────────────────────────── */
+.kpi-value-animate {
+  display: inline-block;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.kpi:hover .kpi-value-animate {
+  transform: scale(1.05);
+}
+
+/* ── CARD INNER GLOW ON HOVER ─────────────────────────────────────── */
+.card-inner-glow {
+  position: relative;
+  transition: all 0.35s ease;
+}
+.card-inner-glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 30px rgba(184, 237, 0, 0);
+  transition: box-shadow 0.35s ease;
+  pointer-events: none;
+}
+.card-inner-glow:hover::after {
+  box-shadow: inset 0 0 30px rgba(184, 237, 0, 0.03);
+}

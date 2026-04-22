@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <rect width="400" height="300" rx="20" fill="#0a0a0a"/>
+  <circle cx="200" cy="150" r="100" fill="rgba(197,241,53,0.05)"/>
+  <defs><filter id="gf"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+  <g filter="url(#gf)" transform="translate(200,150)">
+    <line x1="0" y1="-35" x2="0" y2="20" stroke="#c5f135" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="0" cy="-47" r="12" fill="none" stroke="#c5f135" stroke-width="3"/>
+    <!-- Cable lines from top -->
+    <line x1="-80" y1="-80" x2="-35" y2="-25" stroke="#c5f135" stroke-width="1.5" opacity="0.4"/>
+    <line x1="80" y1="-80" x2="35" y2="-25" stroke="#c5f135" stroke-width="1.5" opacity="0.4"/>
+    <!-- Arms fly motion -->
+    <line x1="-8" y1="-25" x2="-40" y2="-20" stroke="#c5f135" stroke-width="3" stroke-linecap="round">
+      <animate attributeName="x2" values="-40;-15;-40" dur="2.5s" repeatCount="indefinite"/>
+    </line>
+    <line x1="8" y1="-25" x2="40" y2="-20" stroke="#c5f135" stroke-width="3" stroke-linecap="round">
+      <animate attributeName="x2" values="40;15;40" dur="2.5s" repeatCount="indefinite"/>
+    </line>
+    <!-- Hands -->
+    <circle cx="-40" cy="-20" r="4" fill="none" stroke="#c5f135" stroke-width="2">
+      <animate attributeName="cx" values="-40;-15;-40" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="40" cy="-20" r="4" fill="none" stroke="#c5f135" stroke-width="2">
+      <animate attributeName="cx" values="40;15;40" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <line x1="-5" y1="20" x2="-12" y2="60" stroke="#c5f135" stroke-width="3" stroke-linecap="round"/>
+    <line x1="5" y1="20" x2="12" y2="60" stroke="#c5f135" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="200" y="265" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="rgba(255,255,255,0.5)" letter-spacing="4">CABLE FLY</text>
+</svg>

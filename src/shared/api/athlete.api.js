@@ -1,0 +1,63 @@
+import api from './client.js';
+import { ENDPOINTS } from './endpoints.js';
+
+export const getDashboard = () => api.get(ENDPOINTS.athlete.dashboard);
+export const getUser = () => api.get(ENDPOINTS.athlete.user);
+export const patchUser = (data) => api.patch(ENDPOINTS.athlete.user, data);
+export const getGoals = () => api.get(ENDPOINTS.athlete.goals);
+export const putGoals = (data) => api.put(ENDPOINTS.athlete.goals, data);
+export const getToday = () => api.get(ENDPOINTS.athlete.today);
+export const setWater = (cups) => api.post(ENDPOINTS.athlete.todayWater, { cups });
+export const setSteps = (steps) => api.post(ENDPOINTS.athlete.todaySteps, { steps });
+
+export const getExercises = () => api.get(ENDPOINTS.athlete.exercises);
+export const getExLib = (q, muscle) =>
+  api.get(ENDPOINTS.athlete.exercisesLibrary, { params: { q, muscle } });
+export const addExercise = (libId) =>
+  api.post(ENDPOINTS.athlete.exercises, { libId });
+export const toggleExercise = (id) =>
+  api.patch(`${ENDPOINTS.athlete.exercises}/${id}/toggle`);
+export const deleteExercise = (id) =>
+  api.delete(`${ENDPOINTS.athlete.exercises}/${id}`);
+export const bulkDoneExercises = () =>
+  api.patch(`${ENDPOINTS.athlete.exercises}/bulk-done`);
+export const clearExercises = () =>
+  api.delete(ENDPOINTS.athlete.exercises);
+
+export const getMeals = () => api.get(ENDPOINTS.athlete.meals);
+export const addMeal = (foodId, meal) =>
+  api.post(ENDPOINTS.athlete.meals, { foodId, meal });
+export const deleteMeal = (id) => api.delete(`${ENDPOINTS.athlete.meals}/${id}`);
+export const searchFood = (q) =>
+  api.get(ENDPOINTS.athlete.food, { params: { q } });
+export const addCustomFood = (payload) =>
+  api.post(`${ENDPOINTS.athlete.food}/custom`, payload);
+
+export const getSleep = () => api.get(ENDPOINTS.athlete.sleep);
+export const logSleep = (bed, wake, quality) =>
+  api.post(ENDPOINTS.athlete.sleepLog, { bed, wake, quality });
+
+export const getChat = (teamId) => api.get(teamId ? `${ENDPOINTS.athlete.chat}?teamId=${teamId}` : ENDPOINTS.athlete.chat);
+export const sendChat = (msg, teamId) => api.post(ENDPOINTS.athlete.chat, { msg, teamId });
+
+export const uploadAvatar = (file) => {
+  const form = new FormData();
+  form.append('avatar', file);
+  return api.post(ENDPOINTS.athlete.avatar, form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
+export const searchApp = (q) =>
+  api.get(ENDPOINTS.athlete.search, { params: { q } });
+export const getDiscover = (params = {}) => api.get(ENDPOINTS.athlete.discover, { params });
+export const getAchievements = () => api.get('/achievements');
+export const addDiscoverReview = (professionalId, payload) => api.post(`${ENDPOINTS.athlete.discover}/${professionalId}/reviews`, payload);
+
+export const getWorkoutCurrent = () => api.get(ENDPOINTS.athlete.workoutCurrent);
+export const startWorkout = () => api.post(ENDPOINTS.athlete.workoutStart);
+export const completeSet = (exerciseId) =>
+  api.patch(ENDPOINTS.athlete.workoutSet, { exerciseId });
+export const finishWorkout = () => api.post(ENDPOINTS.athlete.workoutFinish);
+export const abandonWorkout = () => api.post(ENDPOINTS.athlete.workoutAbandon);
+export const getWorkoutHistory = () => api.get(ENDPOINTS.athlete.workoutHistory);

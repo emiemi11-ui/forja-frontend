@@ -1,0 +1,172 @@
+/* ── FORJA Mobile App Page Styles ── */
+
+:root{--lime:#C5F135;--coral:#FF4422;--blue:#1A52FF;--black:#0a0a09;--surface:#141413;--bg:#f5f1ea;--text:#0a0a09;--text3:rgba(0,0,0,0.45);--font-display:'Barlow Condensed',sans-serif;--font-body:'Inter',sans-serif;--font-mono:'JetBrains Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text)}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 40px;display:flex;align-items:center;justify-content:space-between;background:rgba(245,241,234,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,0,0,0.06)}
+.nav-logo{font-family:var(--font-display);font-size:28px;font-weight:900;letter-spacing:2px;color:var(--text)}
+.nav-logo em{font-style:normal;color:var(--lime)}
+.nav a{font-size:13px;font-weight:600;color:var(--text);text-decoration:none;opacity:0.6;transition:opacity 0.2s}
+.nav a:hover{opacity:1}
+.btn-back{display:inline-flex;align-items:center;gap:8px;padding:10px 24px;border-radius:100px;border:2px solid var(--text);font-weight:700;font-size:13px;color:var(--text);text-decoration:none;transition:all 0.2s}
+.btn-back:hover{background:var(--text);color:#fff}
+.hero{min-height:100vh;display:flex;align-items:center;padding:120px 32px 80px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 40%,rgba(197,241,53,0.08) 0%,transparent 60%);pointer-events:none}
+.phone-mock{width:280px;height:540px;background:var(--black);border-radius:36px;padding:12px;position:relative;box-shadow:0 40px 80px rgba(0,0,0,0.2),0 0 0 1px rgba(255,255,255,0.1);flex-shrink:0}
+.phone-inner{width:100%;height:100%;border-radius:26px;background:#111;overflow:hidden;position:relative}
+.phone-notch{width:100px;height:24px;background:var(--black);border-radius:0 0 16px 16px;position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:2}
+.feature-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:40px;padding:80px 24px;max-width:1400px;margin:0 auto}
+.feat-card{border-radius:24px;padding:40px;background:var(--surface);color:#fff;position:relative;overflow:hidden;transition:transform 0.3s}
+.feat-card:hover{transform:translateY(-4px)}
+.feat-card h3{font-family:var(--font-display);font-size:28px;font-weight:900;margin-bottom:12px}
+.feat-card p{font-size:14px;line-height:1.7;opacity:0.6}
+.feat-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:16px}
+.cta-section{text-align:center;padding:80px 40px;background:var(--black);color:#fff}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@media(max-width:900px){.hero{flex-direction:column;text-align:center;padding:100px 16px 50px}.feature-grid{grid-template-columns:1fr;padding:40px 16px}}
+
+/* ══════════════════════════════════════════════════════════════
+   MOBILE APP PAGE — Responsive Overrides
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── TABLET (≤ 980px) ── */
+@media (max-width: 980px) {
+  /* Force ALL inline 2-col grids to stack */
+  [style*="grid-template-columns:1fr 1fr"],
+  [style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+
+  /* Max-width containers need padding */
+  [style*="max-width:1200px"],
+  [style*="max-width:1100px"] {
+    max-width: 100% !important;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+
+  /* Section paddings */
+  [style*="padding:60px 40px"] {
+    padding: 40px 24px !important;
+  }
+}
+
+/* ── PHONE (≤ 768px) ── */
+@media (max-width: 768px) {
+  /* Nav */
+  .nav {
+    padding: 12px 16px !important;
+  }
+  .nav-logo {
+    font-size: 22px !important;
+  }
+  .nav a {
+    font-size: 11px !important;
+  }
+  .nav > div {
+    gap: 12px !important;
+  }
+
+  /* Hero — stack layout */
+  .hero {
+    min-height: auto !important;
+    padding: 80px 16px 40px !important;
+  }
+  [style*="grid-template-columns:1fr 1fr"],
+  [style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+
+  /* Phone mock */
+  .phone-mock {
+    width: 220px !important;
+    height: 420px !important;
+    margin: 0 auto !important;
+  }
+
+  /* Inline heading sizes */
+  [style*="font-size:clamp(48px"] {
+    font-size: clamp(28px, 7vw, 42px) !important;
+  }
+  [style*="font-size:clamp(28px"] {
+    font-size: clamp(22px, 6vw, 32px) !important;
+  }
+
+  /* Feature section paddings */
+  [style*="padding:60px 40px"] {
+    padding: 32px 16px !important;
+  }
+
+  /* Feature cards */
+  .feat-card {
+    padding: 24px !important;
+  }
+  .feat-card h3 {
+    font-size: 22px !important;
+  }
+
+  /* Inline padded cards */
+  [style*="padding:32px"] {
+    padding: 20px 16px !important;
+  }
+  [style*="padding:24px 32px"] {
+    padding: 20px 16px !important;
+  }
+
+  /* CTA section */
+  .cta-section {
+    padding: 50px 16px !important;
+  }
+
+  /* Feature grid */
+  .feature-grid {
+    grid-template-columns: 1fr !important;
+    padding: 30px 16px !important;
+  }
+
+  /* Inline margin reductions */
+  [style*="margin-bottom:40px"] {
+    margin-bottom: 24px !important;
+  }
+  [style*="margin-bottom:24px"] {
+    margin-bottom: 16px !important;
+  }
+}
+
+/* ── SMALL PHONE (≤ 480px) ── */
+@media (max-width: 480px) {
+  .nav {
+    padding: 10px 12px !important;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .nav > div {
+    gap: 8px !important;
+    flex-wrap: wrap;
+  }
+  .nav a {
+    font-size: 10px !important;
+  }
+  .hero {
+    padding: 70px 12px 30px !important;
+  }
+  .phone-mock {
+    width: 180px !important;
+    height: 340px !important;
+  }
+  [style*="font-size:clamp(48px"] {
+    font-size: clamp(24px, 7vw, 36px) !important;
+  }
+  [style*="padding:60px 40px"],
+  [style*="padding:40px 24px"] {
+    padding: 24px 12px !important;
+  }
+  .feat-card {
+    padding: 20px 14px !important;
+  }
+  .cta-section {
+    padding: 40px 12px !important;
+  }
+}

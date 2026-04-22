@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 80" fill="none">
+  <ellipse cx="22" cy="25" rx="8" ry="14" fill="rgba(184,237,0,0.2)" stroke="#B8ED00" stroke-width="1.5" transform="rotate(-10 22 25)">
+    <animate attributeName="opacity" values="0.3;0.8;0.3" dur="1.5s" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse cx="38" cy="55" rx="8" ry="14" fill="rgba(184,237,0,0.2)" stroke="#B8ED00" stroke-width="1.5" transform="rotate(10 38 55)">
+    <animate attributeName="opacity" values="0.8;0.3;0.8" dur="1.5s" repeatCount="indefinite"/>
+  </ellipse>
+  <circle cx="16" cy="10" r="3" fill="rgba(184,237,0,0.15)"/>
+  <circle cx="44" cy="40" r="3" fill="rgba(184,237,0,0.15)"/>
+</svg>
