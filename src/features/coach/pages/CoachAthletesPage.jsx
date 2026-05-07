@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCoachAthletes, getCoachAthlete, coachInviteAthlete, startConversation } from '../../../shared/api/index.js';
+import { getCoachAthletes, getCoachAthlete, coachInviteAthlete, startConversation, getCoachRequests, acceptCoachRequest, rejectCoachRequest } from '../../../shared/api/index.js';
 import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
 import Drawer from '../../../shared/ui/Drawer.jsx';
 import Modal, { ModalField, ModalInput, ModalSelect, ModalActions } from '../../../shared/ui/Modal.jsx';
@@ -35,8 +35,39 @@ export default function CoachAthletesPage() {
   const navigate = useNavigate();
 
   const [loadingPage, setLoadingPage] = useState(true);
-  const load = () => { setLoadingPage(true); getCoachAthletes().then(r => { setAthletes(r.data); setLoadingPage(false); }).catch(() => setLoadingPage(false)); };
+  const [requests, setRequests] = useState([]);
+  const load = () => {
+    setLoadingPage(true);
+    Promise.all([getCoachAthletes(), getCoachRequests().catch(() => ({ data: [] }))])
+      .then(([a, r]) => {
+        setAthletes(a.data);
+        setRequests(r.data || []);
+        setLoadingPage(false);
+      })
+      .catch(() => setLoadingPage(false));
+  };
   useEffect(() => { load(); }, []);
+
+  const handleAcceptRequest = async (linkId, athleteName) => {
+    try {
+      await acceptCoachRequest(linkId);
+      showToast(`✅ ${athleteName} este acum atletul tău!`);
+      load();
+    } catch (e) {
+      showToast(e.response?.data?.error || '❌ Eroare', '❌');
+    }
+  };
+
+  const handleRejectRequest = async (linkId, athleteName) => {
+    if (!confirm(`Sigur respingi cererea de la ${athleteName}?`)) return;
+    try {
+      await rejectCoachRequest(linkId);
+      showToast('✅ Cerere respinsă');
+      load();
+    } catch (e) {
+      showToast(e.response?.data?.error || '❌ Eroare', '❌');
+    }
+  };
 
   const openDrawer = async (a) => {
     setSelected(a);
@@ -47,10 +78,10 @@ export default function CoachAthletesPage() {
   };
 
   const handleInvite = async () => {
-    if (!form.name || !form.email) { showToast('Completează toate câmpurile', '⚠️'); return; }
+    if (!form.email) { showToast('Introdu email-ul atletului', '⚠️'); return; }
     setLoading(true);
     try {
-      const r = await coachInviteAthlete(form);
+      const r = await coachInviteAthlete({ email: form.email, goal: form.goal });
       showToast(`✅ Invitație trimisă la ${form.email}`);
       setShowInvite(false);
       setForm({ name: '', email: '', goal: '', plan: 'Full Body 3x' });
@@ -64,7 +95,32 @@ export default function CoachAthletesPage() {
     <AnimatedPage>
       <Toast toast={toast} />
       {loadingPage && <div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}><div className="spinner" /></div>}
-      {!loadingPage && athletes.length === 0 && (
+
+      {/* Cereri primite (sus de tot) */}
+      {!loadingPage && requests.length > 0 && (
+        <div className="card" style={{ marginBottom: 16, border: '2px solid var(--c-lime)' }}>
+          <div className="card-hd">
+            <span className="card-hd-title">📥 Cereri noi ({requests.length})</span>
+          </div>
+          <div className="card-body">
+            {requests.map((r) => (
+              <div key={r.linkId} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--c-bg)' }}>
+                <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--c-blue, #3b82f6)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontFamily: 'var(--fd)', fontSize: 16, flexShrink: 0 }}>
+                  {(r.athlete.name?.[0] || '?').toUpperCase()}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: 'var(--fd)', fontWeight: 700, fontSize: 14 }}>{r.athlete.name}</div>
+                  <div style={{ fontSize: 11, color: 'var(--c-ink3)' }}>{r.athlete.goal || r.athlete.email}</div>
+                </div>
+                <button className="btn btn-black btn-sm" onClick={() => handleAcceptRequest(r.linkId, r.athlete.name)}>✓ Acceptă</button>
+                <button className="btn btn-outline btn-sm" onClick={() => handleRejectRequest(r.linkId, r.athlete.name)} style={{ color: '#dc2626' }}>✕</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {!loadingPage && athletes.length === 0 && requests.length === 0 && (
         <div style={{ padding: '60px 0', textAlign: 'center', color: 'var(--c-ink3)' }}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>👥</div>
           <div style={{ fontFamily: 'var(--fd)', fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Niciun atlet încă</div>
@@ -74,19 +130,14 @@ export default function CoachAthletesPage() {
 
       {/* Invite Modal */}
       <Modal open={showInvite} onClose={() => setShowInvite(false)} title="👥 Invită atlet">
-        <ModalField label="Nume complet">
-          <ModalInput placeholder="ex: Andrei Voicu" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
-        </ModalField>
-        <ModalField label="Email">
+        <div style={{ fontSize: 12, color: 'var(--c-ink3)', marginBottom: 12 }}>
+          Atletul trebuie să aibă deja cont pe FORJA. Introdu emailul lui.
+        </div>
+        <ModalField label="Email atlet">
           <ModalInput type="email" placeholder="andrei@exemplu.ro" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
         </ModalField>
-        <ModalField label="Obiectiv">
+        <ModalField label="Obiectiv (opțional)">
           <ModalInput placeholder="ex: Masă musculară" value={form.goal} onChange={e => setForm(f => ({ ...f, goal: e.target.value }))} />
-        </ModalField>
-        <ModalField label="Plan inițial">
-          <ModalSelect value={form.plan} onChange={e => setForm(f => ({ ...f, plan: e.target.value }))}>
-            {['Full Body 3x','PPL 6x','Upper/Lower 4x','Powerlifting 5x','Cardio+Str 4x'].map(p => <option key={p}>{p}</option>)}
-          </ModalSelect>
         </ModalField>
         <ModalActions>
           <button className="btn btn-outline btn-sm" onClick={() => setShowInvite(false)}>Anulează</button>

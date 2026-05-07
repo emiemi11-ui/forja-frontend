@@ -10,3 +10,8 @@ export const nutCreateTemplate = (data) => api.post(ENDPOINTS.nutritionist.templ
 export const nutApplyTemplate = (id, clientIds) =>
   api.post(`${ENDPOINTS.nutritionist.templates}/${id}/apply`, { clientIds });
 export const nutInviteClient = (data) => api.post(ENDPOINTS.nutritionist.clients + '/invite', data);
+
+// ─── Nutritionist requests ───────────────────────────────────────────────────
+export const getNutritionistRequests = () => api.get('/nutritionist/requests');
+export const acceptNutritionistRequest = (linkId) => api.post(`/nutritionist/requests/${linkId}/accept`);
+export const rejectNutritionistRequest = (linkId) => api.post(`/nutritionist/requests/${linkId}/reject`);

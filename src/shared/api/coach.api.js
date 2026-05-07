@@ -15,3 +15,8 @@ export const coachReadMessage = (id) =>
   api.patch(`${ENDPOINTS.coach.messages}/${id}/read`);
 export const coachAssignWorkout = (id, athleteIds) =>
   api.post(`${ENDPOINTS.coach.workouts}/${id}/assign`, { athleteIds });
+
+// ─── Coach requests (cereri venite de la atleti) ─────────────────────────────
+export const getCoachRequests = () => api.get('/coach/requests');
+export const acceptCoachRequest = (linkId) => api.post(`/coach/requests/${linkId}/accept`);
+export const rejectCoachRequest = (linkId) => api.post(`/coach/requests/${linkId}/reject`);

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getUser, getGoals, putGoals, patchUser, setSteps, uploadAvatar } from '../../../shared/api/index.js';
+import { getUser, getGoals, putGoals, patchUser, setSteps, uploadAvatar, getMyProfessionals, removeProfessionalLink, startConversation } from '../../../shared/api/index.js';
 import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
 import { useAuth } from '../../../features/auth/context/AuthContext.jsx';
 import Modal, { ModalField, ModalInput, ModalActions } from '../../../shared/ui/Modal.jsx';
@@ -15,18 +15,40 @@ export default function ProfilePage() {
   const [userForm, setUserForm] = useState({});
   const [showStepsModal, setShowStepsModal] = useState(false);
   const [stepsInput, setStepsInput] = useState('');
+  const [professionals, setProfessionals] = useState({ coaches: [], nutritionists: [] });
   const { toast, showToast }    = useToast();
   const { logout, updateUser } = useAuth();
   const navigate                = useNavigate();
 
   const load = async () => {
-    const [u, g] = await Promise.all([getUser(), getGoals()]);
+    const [u, g, pros] = await Promise.all([getUser(), getGoals(), getMyProfessionals().catch(() => ({ data: { coaches: [], nutritionists: [] } }))]);
     setUserData(u.data);
     const avatarThemeMatch = /[?&]background=([^&]+)/.exec(u.data.avatarUrl || '');
     setUserForm({ name: u.data.name, weight: u.data.weight || '', avatar: u.data.avatar, avatarUrl: u.data.avatarUrl || '', avatarTheme: avatarThemeMatch ? decodeURIComponent(avatarThemeMatch[1]) : '' });
     setGoals(g.data || {});
+    setProfessionals(pros.data || { coaches: [], nutritionists: [] });
   };
   useEffect(() => { load(); }, []);
+
+  const handleRemoveProfessional = async (type, linkId, name) => {
+    if (!confirm(`Sigur vrei să elimini legătura cu ${name}?`)) return;
+    try {
+      await removeProfessionalLink(type, linkId);
+      showToast('✅ Legătură eliminată');
+      load();
+    } catch (e) {
+      showToast(e.response?.data?.error || '❌ Eroare', '❌');
+    }
+  };
+
+  const handleMessageProfessional = async (professionalId) => {
+    try {
+      await startConversation(professionalId);
+      navigate('/app/dm');
+    } catch (e) {
+      showToast(e.response?.data?.error || '❌ Eroare', '❌');
+    }
+  };
 
   const handleSaveGoals = async () => {
     await putGoals(goals);
@@ -266,8 +288,101 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
+
+          {/* === PROFESIONISTII MEI === */}
+          <div className="card">
+            <div className="card-hd">
+              <span className="card-hd-title">👥 Profesioniștii mei</span>
+              <button className="btn btn-outline btn-sm" onClick={() => navigate('/app/discover')}>
+                + Caută
+              </button>
+            </div>
+            <div className="card-body">
+              {professionals.coaches.length === 0 && professionals.nutritionists.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '24px 12px', color: 'var(--c-ink3)' }}>
+                  <div style={{ fontSize: 13, marginBottom: 8 }}>Nu ai încă niciun coach sau nutriționist.</div>
+                  <button className="btn btn-black btn-sm" onClick={() => navigate('/app/discover')}>
+                    🔍 Găsește profesioniști
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {professionals.coaches.length > 0 && (
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{ fontFamily: 'var(--fm)', fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--c-ink3)', fontWeight: 700, marginBottom: 8 }}>
+                        Coach-i
+                      </div>
+                      {professionals.coaches.map((link) => (
+                        <ProfessionalRow
+                          key={link.linkId}
+                          link={link}
+                          type="COACH"
+                          onMessage={() => handleMessageProfessional(link.professional.id)}
+                          onRemove={() => handleRemoveProfessional('COACH', link.linkId, link.professional.name)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                  {professionals.nutritionists.length > 0 && (
+                    <div>
+                      <div style={{ fontFamily: 'var(--fm)', fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--c-ink3)', fontWeight: 700, marginBottom: 8 }}>
+                        Nutriționiști
+                      </div>
+                      {professionals.nutritionists.map((link) => (
+                        <ProfessionalRow
+                          key={link.linkId}
+                          link={link}
+                          type="NUTRITIONIST"
+                          onMessage={() => handleMessageProfessional(link.professional.id)}
+                          onRemove={() => handleRemoveProfessional('NUTRITIONIST', link.linkId, link.professional.name)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </AnimatedPage>
+  );
+}
+
+// Helper component pentru o linie din lista de profesionisti
+function ProfessionalRow({ link, type, onMessage, onRemove }) {
+  const p = link.professional;
+  const isPending = link.status === 'PENDING';
+  const isWaitingMe = link.status === 'PENDING_ATHLETE' || link.status === 'PENDING_CLIENT';
+  const isAccepted = link.status === 'ACCEPTED';
+
+  let badge = null;
+  if (isAccepted) badge = <span style={{ background: 'var(--c-lime)', color: 'var(--c-ink)', padding: '2px 8px', borderRadius: 4, fontSize: 9, fontWeight: 700, fontFamily: 'var(--fm)', letterSpacing: 1 }}>ACTIV</span>;
+  else if (isPending) badge = <span style={{ background: '#fef3c7', color: '#92400e', padding: '2px 8px', borderRadius: 4, fontSize: 9, fontWeight: 700, fontFamily: 'var(--fm)', letterSpacing: 1 }}>ÎN AȘTEPTARE</span>;
+  else if (isWaitingMe) badge = <span style={{ background: '#dbeafe', color: '#1e40af', padding: '2px 8px', borderRadius: 4, fontSize: 9, fontWeight: 700, fontFamily: 'var(--fm)', letterSpacing: 1 }}>TE-A INVITAT</span>;
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--c-bg)' }}>
+      <div style={{
+        width: 40, height: 40, borderRadius: '50%',
+        background: p.avatarUrl ? `url(${p.avatarUrl}) center/cover` : 'var(--c-blue, #3b82f6)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: 'white', fontWeight: 800, fontFamily: 'var(--fd)', fontSize: 16,
+        flexShrink: 0,
+      }}>
+        {!p.avatarUrl && (p.name?.[0] || p.email?.[0] || '?').toUpperCase()}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontFamily: 'var(--fd)', fontWeight: 700, fontSize: 14, marginBottom: 2 }}>{p.name}</div>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 11, color: 'var(--c-ink3)' }}>{p.specialization || (type === 'COACH' ? 'Antrenor' : 'Nutriționist')}</span>
+          {badge}
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 6 }}>
+        <button className="btn btn-outline btn-sm" onClick={onMessage} title="Trimite mesaj">💬</button>
+        <button className="btn btn-outline btn-sm" onClick={onRemove} title={isAccepted ? 'Desfă legătura' : 'Anulează cererea'} style={{ color: '#dc2626' }}>✕</button>
+      </div>
+    </div>
   );
 }

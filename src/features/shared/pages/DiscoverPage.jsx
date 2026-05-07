@@ -1,9 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { startConversation, getDiscover, addDiscoverReview } from '../../../shared/api/index.js';
+import { startConversation, getDiscover, addDiscoverReview, requestProfessional } from '../../../shared/api/index.js';
 import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
 import { useAuth } from '../../../features/auth/context/AuthContext.jsx';
-import { Star, MessageCircle, Users, Award, ChevronDown, Heart } from 'lucide-react';
+import { Star, MessageCircle, Users, Award, ChevronDown, Heart, UserPlus } from 'lucide-react';
 import { AnimatedPage } from '../../../shared/ui/animations/index.jsx';
 
 const ROLE_FILTERS = ['Toți', 'Coach', 'Nutritionist'];
@@ -46,6 +46,22 @@ export default function DiscoverPage() {
       await startConversation(targetUserId);
       navigate(dmBase);
       showToast('✅ Conversație creată!');
+    } catch (e) {
+      showToast(e.response?.data?.error || '❌ Eroare', '❌');
+    }
+  };
+
+  const handleRequestProfessional = async (professional) => {
+    const label = professional.role === 'COACH' ? 'coach' : 'nutriționist';
+    try {
+      const { data } = await requestProfessional(professional.id);
+      if (data.status === 'ACCEPTED') {
+        showToast(`✅ Ești deja conectat cu acest ${label}!`);
+      } else if (data.status === 'PENDING_ATHLETE' || data.status === 'PENDING_CLIENT') {
+        showToast(`✅ ${professional.name} te-a invitat — confirmă din profil!`);
+      } else {
+        showToast(`✅ Cerere trimisă către ${professional.name}!`);
+      }
     } catch (e) {
       showToast(e.response?.data?.error || '❌ Eroare', '❌');
     }
@@ -129,6 +145,16 @@ export default function DiscoverPage() {
                     <button className="btn btn-black btn-sm" style={{ flex: 1, justifyContent: 'center' }} onClick={() => handleMessage(p.id)}>
                       <MessageCircle size={14} /> Mesaj
                     </button>
+                    {user?.role === 'USER' && (
+                      <button
+                        className="btn btn-outline btn-sm"
+                        style={{ flex: 1, justifyContent: 'center', background: 'var(--c-lime)', color: 'var(--c-ink)', borderColor: 'var(--c-lime)' }}
+                        onClick={() => handleRequestProfessional(p)}
+                        title={p.role === 'COACH' ? 'Cere să-ți fie coach' : 'Cere să-ți fie nutriționist'}
+                      >
+                        <UserPlus size={14} /> Cere
+                      </button>
+                    )}
                     <button className="btn btn-outline btn-sm" onClick={() => setExpanded(isExpanded ? null : p.id)} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                       <ChevronDown size={14} style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} /> Postări
                     </button>
