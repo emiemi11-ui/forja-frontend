@@ -17,6 +17,10 @@ export const addExercise = (libId) =>
   api.post(ENDPOINTS.athlete.exercises, { libId });
 export const toggleExercise = (id) =>
   api.patch(`${ENDPOINTS.athlete.exercises}/${id}/toggle`);
+
+// Edit an exercise's sets/reps/weight/restSec/name
+export const updateExercise = (id, data) =>
+  api.patch(`${ENDPOINTS.athlete.exercises}/${id}`, data);
 export const deleteExercise = (id) =>
   api.delete(`${ENDPOINTS.athlete.exercises}/${id}`);
 export const bulkDoneExercises = () =>
@@ -61,10 +65,3 @@ export const completeSet = (exerciseId) =>
 export const finishWorkout = () => api.post(ENDPOINTS.athlete.workoutFinish);
 export const abandonWorkout = () => api.post(ENDPOINTS.athlete.workoutAbandon);
 export const getWorkoutHistory = () => api.get(ENDPOINTS.athlete.workoutHistory);
-
-// ─── Professionals (coach + nutritionist) ────────────────────────────────────
-export const getMyProfessionals = () => api.get('/user/professionals');
-export const requestProfessional = (professionalId) =>
-  api.post('/user/professionals/request', { professionalId });
-export const removeProfessionalLink = (type, linkId) =>
-  api.delete(`/user/professionals/${type}/${linkId}`);

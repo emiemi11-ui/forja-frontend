@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { getConversations, getConversation, sendDirectMessage, startConversation } from '../../../shared/api/index.js';
 import { useAuth } from '../../auth/context/AuthContext.jsx';
@@ -17,6 +18,7 @@ export default function DirectMessagesPage() {
   const { toast, showToast } = useToast();
   const msgsEndRef = useRef(null);
   const socketRef = useRef(null);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => { msgsEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
@@ -30,7 +32,21 @@ export default function DirectMessagesPage() {
 
   useEffect(() => { loadConversations(); }, [loadConversations]);
 
-  // Socket for real-time DM
+  // Auto-open conversation if ?convo=ID is in URL (from Discover/Profile)
+  useEffect(() => {
+    const convoId = searchParams.get('convo');
+    if (!convoId || activeConvo?.id === convoId) return;
+    (async () => {
+      try {
+        const { data } = await getConversation(convoId);
+        setActiveConvo(data.conversation);
+        setMessages(data.messages);
+        setSearchParams({}); // clear URL param after opening
+      } catch { /* ignore */ }
+    })();
+  }, [searchParams, activeConvo?.id, setSearchParams]);
+
+  // Socket for real-time DM — UN SINGUR socket, NU se reconectează la schimbarea de convo
   useEffect(() => {
     const token = getStoredToken();
     if (!token) return;
@@ -38,13 +54,21 @@ export default function DirectMessagesPage() {
     const socket = io(socketUrl, { auth: { token }, transports: ['websocket', 'polling'] });
     socketRef.current = socket;
     socket.on('dm:new', ({ conversationId, message }) => {
-      if (activeConvo?.id === conversationId) {
-        setMessages(prev => [...prev, message]);
-      }
+      // Folosesc functional update ca să citesc activeConvo curent (nu cel din closure)
+      setActiveConvo((curConvo) => {
+        if (curConvo?.id === conversationId) {
+          // Adaug doar dacă mesajul NU e al meu (al meu e deja adăugat optimist)
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === message.id)) return prev; // dedup
+            return [...prev, message];
+          });
+        }
+        return curConvo;
+      });
       loadConversations();
     });
-    return () => socket.disconnect();
-  }, [activeConvo?.id, loadConversations]);
+    return () => { socket.disconnect(); socketRef.current = null; };
+  }, [loadConversations]); // <- NU mai depinde de activeConvo.id
 
   const openConvo = async (convoId) => {
     try {
@@ -57,14 +81,21 @@ export default function DirectMessagesPage() {
 
   const handleSend = async (e) => {
     e?.preventDefault();
-    if (!msg.trim() || !activeConvo) return;
+    if (!msg.trim() || !activeConvo || sending) return; // anti double-submit
     setSending(true);
+    const text = msg.trim();
+    setMsg(''); // clear ASAP ca să previn dublu trimitere
     try {
-      const { data } = await sendDirectMessage(activeConvo.id, msg.trim());
-      setMessages(prev => [...prev, data]);
-      setMsg('');
+      const { data } = await sendDirectMessage(activeConvo.id, text);
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === data.id)) return prev; // dedup în caz că socket a livrat înainte
+        return [...prev, data];
+      });
       loadConversations();
-    } catch { showToast('❌ Eroare la trimitere', '❌'); }
+    } catch {
+      showToast('❌ Eroare la trimitere', '❌');
+      setMsg(text); // restore text dacă a eșuat
+    }
     setSending(false);
   };
 

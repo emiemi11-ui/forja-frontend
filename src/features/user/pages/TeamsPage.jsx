@@ -1,9 +1,13 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getTeams, createTeam, getTeamDetail, joinTeam, leaveTeam } from '../../../shared/api/index.js';
+import { io } from 'socket.io-client';
+import { getTeams, createTeam, getTeamDetail, joinTeam, leaveTeam, createPost, likePost, commentPost, deletePost, deleteComment, deleteTeam, patchTeam, updateTeamMember, acceptJoinRequest, rejectJoinRequest } from '../../../shared/api/index.js';
+import { getStoredToken } from '../../auth/model/authStorage.js';
 import { Search, Dumbbell } from 'lucide-react';
 import { useAuth } from '../../auth/context/AuthContext.jsx';
 import { useConfirm } from '../../../shared/ui/ConfirmModal.jsx';
+import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
 import { AnimatedPage, ScrollReveal, StaggerGrid } from '../../../shared/ui/animations/index.jsx';
 import EmptyState from '../../../shared/ui/EmptyState.jsx';
 import ImageUploadButton from '../../../shared/ui/ImageUploadButton.jsx';
@@ -23,6 +27,7 @@ function coverFor(id) { let h = 0; for (let i = 0; i < (id||'').length; i++) h =
 export default function TeamsPage() {
   const { updateUser } = useAuth();
   const confirm = useConfirm();
+  const { toast, showToast } = useToast();
   const [teams, setTeams] = useState([]);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -31,9 +36,12 @@ export default function TeamsPage() {
   const [detail, setDetail] = useState(null);
   const [form, setForm] = useState({ name: '', category: 'Fitness', description: '', isPublic: true });
   const [busy, setBusy] = useState(false);
+  const [posting, setPosting] = useState(false);          // anti double-submit
   const [showMembers, setShowMembers] = useState(false);
   const [commentTexts, setCommentTexts] = useState({});
   const [teamDetailPostImg, setTeamDetailPostImg] = useState(null);
+  const [postContent, setPostContent] = useState('');
+  const socketRef = useRef(null);
 
   const syncTeamState = useCallback((data) => {
     updateUser({ teamName: data?.activeTeam || '' });
@@ -48,10 +56,230 @@ export default function TeamsPage() {
   }, [filter, search]);
   useEffect(() => { load(); }, [load]);
 
-  const openDetail = async (id) => { try { const { data } = await getTeamDetail(id); setDetail(data); setView('detail'); } catch {} };
+  // === Persist active team in URL — survives refresh ===
+  const openDetail = useCallback(async (id) => {
+    try {
+      const { data } = await getTeamDetail(id);
+      setDetail(data);
+      setView('detail');
+      // pune ID în URL ca să supraviețuim refresh-ului
+      const url = new URL(window.location.href);
+      url.searchParams.set('team', id);
+      window.history.replaceState({}, '', url.pathname + '?' + url.searchParams.toString());
+    } catch (e) {
+      showToast('❌ Echipa nu a putut fi încărcată', '❌');
+    }
+  }, [showToast]);
+
+  // La montare: dacă URL are ?team=ID, deschide automat detaliul
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const teamId = params.get('team');
+    if (teamId) openDetail(teamId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // === Socket.IO listener for live feed updates on the open team ===
+  useEffect(() => {
+    if (!detail?.id) return;
+    const token = getStoredToken();
+    if (!token) return;
+    const socketUrl = import.meta.env.VITE_API_URL || window.location.origin;
+    const socket = io(socketUrl, { auth: { token }, transports: ['websocket', 'polling'] });
+    socketRef.current = socket;
+
+    socket.on('feed:new', ({ teamId, post }) => {
+      if (teamId !== detail.id) return;
+      setDetail((cur) => {
+        if (!cur || cur.id !== teamId) return cur;
+        if ((cur.posts || []).some((p) => p.id === post.id)) return cur; // dedup
+        return { ...cur, posts: [post, ...(cur.posts || [])] };
+      });
+    });
+    socket.on('feed:like', ({ postId, likes }) => {
+      setDetail((cur) => {
+        if (!cur) return cur;
+        return { ...cur, posts: (cur.posts || []).map(p => p.id === postId ? { ...p, likes } : p) };
+      });
+    });
+    socket.on('feed:comment', ({ postId, comment }) => {
+      setDetail((cur) => {
+        if (!cur) return cur;
+        return {
+          ...cur,
+          posts: (cur.posts || []).map((p) => {
+            if (p.id !== postId) return p;
+            const existing = p.comments || [];
+            if (existing.some((c) => c.id === comment.id)) return p; // dedup
+            return { ...p, comments: [...existing, comment] };
+          }),
+        };
+      });
+    });
+    socket.on('feed:comment:deleted', ({ postId, commentId }) => {
+      setDetail((cur) => {
+        if (!cur) return cur;
+        return {
+          ...cur,
+          posts: (cur.posts || []).map((p) => p.id === postId
+            ? { ...p, comments: (p.comments || []).filter(c => c.id !== commentId) }
+            : p),
+        };
+      });
+    });
+    socket.on('feed:deleted', ({ postId, teamId }) => {
+      if (teamId !== detail.id) return;
+      setDetail((cur) => {
+        if (!cur) return cur;
+        return { ...cur, posts: (cur.posts || []).filter(p => p.id !== postId) };
+      });
+    });
+
+    return () => { socket.disconnect(); socketRef.current = null; };
+  }, [detail?.id]);
+
+  // Când părăsim detail view, curățăm URL-ul
+  const closeDetail = () => {
+    setDetail(null);
+    setView('list');
+    const url = new URL(window.location.href);
+    url.searchParams.delete('team');
+    window.history.replaceState({}, '', url.pathname + (url.searchParams.toString() ? '?' + url.searchParams.toString() : ''));
+  };
+
   const handleJoin = async (id) => { setBusy(true); try { const { data } = await joinTeam(id); syncTeamState(data); load(); if (detail) openDetail(id); } catch {} setBusy(false); };
-  const handleLeave = (id) => { confirm('Sigur vrei să părăsești echipa?', async () => { setBusy(true); try { const { data } = await leaveTeam(id); syncTeamState(data); load(); setView('list'); } catch {} setBusy(false); }); };
+  const handleLeave = (id) => { confirm('Sigur vrei să părăsești echipa?', async () => { setBusy(true); try { const { data } = await leaveTeam(id); syncTeamState(data); load(); closeDetail(); } catch {} setBusy(false); }); };
   const handleCreate = async () => { if (!form.name.trim()) return; setBusy(true); try { const { data } = await createTeam(form); syncTeamState(data || { activeTeam: form.name.trim(), refreshSocket: true }); setForm({ name: '', category: 'Fitness', description: '', isPublic: true }); load(); if (data?.id) { openDetail(data.id); } else { setView('list'); }  } catch {} setBusy(false); };
+
+  // === Real handlers using API ===
+  const handlePublish = async () => {
+    if (!postContent.trim() || posting) return; // anti double-submit
+    setPosting(true);
+    try {
+      const { data } = await createPost({
+        content: postContent.trim(),
+        teamId: detail.id,
+        imageUrl: teamDetailPostImg || undefined,
+      });
+      setDetail((cur) => {
+        if (!cur) return cur;
+        if ((cur.posts || []).some((p) => p.id === data.id)) return cur;
+        return { ...cur, posts: [data, ...(cur.posts || [])] };
+      });
+      setPostContent('');
+      setTeamDetailPostImg(null);
+      showToast('✅ Postare publicată');
+    } catch (e) {
+      showToast(e.response?.data?.error || '❌ Eroare la publicare', '❌');
+    } finally {
+      setPosting(false);
+    }
+  };
+
+  const handleToggleLike = async (postId) => {
+    try {
+      const { data } = await likePost(postId);
+      setDetail((cur) => {
+        if (!cur) return cur;
+        return { ...cur, posts: (cur.posts || []).map(p => p.id === postId ? { ...p, likes: data.likes, liked: data.liked } : p) };
+      });
+    } catch (e) {
+      showToast(e.response?.data?.error || '❌ Eroare', '❌');
+    }
+  };
+
+  const handleAddComment = async (postId) => {
+    const text = (commentTexts[postId] || '').trim();
+    if (!text) return;
+    try {
+      const { data } = await commentPost(postId, text);
+      setDetail((cur) => {
+        if (!cur) return cur;
+        return {
+          ...cur,
+          posts: (cur.posts || []).map((p) => {
+            if (p.id !== postId) return p;
+            const existing = p.comments || [];
+            if (existing.some((c) => c.id === data.id)) return p;
+            return { ...p, comments: [...existing, data] };
+          }),
+        };
+      });
+      setCommentTexts((prev) => ({ ...prev, [postId]: '' }));
+    } catch (e) {
+      showToast(e.response?.data?.error || '❌ Eroare la comentariu', '❌');
+    }
+  };
+
+  const handleDeletePost = async (postId) => {
+    confirm('Sigur vrei să ștergi postarea?', async () => {
+      try {
+        await deletePost(postId);
+        setDetail((cur) => {
+          if (!cur) return cur;
+          return { ...cur, posts: (cur.posts || []).filter(p => p.id !== postId) };
+        });
+        showToast('✅ Postare ștearsă');
+      } catch (e) {
+        showToast(e.response?.data?.error || '❌ Eroare la ștergere', '❌');
+      }
+    });
+  };
+
+  // === OWNER ACTIONS ===
+  const handleDeleteTeam = () => {
+    if (!detail) return;
+    confirm(`Sigur vrei să ȘTERGI echipa "${detail.name}"? Acțiune ireversibilă.`, async () => {
+      try {
+        await deleteTeam(detail.id);
+        showToast('✅ Echipă ștearsă');
+        closeDetail();
+        load();
+      } catch (e) {
+        showToast(e.response?.data?.error || '❌ Eroare', '❌');
+      }
+    });
+  };
+
+  const handleKickMember = (member) => {
+    if (!detail || member.teamRole === 'OWNER') return;
+    confirm(`Scoți "${member.name}" din echipă?`, async () => {
+      try {
+        await updateTeamMember(detail.id, member.userId || member.id, 'remove');
+        showToast('✅ Membru scos');
+        // Reload team detail
+        const { data } = await getTeamDetail(detail.id);
+        setDetail(data);
+      } catch (e) {
+        showToast(e.response?.data?.error || '❌ Eroare', '❌');
+      }
+    });
+  };
+
+  const handleAcceptRequest = async (reqId) => {
+    if (!detail) return;
+    try {
+      await acceptJoinRequest(detail.id, reqId);
+      showToast('✅ Cerere acceptată');
+      const { data } = await getTeamDetail(detail.id);
+      setDetail(data);
+    } catch (e) {
+      showToast(e.response?.data?.error || '❌ Eroare', '❌');
+    }
+  };
+
+  const handleRejectRequest = async (reqId) => {
+    if (!detail) return;
+    try {
+      await rejectJoinRequest(detail.id, reqId);
+      showToast('✅ Cerere respinsă');
+      const { data } = await getTeamDetail(detail.id);
+      setDetail(data);
+    } catch (e) {
+      showToast(e.response?.data?.error || '❌ Eroare', '❌');
+    }
+  };
+
 
   // === CREATE ===
   if (view === 'create') return (
@@ -91,9 +319,11 @@ export default function TeamsPage() {
   // === DETAIL ===
   if (view === 'detail' && detail) {
     const isAdmin = detail.myRole === 'OWNER' || detail.myRole === 'ADMIN';
+    const currentUserId = JSON.parse(localStorage.getItem('forja:user') || '{}')?.id;
     return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 20px 40px' }}>
-      <button onClick={() => { setView('list'); setDetail(null); }} style={{ background: 'none', border: 0, color: 'var(--c-ink3)', cursor: 'pointer', fontFamily: 'var(--fb)', fontSize: 14, margin: '20px 0' }}>← Înapoi</button>
+      <Toast toast={toast} />
+      <button onClick={closeDetail} style={{ background: 'none', border: 0, color: 'var(--c-ink3)', cursor: 'pointer', fontFamily: 'var(--fb)', fontSize: 14, margin: '20px 0' }}>← Înapoi</button>
       <div style={{ borderRadius: 20, overflow: 'hidden', boxShadow: 'var(--shadow)', background: 'var(--c-surface)' }}>
         <div style={{ position: 'relative', height: 200, background: `url(${detail.avatarUrl || coverFor(detail.id)}) center/cover` }}>
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 30%, rgba(0,0,0,.7))' }} />
@@ -133,9 +363,52 @@ export default function TeamsPage() {
                   <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--c-ink)' }}>{m.name}</div>
                 </div>
                 <span style={{ padding: '3px 8px', borderRadius: 5, fontSize: 9, fontWeight: 700, fontFamily: 'var(--fm)', background: m.teamRole === 'OWNER' ? 'var(--c-ink)' : 'var(--c-bg)', color: m.teamRole === 'OWNER' ? '#fff' : 'var(--c-ink3)' }}>{m.teamRole}</span>
+                {detail.myRole === 'OWNER' && m.teamRole !== 'OWNER' && (
+                  <button onClick={() => handleKickMember(m)}
+                    style={{ background: 'none', border: 'none', color: 'var(--c-coral)', fontSize: 11, cursor: 'pointer', padding: '4px 8px' }}>
+                    🚫 Scoate
+                  </button>
+                )}
               </div>
             ))}
           </div>}
+
+          {/* === OWNER: Pending join requests === */}
+          {detail.myRole === 'OWNER' && (detail.pendingRequests || []).length > 0 && (
+            <div style={{ marginTop: 16, padding: 14, borderRadius: 12, background: 'var(--c-amber-bg)', border: '1.5px solid var(--c-amber)' }}>
+              <div style={{ fontFamily: 'var(--fd)', fontSize: 14, fontWeight: 800, marginBottom: 10, color: 'var(--c-amber-d, #B45309)' }}>
+                ⏳ Cereri în așteptare ({detail.pendingRequests.length})
+              </div>
+              {detail.pendingRequests.map((r) => (
+                <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderTop: '1px solid rgba(180,88,9,0.15)' }}>
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(180,88,9,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 12, color: 'var(--c-amber-d, #B45309)' }}>
+                    {(r.user?.name || '?')[0]}
+                  </div>
+                  <div style={{ flex: 1, fontSize: 13 }}>
+                    <strong>{r.user?.name}</strong>
+                  </div>
+                  <button onClick={() => handleAcceptRequest(r.id)}
+                    style={{ padding: '6px 12px', borderRadius: 8, border: 0, background: 'var(--c-lime)', color: '#000', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
+                    ✅ Accept
+                  </button>
+                  <button onClick={() => handleRejectRequest(r.id)}
+                    style={{ padding: '6px 12px', borderRadius: 8, border: '1.5px solid var(--c-coral)', background: 'transparent', color: 'var(--c-coral)', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
+                    ✖
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* === OWNER: Delete team button === */}
+          {detail.myRole === 'OWNER' && (
+            <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px dashed var(--c-border)' }}>
+              <button onClick={handleDeleteTeam}
+                style={{ width: '100%', padding: '10px', borderRadius: 10, border: '1.5px solid var(--c-coral)', background: 'transparent', color: 'var(--c-coral)', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--fb)' }}>
+                🗑 Șterge echipa (acțiune ireversibilă)
+              </button>
+            </div>
+          )}
 
 
 
@@ -154,18 +427,19 @@ export default function TeamsPage() {
                 label="Imagine postare"
                 compact
               />
+              <textarea
+                id="teamPostInput"
+                value={postContent}
+                onChange={(e) => setPostContent(e.target.value)}
+                placeholder="Scrie o postare pentru echipă... (antrenamente, motivație, anunțuri)"
+                rows={3}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1.5px solid var(--c-border)', fontFamily: 'var(--fb)', fontSize: 14, marginTop: 10, boxSizing: 'border-box', resize: 'vertical' }}
+              />
               <div style={{ marginTop: 8 }}>
                 <button className="btn btn-lime" style={{ whiteSpace: 'nowrap' }}
-                  onClick={() => {
-                    const input = document.getElementById('teamPostInput');
-                    if (!input?.value.trim()) return;
-                    const newPost = { id: 'tp-' + Date.now(), author: 'Tu', content: input.value, img: teamDetailPostImg || undefined, createdAt: new Date().toISOString(), likes: 0, comments: 0 };
-                    detail.posts = [newPost, ...(detail.posts || [])];
-                    input.value = '';
-                    setTeamDetailPostImg(null);
-                    setDetail({ ...detail });
-                  }}>
-                  📢 Publică
+                  onClick={handlePublish}
+                  disabled={posting || !postContent.trim()}>
+                  {posting ? '⏳ Se publică...' : '📢 Publică'}
                 </button>
               </div>
             </div>
@@ -184,34 +458,37 @@ export default function TeamsPage() {
               {detail.posts.map(post => (
                 <div key={post.id} style={{ padding: '16px 0', borderBottom: '1px solid var(--c-border)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--c-lime-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14, color: 'var(--c-lime-d)', fontFamily: 'var(--fd)' }}>{post.author[0]}</div>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--c-lime-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14, color: 'var(--c-lime-d)', fontFamily: 'var(--fd)' }}>{(post.author || '?')[0]}</div>
                     <div>
                       <div style={{ fontWeight: 700, fontSize: 13 }}>{post.author}</div>
                       <div style={{ fontSize: 11, color: 'var(--c-ink3)' }}>{new Date(post.createdAt).toLocaleDateString('ro-RO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</div>
                     </div>
-                    {isAdmin && <button onClick={(e) => { e.stopPropagation(); detail.posts = detail.posts.filter(p2 => p2.id !== post.id); setDetail({...detail}); }}
-                      style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: 'var(--c-coral)', padding: '2px 6px' }}>🗑️ Șterge</button>}
+                    {(isAdmin || post.authorId === currentUserId) && (
+                      <button onClick={(e) => { e.stopPropagation(); handleDeletePost(post.id); }}
+                        style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: 'var(--c-coral)', padding: '2px 6px' }}>🗑️ Șterge</button>
+                    )}
                   </div>
                   <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--c-ink2)', margin: 0 }}>{post.content}</p>
                   {post.img && <img src={post.img} alt="" style={{ width: '100%', height: 180, objectFit: 'cover', borderRadius: 12, marginTop: 10 }} />}
                   <div style={{ display: 'flex', gap: 16, marginTop: 10, alignItems: 'center' }}>
-                    <button onClick={() => { post.liked = !post.liked; post.likes = (post.likes||0) + (post.liked ? 1 : -1); setDetail({...detail}); }}
+                    <button onClick={() => handleToggleLike(post.id)}
                       style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: post.liked ? 'var(--c-coral)' : 'var(--c-ink3)', display: 'flex', alignItems: 'center', gap: 4, padding: 0 }}>
                       {post.liked ? '❤️' : '🤍'} {post.likes || 0}
                     </button>
-                    <span style={{ fontSize: 12, color: 'var(--c-ink3)' }}>💬 {(post._comments||[]).length}</span>
+                    <span style={{ fontSize: 12, color: 'var(--c-ink3)' }}>💬 {(post.comments||[]).length}</span>
                   </div>
                   {/* Comments */}
-                  {(post._comments||[]).map((c, ci) => (
-                    <div key={ci} style={{ display: 'flex', gap: 8, padding: '6px 0 6px 46px', fontSize: 12 }}>
+                  {(post.comments||[]).map((c) => (
+                    <div key={c.id} style={{ display: 'flex', gap: 8, padding: '6px 0 6px 46px', fontSize: 12 }}>
                       <span style={{ fontWeight: 700, color: 'var(--c-ink)' }}>{c.author}:</span>
-                      <span style={{ color: 'var(--c-ink2)' }}>{c.text}</span>
+                      <span style={{ color: 'var(--c-ink2)' }}>{c.content || c.text}</span>
                     </div>
                   ))}
                   <div style={{ display: 'flex', gap: 6, marginTop: 6, paddingLeft: 46 }}>
                     <input value={commentTexts[post.id]||''} onChange={e => setCommentTexts(prev => ({...prev, [post.id]: e.target.value}))}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAddComment(post.id)}
                       placeholder="Scrie un comentariu..." style={{ flex: 1, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--c-border)', fontSize: 12, fontFamily: 'var(--fb)', background: 'var(--c-surface)' }} />
-                    <button onClick={() => { if (!commentTexts[post.id]?.trim()) return; if (!post._comments) post._comments = []; post._comments.push({author:'Tu',text:commentTexts[post.id]}); setCommentTexts(prev => ({...prev,[post.id]:''})); setDetail({...detail}); }}
+                    <button onClick={() => handleAddComment(post.id)}
                       style={{ padding: '6px 12px', borderRadius: 8, border: 'none', background: 'var(--c-lime)', color: '#000', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>→</button>
                   </div>
                 </div>

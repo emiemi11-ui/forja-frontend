@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getChallenges, createChallenge, joinChallenge, updateProgress } from '../../../shared/api/index.js';
+import { getChallenges, createChallenge, joinChallenge, updateProgress, getLeaderboard } from '../../../shared/api/index.js';
 import { Trophy } from 'lucide-react';
 import { AnimatedPage } from '../../../shared/ui/animations/index.jsx';
 
@@ -26,6 +26,18 @@ export default function ChallengePage() {
   const handleCreate = async () => { if (!form.title.trim()) return; setBusy(true); try { await createChallenge(form); setView('list'); load(); } catch {} setBusy(false); };
   const handleJoin = async (id) => { setBusy(true); try { await joinChallenge(id); load(); } catch {} setBusy(false); };
   const handleProgress = async (id, cur, max) => { const v = prompt('Progres:', String(Math.min(cur + 1, max))); if (v === null) return; try { await updateProgress(id, Number(v)); load(); } catch {} };
+
+  // === Leaderboard ===
+  const [leaderboardFor, setLeaderboardFor] = useState(null); // { challenge, entries }
+  const handleLeaderboard = async (challenge) => {
+    try {
+      const { data } = await getLeaderboard(challenge.id);
+      setLeaderboardFor({ challenge, entries: data || [] });
+    } catch {
+      setLeaderboardFor({ challenge, entries: [] });
+    }
+  };
+
 
   const inputBase = { width: '100%', padding: '12px 14px', borderRadius: 'var(--r)', border: '1.5px solid var(--c-border)', fontSize: 15, fontFamily: 'var(--fb)', background: 'var(--c-bg)', boxSizing: 'border-box', marginBottom: 12 };
 
@@ -102,12 +114,67 @@ export default function ChallengePage() {
                     ) : (
                       <button onClick={() => handleJoin(c.id)} disabled={busy} style={{ padding: '6px 16px', borderRadius: 8, border: 0, background: CAT_CLR[c.category] || 'var(--c-lime)', color: '#000', fontWeight: 800, fontSize: 12, cursor: 'pointer', fontFamily: 'var(--fd)' }}>PARTICIPĂ →</button>
                     )}
+                    <button onClick={() => handleLeaderboard(c)}
+                      style={{ padding: '6px 12px', borderRadius: 8, border: '1.5px solid var(--c-border)', background: 'var(--c-bg)', color: 'var(--c-ink2)', fontWeight: 700, fontSize: 11, cursor: 'pointer', fontFamily: 'var(--fb)' }}>
+                      🏆
+                    </button>
                     {c.creator && <span style={{ fontSize: 11, color: 'var(--c-ink3)', marginLeft: 'auto', fontFamily: 'var(--fm)' }}>de {c.creator.name}</span>}
                   </div>
                 </div>
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* === LEADERBOARD MODAL === */}
+      {leaderboardFor && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+        }} onClick={() => setLeaderboardFor(null)}>
+          <div style={{
+            background: 'var(--c-surface)', borderRadius: 18, padding: 24, maxWidth: 480, width: '100%',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.4)', maxHeight: '80vh', overflow: 'auto',
+          }} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ fontFamily: 'var(--fd)', fontSize: 22, fontWeight: 900, marginTop: 0, marginBottom: 4 }}>
+              🏆 Leaderboard
+            </h3>
+            <div style={{ fontSize: 13, color: 'var(--c-ink3)', marginBottom: 16 }}>{leaderboardFor.challenge.title}</div>
+            {leaderboardFor.entries.length === 0 ? (
+              <div style={{ padding: 30, textAlign: 'center', color: 'var(--c-ink3)' }}>
+                Niciun participant încă. Fii primul!
+              </div>
+            ) : (
+              leaderboardFor.entries.map((entry, idx) => (
+                <div key={entry.userId || entry.id || idx} style={{
+                  display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px',
+                  borderRadius: 10,
+                  background: idx < 3 ? 'var(--c-lime-bg)' : 'transparent',
+                  marginBottom: 4,
+                }}>
+                  <div style={{
+                    width: 32, height: 32, borderRadius: '50%',
+                    background: idx === 0 ? '#FFD700' : idx === 1 ? '#C0C0C0' : idx === 2 ? '#CD7F32' : 'var(--c-bg)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontFamily: 'var(--fd)', fontSize: 14, fontWeight: 900, color: idx < 3 ? '#000' : 'var(--c-ink2)',
+                  }}>
+                    {idx + 1}
+                  </div>
+                  <div style={{ flex: 1, fontSize: 14, fontWeight: 700 }}>
+                    {entry.user?.name || entry.name || 'Utilizator'}
+                  </div>
+                  <div style={{ fontSize: 13, color: 'var(--c-ink2)', fontFamily: 'var(--fm)', fontWeight: 700 }}>
+                    {entry.progress || 0}/{leaderboardFor.challenge.targetValue} {leaderboardFor.challenge.targetUnit}
+                  </div>
+                </div>
+              ))
+            )}
+            <button onClick={() => setLeaderboardFor(null)}
+              style={{ width: '100%', marginTop: 16, padding: '12px', borderRadius: 10, border: '1.5px solid var(--c-border)', background: 'transparent', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}>
+              Închide
+            </button>
+          </div>
         </div>
       )}
     </div>

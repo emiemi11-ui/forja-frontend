@@ -9,3 +9,7 @@ export const getAdminInbox = () => api.get(ENDPOINTS.admin.inbox);
 export const getAdminSettings = () => api.get(ENDPOINTS.admin.settings);
 export const updateAdminSettings = (data) => api.put(ENDPOINTS.admin.settings, data);
 export const getAdminAudit = (params = {}) => api.get(ENDPOINTS.admin.audit, { params });
+
+// Password reset admin endpoints
+export const getPasswordResetRequests = () => api.get('/admin/password-resets');
+export const generateTempPassword = (userId) => api.post(`/admin/password-resets/${userId}/generate`);

@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getExercises, getExLib, addExercise, toggleExercise, deleteExercise, bulkDoneExercises, clearExercises, getWorkoutCurrent, startWorkout, completeSet, finishWorkout, abandonWorkout } from '../../../shared/api/index.js';
+import { getExercises, getExLib, addExercise, toggleExercise, updateExercise, deleteExercise, bulkDoneExercises, clearExercises, getWorkoutCurrent, startWorkout, completeSet, finishWorkout, abandonWorkout } from '../../../shared/api/index.js';
 import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
 import { useConfirm } from '../../../shared/ui/ConfirmModal.jsx';
 import BodyMap from '../../../shared/ui/BodyMap.jsx';
@@ -75,6 +75,40 @@ export default function Workout() {
   const handleDelete = async id => { await deleteExercise(id); showToast('🗑 Exercițiu eliminat'); loadPlan(); };
   const handleBulkDone = async () => { try { await bulkDoneExercises(); loadPlan(); showToast('✅ Toate completate!'); } catch { showToast('❌ Eroare', '❌'); } };
   const handleClearAll = async () => { try { await clearExercises(); loadPlan(); showToast('🗑 Plan șters'); } catch { showToast('❌ Eroare', '❌'); } };
+
+  // === EDIT EXERCITIU ===
+  const [editingEx, setEditingEx] = useState(null); // { id, sets, reps, weight, restSec }
+  const [savingEdit, setSavingEdit] = useState(false);
+  const handleEditClick = (ex) => {
+    setEditingEx({
+      id: ex.id,
+      name: ex.name,
+      sets: ex.sets || 3,
+      reps: ex.reps || 10,
+      weight: ex.weight || 0,
+      restSec: ex.restSec || 90,
+    });
+  };
+  const handleEditSave = async () => {
+    if (!editingEx || savingEdit) return;
+    setSavingEdit(true);
+    try {
+      await updateExercise(editingEx.id, {
+        sets: editingEx.sets,
+        reps: editingEx.reps,
+        weight: editingEx.weight,
+        restSec: editingEx.restSec,
+      });
+      showToast('✅ Modificări salvate');
+      setEditingEx(null);
+      loadPlan();
+    } catch (e) {
+      showToast(e.response?.data?.error || '❌ Eroare la salvare', '❌');
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
 
   const handleStartWorkout = async () => {
     try { const { data } = await startWorkout(); setSession(data.session); setSessionMode('active'); setActiveExIdx(0); setTimerSec(0); setRunning(true); }
@@ -349,8 +383,17 @@ export default function Workout() {
                 {ex.img && <img src={ex.img} alt="" style={{ width:32, height:32, borderRadius:8, objectFit:'cover', flexShrink:0 }} />}
                 <div style={{ flex: 1 }}>
                   <div className="pex-nm" style={{ textDecoration: ex.done ? 'line-through' : 'none', opacity: ex.done ? .5 : 1 }}>{ex.name}</div>
+                  <div style={{ fontSize: 11, color: 'var(--c-ink3)', fontFamily: 'var(--fm)', marginTop: 2 }}>
+                    {ex.sets || 3}x{ex.reps || 10}{ex.weight ? ` · ${ex.weight}kg` : ''} · pauză {ex.restSec || 90}s
+                  </div>
                 </div>
-                <span className="pex-sets">{ex.sets}</span>
+                <button
+                  onClick={() => handleEditClick(ex)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', fontSize: 14, color: 'var(--c-ink3)' }}
+                  title="Editează"
+                >
+                  ✏️
+                </button>
                 <button className="pex-rm" onClick={() => handleDelete(ex.id)}>✕</button>
               </motion.div>
             ))}
@@ -361,6 +404,70 @@ export default function Workout() {
           </div>
         </div>
       </div>
+
+      {/* === EDIT EXERCITIU MODAL === */}
+      <AnimatePresence>
+      {editingEx && (
+        <motion.div
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          onClick={() => setEditingEx(null)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+          }}>
+          <motion.div
+            initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'var(--c-surface)', borderRadius: 18, padding: 28, maxWidth: 420, width: '100%',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.4)', border: '2px solid var(--c-lime)',
+            }}>
+            <h3 style={{ fontFamily: 'var(--fd)', fontSize: 22, fontWeight: 900, marginTop: 0, marginBottom: 6 }}>
+              ✏️ Editează exercițiu
+            </h3>
+            <div style={{ fontSize: 13, color: 'var(--c-ink3)', marginBottom: 18 }}>{editingEx.name}</div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--fm)' }}>Seturi</label>
+                <input type="number" min="1" max="20" value={editingEx.sets}
+                  onChange={(e) => setEditingEx({ ...editingEx, sets: Math.max(1, Math.min(20, parseInt(e.target.value) || 1)) })}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1.5px solid var(--c-border)', fontSize: 14, fontFamily: 'var(--fb)', background: 'var(--c-bg)', boxSizing: 'border-box', marginTop: 4 }} />
+              </div>
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--fm)' }}>Repetări</label>
+                <input type="number" min="1" max="100" value={editingEx.reps}
+                  onChange={(e) => setEditingEx({ ...editingEx, reps: Math.max(1, Math.min(100, parseInt(e.target.value) || 1)) })}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1.5px solid var(--c-border)', fontSize: 14, fontFamily: 'var(--fb)', background: 'var(--c-bg)', boxSizing: 'border-box', marginTop: 4 }} />
+              </div>
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--fm)' }}>Greutate (kg)</label>
+                <input type="number" min="0" max="500" step="0.5" value={editingEx.weight}
+                  onChange={(e) => setEditingEx({ ...editingEx, weight: Math.max(0, Math.min(500, parseFloat(e.target.value) || 0)) })}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1.5px solid var(--c-border)', fontSize: 14, fontFamily: 'var(--fb)', background: 'var(--c-bg)', boxSizing: 'border-box', marginTop: 4 }} />
+              </div>
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--fm)' }}>Pauză (sec)</label>
+                <input type="number" min="0" max="600" step="15" value={editingEx.restSec}
+                  onChange={(e) => setEditingEx({ ...editingEx, restSec: Math.max(0, Math.min(600, parseInt(e.target.value) || 0)) })}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1.5px solid var(--c-border)', fontSize: 14, fontFamily: 'var(--fb)', background: 'var(--c-bg)', boxSizing: 'border-box', marginTop: 4 }} />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 8, marginTop: 22 }}>
+              <button onClick={() => setEditingEx(null)}
+                style={{ flex: 1, padding: '12px', borderRadius: 10, border: '1.5px solid var(--c-border)', background: 'transparent', color: 'var(--c-ink)', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
+                Anulează
+              </button>
+              <button onClick={handleEditSave} disabled={savingEdit}
+                style={{ flex: 1, padding: '12px', borderRadius: 10, border: 'none', background: 'var(--c-lime)', color: '#000', fontWeight: 800, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
+                {savingEdit ? 'Salvez...' : '✅ Salvează'}
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+      </AnimatePresence>
     </AnimatedPage>
   );
 }

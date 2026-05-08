@@ -43,9 +43,14 @@ export default function DiscoverPage() {
 
   const handleMessage = async (targetUserId) => {
     try {
-      await startConversation(targetUserId);
-      navigate(dmBase);
-      showToast('✅ Conversație creată!');
+      const { data } = await startConversation(targetUserId);
+      const convoId = data?.id || data?.conversationId;
+      if (convoId) {
+        navigate(`${dmBase}?convo=${convoId}`);
+      } else {
+        navigate(dmBase);
+      }
+      showToast('✅ Conversație deschisă!');
     } catch (e) {
       showToast(e.response?.data?.error || '❌ Eroare', '❌');
     }

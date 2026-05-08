@@ -73,6 +73,12 @@ api.interceptors.response.use(
       }
     }
 
+    // 503 = maintenance mode. Show overlay and block UI.
+    if (err.response?.status === 503 && err.response?.data?.error === 'maintenance') {
+      const message = err.response?.data?.message || 'Platforma este în mentenanță. Revenim curând!';
+      window.dispatchEvent(new CustomEvent('forja:maintenance', { detail: { message } }));
+    }
+
     return Promise.reject(err);
   },
 );

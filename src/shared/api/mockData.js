@@ -34,7 +34,7 @@ const EXERCISE_LIBRARY = [
 
 // ── FOOD DATABASE ────────────────────────────────────────────────────────
 const FOOD_DB = [
-  { id: 'f1', name: 'Piept de pui (100g)',  kcal: 165, p: 31, c: 0,  f: 3.6, fib: 0,  img: '' },
+  { id: 'f1', name: 'Piept de pui (100g)',  kcal: 165, p: 31, c: 0,  f: 3.6, fib: 0,  img: '', icon: '🍗' },
   { id: 'f2', name: 'Orez alb (100g)',      kcal: 130, p: 2.7,c: 28, f: 0.3, fib: 0.4,img: '/img/ext/u-ad8afb97c7.jpg' },
   { id: 'f3', name: 'Ou (1 buc)',           kcal: 72,  p: 6.3,c: 0.4,f: 5,   fib: 0,  img: '/img/ext/u-cd286f26a0.jpg' },
   { id: 'f4', name: 'Banană (1 medie)',     kcal: 105, p: 1.3,c: 27, f: 0.4, fib: 3.1,img: '/img/ext/u-0297955a9f.jpg' },

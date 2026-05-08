@@ -3,6 +3,8 @@ import { useState } from 'react';
 import ErrorBoundary from '../shared/ui/ErrorBoundary.jsx';
 import ProtectedRoute from '../shared/ui/ProtectedRoute.jsx';
 import SplashScreen from '../shared/ui/SplashScreen.jsx';
+import MaintenanceOverlay from '../shared/ui/MaintenanceOverlay.jsx';
+import PlanLock from '../shared/ui/PlanLock.jsx';
 import { AuthProvider, useAuth } from '../features/auth/context/AuthContext.jsx';
 import { ThemeProvider } from '../shared/ui/ThemeToggle.jsx';
 import { ConfirmProvider } from '../shared/ui/ConfirmModal.jsx';
@@ -61,6 +63,7 @@ export default function AppRouter() {
     <ConfirmProvider>
       <ErrorBoundary>
         {!splashDone && <SplashScreen onDone={() => setSplashDone(true)} />}
+        <MaintenanceOverlay />
         <AuthProvider>
           <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
@@ -81,15 +84,15 @@ export default function AppRouter() {
               <Route path="nutrition" element={<NutritionPage />} />
               <Route path="sleep" element={<SleepPage />} />
               <Route path="feed" element={<FeedPage />} />
-              <Route path="teams" element={<TeamsPage />} />
+              <Route path="teams" element={<PlanLock requiredPlan="TEAM"><TeamsPage /></PlanLock>} />
               <Route path="challenges" element={<ChallengePage />} />
               <Route path="chat" element={<ChatPage />} />
               <Route path="profile" element={<ProfilePage />} />
               <Route path="public-profile" element={<ProProfilePage />} />
-              <Route path="achievements" element={<AchievementsPage />} />
-              <Route path="my-plans" element={<MyPlansPage />} />
-              <Route path="dm" element={<DirectMessagesPage />} />
-              <Route path="discover" element={<DiscoverPage />} />
+              <Route path="achievements" element={<PlanLock requiredPlan="PRO"><AchievementsPage /></PlanLock>} />
+              <Route path="my-plans" element={<PlanLock requiredPlan="PRO"><MyPlansPage /></PlanLock>} />
+              <Route path="dm" element={<PlanLock requiredPlan="PRO"><DirectMessagesPage /></PlanLock>} />
+              <Route path="discover" element={<PlanLock requiredPlan="PRO"><DiscoverPage /></PlanLock>} />
             </Route>
 
             <Route
