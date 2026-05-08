@@ -65,3 +65,13 @@ export const completeSet = (exerciseId) =>
 export const finishWorkout = () => api.post(ENDPOINTS.athlete.workoutFinish);
 export const abandonWorkout = () => api.post(ENDPOINTS.athlete.workoutAbandon);
 export const getWorkoutHistory = () => api.get(ENDPOINTS.athlete.workoutHistory);
+
+// === BATCH 1: Profesioniștii mei (coach + nutritionist relationships) ===
+export const getMyProfessionals = () =>
+  api.get('/user/professionals');
+
+export const requestProfessional = (professionalId) =>
+  api.post('/user/professionals/request', { professionalId });
+
+export const removeProfessionalLink = (type, linkId) =>
+  api.delete(`/user/professionals/${type}/${linkId}`);

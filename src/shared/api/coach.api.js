@@ -16,7 +16,7 @@ export const coachReadMessage = (id) =>
 export const coachAssignWorkout = (id, athleteIds) =>
   api.post(`${ENDPOINTS.coach.workouts}/${id}/assign`, { athleteIds });
 
-// ─── Coach requests (cereri venite de la atleti) ─────────────────────────────
+// === BATCH 1: Cereri de la atleți pentru a fi coach-ul lor ===
 export const getCoachRequests = () => api.get('/coach/requests');
 export const acceptCoachRequest = (linkId) => api.post(`/coach/requests/${linkId}/accept`);
 export const rejectCoachRequest = (linkId) => api.post(`/coach/requests/${linkId}/reject`);
