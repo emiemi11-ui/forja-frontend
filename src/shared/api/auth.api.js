@@ -18,3 +18,6 @@ export const register = (name, email, password, role, plan, inviteToken, extra, 
 
 export const requestPasswordReset = (email) =>
   api.post('/auth/forgot-password', { email });
+
+export const changePassword = (currentPassword, newPassword) =>
+  api.post('/auth/change-password', { currentPassword, newPassword });

@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { getAdminUsers, deleteUser, getPasswordResetRequests, generateTempPassword } from '../../../shared/api/index.js';
 import { AdminPanel, EmptyState, StatusPill } from '../components/AdminUi.jsx';
 import { useConfirm } from '../../../shared/ui/ConfirmModal.jsx';
@@ -17,7 +16,6 @@ function roleTone(role) {
 }
 
 export default function AdminUsersPage() {
-  const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [role, setRole] = useState('');
   const [data, setData] = useState({ total: 0, users: [] });
@@ -249,12 +247,13 @@ export default function AdminUsersPage() {
                     <td>{formatDate(user.createdAt)}</td>
                     <td>
                       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                        <button
-                          style={{ fontSize: 10, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--c-lime)', background: 'var(--c-lime-bg)', cursor: 'pointer', fontWeight: 600 }}
-                          onClick={() => { navigate('/admin/dm'); }}
+                        <a
+                          href={`mailto:${user.email}`}
+                          style={{ fontSize: 10, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--c-lime)', background: 'var(--c-lime-bg)', cursor: 'pointer', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                          title={`Trimite email la ${user.email}`}
                         >
-                          💬
-                        </button>
+                          ✉️
+                        </a>
                         <button
                           style={{ fontSize: 10, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--c-coral)', background: 'var(--c-coral-bg)', cursor: 'pointer', fontWeight: 600, color: 'var(--c-coral)' }}
                           onClick={() => handleDelete(user.id, user.name)}

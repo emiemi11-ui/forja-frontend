@@ -75,3 +75,9 @@ export const requestProfessional = (professionalId) =>
 
 export const removeProfessionalLink = (type, linkId) =>
   api.delete(`/user/professionals/${type}/${linkId}`);
+
+export const acceptProfessionalInvite = (type, linkId) =>
+  api.post(`/user/professionals/${type}/${linkId}/accept`);
+
+export const rejectProfessionalInvite = (type, linkId) =>
+  api.post(`/user/professionals/${type}/${linkId}/reject`);

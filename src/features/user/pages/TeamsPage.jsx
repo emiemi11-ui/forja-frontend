@@ -147,7 +147,22 @@ export default function TeamsPage() {
     window.history.replaceState({}, '', url.pathname + (url.searchParams.toString() ? '?' + url.searchParams.toString() : ''));
   };
 
-  const handleJoin = async (id) => { setBusy(true); try { const { data } = await joinTeam(id); syncTeamState(data); load(); if (detail) openDetail(id); } catch {} setBusy(false); };
+  const handleJoin = async (id) => {
+    setBusy(true);
+    try {
+      const { data } = await joinTeam(id);
+      syncTeamState(data);
+      // Pentru echipe private, backend răspunde cu message='Cerere trimisă' și activeTeamId=null
+      if (data?.message === 'Cerere trimisă') {
+        showToast('🔒 Cerere trimisă către owner. Aștepți acceptarea.');
+      }
+      load();
+      if (detail) openDetail(id);
+    } catch (error) {
+      showToast(error.response?.data?.error || '❌ Nu am putut trimite cererea', '❌');
+    }
+    setBusy(false);
+  };
   const handleLeave = (id) => { confirm('Sigur vrei să părăsești echipa?', async () => { setBusy(true); try { const { data } = await leaveTeam(id); syncTeamState(data); load(); closeDetail(); } catch {} setBusy(false); }); };
   const handleCreate = async () => { if (!form.name.trim()) return; setBusy(true); try { const { data } = await createTeam(form); syncTeamState(data || { activeTeam: form.name.trim(), refreshSocket: true }); setForm({ name: '', category: 'Fitness', description: '', isPublic: true }); load(); if (data?.id) { openDetail(data.id); } else { setView('list'); }  } catch {} setBusy(false); };
 
@@ -341,9 +356,11 @@ export default function TeamsPage() {
             {detail.isMember ? (
               <button onClick={() => handleLeave(detail.id)} disabled={busy} style={{ marginLeft: 'auto', padding: '6px 18px', borderRadius: 8, border: '1.5px solid var(--c-border)', background: 'transparent', fontWeight: 700, fontSize: 12, cursor: 'pointer', color: 'var(--c-coral)' }}>Părăsește</button>
             ) : detail.teamType === 'private' ? (
-              <button onClick={() => { detail._requested = true; setDetail({...detail}); }} disabled={busy || detail._requested}
-                style={{ marginLeft: 'auto', padding: '6px 18px', borderRadius: 8, border: 0, background: detail._requested ? 'var(--c-amber-bg)' : 'var(--c-amber)', color: detail._requested ? 'var(--c-amber)' : '#fff', fontWeight: 700, fontSize: 12, cursor: 'pointer', opacity: detail._requested ? 0.8 : 1 }}>
-                {detail._requested ? '⏳ Cerere trimisă' : '🔒 Cere invitație'}
+              <button
+                onClick={() => handleJoin(detail.id)}
+                disabled={busy || !!detail.myPendingRequestId}
+                style={{ marginLeft: 'auto', padding: '6px 18px', borderRadius: 8, border: 0, background: detail.myPendingRequestId ? 'var(--c-amber-bg)' : 'var(--c-amber)', color: detail.myPendingRequestId ? 'var(--c-amber)' : '#fff', fontWeight: 700, fontSize: 12, cursor: detail.myPendingRequestId ? 'default' : 'pointer', opacity: detail.myPendingRequestId ? 0.85 : 1 }}>
+                {detail.myPendingRequestId ? '⏳ Cerere trimisă' : '🔒 Cere intrare'}
               </button>
             ) : (
               <button onClick={() => handleJoin(detail.id)} disabled={busy} style={{ marginLeft: 'auto', padding: '6px 18px', borderRadius: 8, border: 0, background: 'var(--c-ink)', color: '#fff', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Alătură-te</button>
@@ -381,11 +398,12 @@ export default function TeamsPage() {
               </div>
               {detail.pendingRequests.map((r) => (
                 <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderTop: '1px solid rgba(180,88,9,0.15)' }}>
-                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(180,88,9,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 12, color: 'var(--c-amber-d, #B45309)' }}>
-                    {(r.user?.name || '?')[0]}
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: r.avatarUrl ? `url(${r.avatarUrl}) center/cover` : 'rgba(180,88,9,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 12, color: 'var(--c-amber-d, #B45309)', overflow: 'hidden' }}>
+                    {!r.avatarUrl && (r.userName || '?')[0]}
                   </div>
                   <div style={{ flex: 1, fontSize: 13 }}>
-                    <strong>{r.user?.name}</strong>
+                    <strong>{r.userName || 'Utilizator'}</strong>
+                    {r.date && <div style={{ fontSize: 10, color: 'var(--c-ink3)', fontFamily: 'var(--fm)' }}>{new Date(r.date).toLocaleDateString('ro-RO')}</div>}
                   </div>
                   <button onClick={() => handleAcceptRequest(r.id)}
                     style={{ padding: '6px 12px', borderRadius: 8, border: 0, background: 'var(--c-lime)', color: '#000', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
@@ -418,22 +436,20 @@ export default function TeamsPage() {
               <div style={{ fontFamily: 'var(--fm)', fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--c-lime-d)', marginBottom: 8 }}>
                 📢 POSTEAZĂ ÎN ECHIPĂ ({detail.myRole})
               </div>
-              <textarea id="teamPostInput" placeholder="Scrie o postare pentru echipă... (antrenamente, motivație, anunțuri)" rows={2}
-                style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid var(--c-border)', fontSize: 13, fontFamily: 'var(--fb)', background: 'var(--c-surface)', resize: 'vertical', boxSizing: 'border-box' }} />
-              <ImageUploadButton
-                onImageSelect={setTeamDetailPostImg}
-                currentImage={teamDetailPostImg}
-                onRemove={() => setTeamDetailPostImg(null)}
-                label="Imagine postare"
-                compact
-              />
               <textarea
                 id="teamPostInput"
                 value={postContent}
                 onChange={(e) => setPostContent(e.target.value)}
                 placeholder="Scrie o postare pentru echipă... (antrenamente, motivație, anunțuri)"
                 rows={3}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1.5px solid var(--c-border)', fontFamily: 'var(--fb)', fontSize: 14, marginTop: 10, boxSizing: 'border-box', resize: 'vertical' }}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1.5px solid var(--c-border)', fontFamily: 'var(--fb)', fontSize: 14, boxSizing: 'border-box', resize: 'vertical' }}
+              />
+              <ImageUploadButton
+                onImageSelect={setTeamDetailPostImg}
+                currentImage={teamDetailPostImg}
+                onRemove={() => setTeamDetailPostImg(null)}
+                label="Imagine postare"
+                compact
               />
               <div style={{ marginTop: 8 }}>
                 <button className="btn btn-lime" style={{ whiteSpace: 'nowrap' }}

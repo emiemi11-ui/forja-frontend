@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getNutClients, getNutClient, nutInviteClient, nutApplyTemplate, getNutTemplates, startConversation } from '../../../shared/api/index.js';
 import { pct, Toast, useToast } from '../../../shared/ui/helpers.jsx';
 import Drawer from '../../../shared/ui/Drawer.jsx';
-import Modal, { ModalField, ModalInput, ModalSelect, ModalActions } from '../../../shared/ui/Modal.jsx';
+import Modal, { ModalField, ModalInput, ModalActions } from '../../../shared/ui/Modal.jsx';
 import { AnimatedPage } from '../../../shared/ui/animations/index.jsx';
 
 
@@ -30,7 +30,7 @@ export default function NutClientsPage() {
   const [drawerData, setDrawerData] = useState(null);
   const [showJournal, setShowJournal] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
-  const [form, setForm]         = useState({ name: '', email: '', goal: 'Menținere', plan: 'Menținere', kcal_target: 2000 });
+  const [form, setForm]         = useState({ email: '' });
   const [loading, setLoading]   = useState(false);
   const { toast, showToast }    = useToast();
 
@@ -46,13 +46,13 @@ export default function NutClientsPage() {
   };
 
   const handleCreate = async () => {
-    if (!form.name || !form.email) { showToast('Completează numele și emailul', '⚠️'); return; }
+    if (!form.email) { showToast('Introdu emailul clientului', '⚠️'); return; }
     setLoading(true);
     try {
-      const r = await nutInviteClient(form);
-      showToast(r.data.message || '✅ Client invitat!');
+      const r = await nutInviteClient({ email: form.email });
+      showToast(r.data.message || '✅ Invitație trimisă!');
       setShowCreate(false);
-      setForm({ name: '', email: '', goal: 'Menținere', plan: 'Menținere', kcal_target: 2000 });
+      setForm({ email: '' });
       load();
     } catch (e) {
       showToast(e.response?.data?.error || '❌ Eroare', '❌');
@@ -65,22 +65,11 @@ export default function NutClientsPage() {
 
       {/* Create Modal */}
       <Modal open={showCreate} onClose={() => setShowCreate(false)} title="✉️ Invită client">
-        <ModalField label="Nume complet *">
-          <ModalInput placeholder="ex: Maria Ionescu" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
-        </ModalField>
-        <ModalField label="Email *">
-          <ModalInput type="email" placeholder="maria@exemplu.ro" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
-        </ModalField>
-        <ModalField label="Obiectiv">
-          <ModalSelect value={form.goal} onChange={e => setForm(f => ({ ...f, goal: e.target.value }))}>
-            {['Slăbire','Masă musculară','Menținere','Recomp','Sănătate generală'].map(g => <option key={g}>{g}</option>)}
-          </ModalSelect>
-        </ModalField>
-        <ModalField label="Plan inițial">
-          <ModalInput placeholder="ex: Deficit caloric" value={form.plan} onChange={e => setForm(f => ({ ...f, plan: e.target.value }))} />
-        </ModalField>
-        <ModalField label="Target calorii/zi">
-          <ModalInput type="number" value={form.kcal_target} onChange={e => setForm(f => ({ ...f, kcal_target: parseInt(e.target.value) || 2000 }))} />
+        <div style={{ fontSize: 12, color: 'var(--c-ink3)', marginBottom: 12 }}>
+          Clientul trebuie să aibă deja cont pe FORJA. Introdu emailul lui — primește invitația direct în aplicație și o poate accepta sau refuza.
+        </div>
+        <ModalField label="Email client *">
+          <ModalInput type="email" placeholder="maria@exemplu.ro" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} autoFocus />
         </ModalField>
         <ModalActions>
           <button className="btn btn-outline btn-sm" onClick={() => setShowCreate(false)}>Anulează</button>

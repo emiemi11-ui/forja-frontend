@@ -65,15 +65,18 @@ function KpiCards({ data, onWaterClick, onNavNutrition, onNavSleep }) {
   const today = data.today || { water_cups: 0, steps: 0, sleep_score: 0 };
   const macros = data.macros || { kcal: 0 };
   const goals = data.goals || { kcal: 2000, water: 3, steps: 10000, sleep: 8 };
-  const cups = today.water_cups || 0;
+  const waterTargetLiters = today.waterTargetLiters || today.water_target_liters || goals.water || 3;
+  const waterTargetCups = today.waterTargetCups || today.water_target_cups || Math.max(4, Math.round(waterTargetLiters * 4));
+  const cups = Math.min(today.water_cups || 0, waterTargetCups);
+  const waterLiters = today.waterLiters || today.water_liters || Number((cups / 4).toFixed(1));
   const kcalPct = pct(macros.kcal, goals.kcal);
-  const waterPct = pct(cups, 8);
+  const waterPct = pct(cups, waterTargetCups);
   const stepsPct = pct(today.steps, goals.steps);
   const sleep = today.sleep_score;
 
   const kpis = [
     { label: 'Calorii azi', color: 'var(--c-coral)', rawColor: '#FF4422', val: macros.kcal || 0, suffix: '', decimals: 0, sub: `din ${goals.kcal?.toLocaleString('ro')} kcal`, progPct: kcalPct, trend: `${kcalPct}%`, trendClass: kcalPct >= 90 ? 'kt-up' : kcalPct >= 60 ? 'kt-warn' : 'kt-dn', onClick: onNavNutrition, borderColor: 'var(--c-coral)', sparkData: sparkCalories },
-    { label: 'Hidratare', color: 'var(--c-blue)', rawColor: '#1A52FF', val: (cups * (goals.water || 3) / 8), suffix: 'L', decimals: 1, sub: `din ${goals.water || 3}L`, progPct: null, trend: `${waterPct}%`, trendClass: waterPct >= 80 ? 'kt-up' : 'kt-warn', isWater: true, cups, onClick: onNavNutrition, borderColor: 'var(--c-blue)', sparkData: sparkWater, onWaterClick },
+    { label: 'Hidratare', color: 'var(--c-blue)', rawColor: '#1A52FF', val: waterLiters, suffix: 'L', decimals: 1, sub: `din ${waterTargetLiters}L`, progPct: null, trend: `${waterPct}%`, trendClass: waterPct >= 80 ? 'kt-up' : 'kt-warn', isWater: true, cups, waterTargetCups, onClick: onNavNutrition, borderColor: 'var(--c-blue)', sparkData: sparkWater, onWaterClick },
     { label: 'Pasi azi', color: 'var(--c-green)', rawColor: '#15803D', val: ((today.steps || 0) / 1000), suffix: 'K', decimals: 1, sub: `din ${((goals.steps || 10000) / 1000).toFixed(0)}K`, progPct: stepsPct, trend: `${stepsPct}%`, trendClass: 'kt-up', borderColor: 'var(--c-green)', sparkData: sparkSteps },
     { label: 'Scor somn', color: 'var(--c-purple)', rawColor: '#7B2FBE', val: sleep || 0, suffix: '', decimals: 0, sub: `${today.sleep_hours?.toFixed(1) || 0}h`, progPct: sleep, trend: sleep >= 80 ? 'Excelent' : sleep >= 60 ? 'Moderat' : 'Insuficient', trendClass: sleep >= 80 ? 'kt-up' : sleep >= 60 ? 'kt-warn' : 'kt-dn', onClick: onNavSleep, borderColor: 'var(--c-purple)', sparkData: sparkSleep },
   ];
@@ -92,8 +95,8 @@ function KpiCards({ data, onWaterClick, onNavNutrition, onNavSleep }) {
               <div style={{ margin: '8px 0' }}><AnimatedBar value={k.progPct} color={k.rawColor} /></div>
             )}
             {k.isWater && (
-              <div className="wcups" style={{ marginTop: 8 }}>
-                {Array.from({ length: 8 }, (_, j) => (
+              <div className="wcups" style={{ marginTop: 8, flexWrap: 'wrap', gap: 4 }}>
+                {Array.from({ length: k.waterTargetCups || 12 }, (_, j) => (
                   <motion.div key={j} className={`wcup${j < k.cups ? ' f' : ''}`}
                     whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}
                     onClick={e => { e.stopPropagation(); k.onWaterClick(j + 1); }}>

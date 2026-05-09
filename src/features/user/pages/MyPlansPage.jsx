@@ -160,17 +160,56 @@ export default function MyPlansPage() {
               <div style={{ padding: '0' }}>
                 {(plan.meals || []).length === 0 ? (
                   <div style={{ padding: '18px 20px', fontSize: 12, color: 'var(--c-ink3)' }}>Template-ul există, dar încă nu are mesele salvate în planul aplicat.</div>
-                ) : (plan.meals || []).map((meal, idx) => (
-                  <div key={`${plan.id}-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', borderBottom: '1px solid var(--c-border)' }}>
-                    {meal.img && <img src={meal.img} alt="" onError={(event) => { event.target.style.display = 'none'; }} style={{ width: 48, height: 48, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} />}
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 700, fontSize: 13 }}>{meal.type}</div>
-                      <div style={{ fontFamily: 'var(--fb)', fontSize: 12, color: 'var(--c-ink3)', marginTop: 2 }}>{meal.items || meal.name || ''}</div>
+                ) : (plan.meals || []).map((meal, idx) => {
+                  const ingredients = Array.isArray(meal.ingredients) ? meal.ingredients : [];
+                  return (
+                    <div key={`${plan.id}-${idx}`} style={{ borderBottom: '1px solid var(--c-border)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px' }}>
+                        {meal.img && <img src={meal.img} alt="" onError={(event) => { event.target.style.display = 'none'; }} style={{ width: 48, height: 48, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} />}
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 700, fontSize: 13 }}>{meal.type}</div>
+                          <div style={{ fontFamily: 'var(--fb)', fontSize: 12, color: 'var(--c-ink3)', marginTop: 2 }}>{meal.name || meal.items || ''}</div>
+                          {(meal.p || meal.c || meal.f) ? (
+                            <div style={{ fontFamily: 'var(--fm)', fontSize: 10, color: 'var(--c-ink3)', marginTop: 4, letterSpacing: 0.5 }}>
+                              P: {meal.p || 0}g · C: {meal.c || 0}g · F: {meal.f || 0}g
+                            </div>
+                          ) : null}
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontFamily: 'var(--fd)', fontSize: 16, fontWeight: 800, color: 'var(--c-ink)' }}>{meal.kcal || 0}</div>
+                          <div style={{ fontFamily: 'var(--fm)', fontSize: 9, color: 'var(--c-ink3)' }}>kcal</div>
+                        </div>
+                      </div>
+
+                      {/* Lista ingrediente cu gramaje */}
+                      {ingredients.length > 0 && (
+                        <div style={{ padding: '0 20px 12px 76px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {ingredients.map((ingredient) => (
+                            <div key={ingredient.id || `${idx}-${ingredient.name}`} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: 'var(--c-bg)', borderRadius: 10, border: '1px solid var(--c-border)' }}>
+                              {ingredient.img ? (
+                                <img src={ingredient.img} alt="" onError={(event) => { event.target.style.display = 'none'; }} style={{ width: 28, height: 28, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} />
+                              ) : <span style={{ fontSize: 16 }}>🥄</span>}
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--c-ink)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ingredient.name || '—'}</div>
+                                <div style={{ fontFamily: 'var(--fm)', fontSize: 10, color: 'var(--c-ink3)', marginTop: 1 }}>
+                                  {ingredient.quantity || '1 porție'}
+                                  {(ingredient.p || ingredient.c || ingredient.f) ? ` · P:${ingredient.p || 0}g C:${ingredient.c || 0}g F:${ingredient.f || 0}g` : ''}
+                                </div>
+                              </div>
+                              <div style={{ fontSize: 11, fontFamily: 'var(--fm)', color: 'var(--c-ink2)', fontWeight: 700, flexShrink: 0 }}>{ingredient.kcal || 0} kcal</div>
+                            </div>
+                          ))}
+                          {meal.recipe ? (
+                            <div style={{ marginTop: 6, padding: '10px 12px', background: 'var(--c-lime-bg)', border: '1px solid var(--c-lime)', borderRadius: 10, fontSize: 12, lineHeight: 1.5, color: 'var(--c-ink2)', whiteSpace: 'pre-wrap' }}>
+                              <div style={{ fontFamily: 'var(--fm)', fontSize: 9, letterSpacing: 1, color: 'var(--c-lime-d)', marginBottom: 4, textTransform: 'uppercase', fontWeight: 700 }}>📝 Rețetă</div>
+                              {meal.recipe}
+                            </div>
+                          ) : null}
+                        </div>
+                      )}
                     </div>
-                    <div style={{ fontFamily: 'var(--fd)', fontSize: 16, fontWeight: 800, color: 'var(--c-ink)' }}>{meal.kcal || 0}</div>
-                    <div style={{ fontFamily: 'var(--fm)', fontSize: 9, color: 'var(--c-ink3)' }}>kcal</div>
-                  </div>
-                ))}
+                  );
+                })}
                 <div style={{ padding: '12px 20px', background: 'var(--c-bg)', textAlign: 'center' }}>
                   <span style={{ fontFamily: 'var(--fd)', fontSize: 18, fontWeight: 800, color: 'var(--c-lime-d)' }}>{plan.kcal || 0} kcal</span>
                   <span style={{ fontFamily: 'var(--fm)', fontSize: 11, color: 'var(--c-ink3)', marginLeft: 8 }}>total zilnic</span>

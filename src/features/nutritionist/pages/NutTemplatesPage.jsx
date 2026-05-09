@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getNutTemplates, nutCreateTemplate, nutApplyTemplate, getNutClients, searchFood as searchFoodApi } from '../../../shared/api/index.js';
+import { getNutTemplates, nutCreateTemplate, nutUpdateTemplate, nutDeleteTemplate, nutApplyTemplate, getNutClients, searchFood as searchFoodApi } from '../../../shared/api/index.js';
 import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
+import { useConfirm } from '../../../shared/ui/ConfirmModal.jsx';
 import Modal, { ModalActions } from '../../../shared/ui/Modal.jsx';
 import ImageUploadButton from '../../../shared/ui/ImageUploadButton.jsx';
 import { AnimatedPage } from '../../../shared/ui/animations/index.jsx';
@@ -109,6 +110,7 @@ export default function NutTemplatesPage() {
   const [selectedClients, setSelectedClients] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
+  const [editingTemplateId, setEditingTemplateId] = useState(null);
   const [editName, setEditName] = useState('');
   const [editKcal, setEditKcal] = useState(2000);
   const [editP, setEditP] = useState(160);
@@ -121,6 +123,7 @@ export default function NutTemplatesPage() {
   const [foodResultsByMeal, setFoodResultsByMeal] = useState({});
   const [compact, setCompact] = useState(typeof window !== 'undefined' ? window.innerWidth <= 820 : false);
   const { toast, showToast } = useToast();
+  const confirm = useConfirm();
 
   useEffect(() => {
     const onResize = () => setCompact(window.innerWidth <= 820);
@@ -236,6 +239,7 @@ export default function NutTemplatesPage() {
 
   const openEditor = (template) => {
     if (template) {
+      setEditingTemplateId(template.id);
       setEditName(template.name || template.nm || '');
       setEditKcal(template.kcal || 2000);
       setEditP(template.p ?? template.protein ?? 160);
@@ -245,6 +249,7 @@ export default function NutTemplatesPage() {
       setEditMeals(normalizedMeals);
       setEditingMealId(normalizedMeals[0]?.id || null);
     } else {
+      setEditingTemplateId(null);
       setEditName('');
       setEditKcal(2000);
       setEditP(160);
@@ -295,7 +300,7 @@ export default function NutTemplatesPage() {
         };
       });
 
-      await nutCreateTemplate({
+      const payload = {
         name: editName.trim(),
         kcal: editKcal,
         p: editP,
@@ -304,14 +309,39 @@ export default function NutTemplatesPage() {
         description: '',
         img: mealPlan.find((meal) => meal.img)?.img || '',
         mealPlan,
-      });
-      showToast('✅ Template salvat!');
+      };
+
+      if (editingTemplateId) {
+        await nutUpdateTemplate(editingTemplateId, payload);
+        showToast('✅ Template actualizat!');
+      } else {
+        await nutCreateTemplate(payload);
+        showToast('✅ Template creat!');
+      }
       setShowEditor(false);
+      setEditingTemplateId(null);
       await load();
     } catch (error) {
       showToast(error.response?.data?.error || '❌ Eroare la salvare', '❌');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteTemplate = async (template) => {
+    const ok = await confirm({
+      title: 'Șterge template-ul?',
+      message: `Template-ul "${template.name || 'acesta'}" va fi șters definitiv. Clienții care îl au asignat își vor păstra mesele deja înregistrate, dar nu vor mai vedea planul ca activ.`,
+      confirmText: 'Șterge',
+      tone: 'danger',
+    });
+    if (!ok) return;
+    try {
+      await nutDeleteTemplate(template.id);
+      showToast('🗑️ Template șters');
+      await load();
+    } catch (error) {
+      showToast(error.response?.data?.error || '❌ Eroare la ștergere', '❌');
     }
   };
 
@@ -550,6 +580,14 @@ export default function NutTemplatesPage() {
               <div style={{ padding: '8px 16px 14px', display: 'flex', gap: 8 }}>
                 <button className="btn btn-outline btn-sm" style={{ flex: 1 }} onClick={() => openEditor(template)}>✏️ Editează</button>
                 <button className="btn btn-black btn-sm" style={{ flex: 1 }} onClick={() => setShowApply(template)}>📤 Aplică</button>
+                <button
+                  className="btn btn-sm"
+                  onClick={() => handleDeleteTemplate(template)}
+                  title="Șterge template"
+                  style={{ padding: '0 12px', border: '1.5px solid var(--c-coral)', background: 'transparent', color: 'var(--c-coral)', fontWeight: 700 }}
+                >
+                  🗑️
+                </button>
               </div>
             </div>
           );

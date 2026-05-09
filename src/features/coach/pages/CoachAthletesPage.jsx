@@ -29,7 +29,7 @@ export default function CoachAthletesPage() {
   const [drawerData, setDrawerData] = useState(null);
   const [showJournal, setShowJournal] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
-  const [form, setForm]           = useState({ name: '', email: '', goal: '', plan: 'Full Body 3x' });
+  const [form, setForm]           = useState({ email: '' });
   const [loading, setLoading]     = useState(false);
   const { toast, showToast }      = useToast();
   const navigate = useNavigate();
@@ -81,10 +81,10 @@ export default function CoachAthletesPage() {
     if (!form.email) { showToast('Introdu email-ul atletului', '⚠️'); return; }
     setLoading(true);
     try {
-      const r = await coachInviteAthlete({ email: form.email, goal: form.goal });
+      await coachInviteAthlete({ email: form.email });
       showToast(`✅ Invitație trimisă la ${form.email}`);
       setShowInvite(false);
-      setForm({ name: '', email: '', goal: '', plan: 'Full Body 3x' });
+      setForm({ email: '' });
       load();
     } catch (e) {
       showToast(e.response?.data?.error || '❌ Eroare', '❌');
@@ -131,13 +131,10 @@ export default function CoachAthletesPage() {
       {/* Invite Modal */}
       <Modal open={showInvite} onClose={() => setShowInvite(false)} title="👥 Invită atlet">
         <div style={{ fontSize: 12, color: 'var(--c-ink3)', marginBottom: 12 }}>
-          Atletul trebuie să aibă deja cont pe FORJA. Introdu emailul lui.
+          Atletul trebuie să aibă deja cont pe FORJA. Introdu emailul lui — primește invitația direct în aplicație și o poate accepta sau refuza.
         </div>
-        <ModalField label="Email atlet">
-          <ModalInput type="email" placeholder="andrei@exemplu.ro" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
-        </ModalField>
-        <ModalField label="Obiectiv (opțional)">
-          <ModalInput placeholder="ex: Masă musculară" value={form.goal} onChange={e => setForm(f => ({ ...f, goal: e.target.value }))} />
+        <ModalField label="Email atlet *">
+          <ModalInput type="email" placeholder="andrei@exemplu.ro" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} autoFocus />
         </ModalField>
         <ModalActions>
           <button className="btn btn-outline btn-sm" onClick={() => setShowInvite(false)}>Anulează</button>

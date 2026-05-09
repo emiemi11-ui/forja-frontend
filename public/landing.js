@@ -270,11 +270,19 @@ async function submitContact(ev) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, topic, message })
     });
-    if (!res.ok) throw new Error('no-server');
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      const errMsg = errData?.error || (res.status === 403 ? '🔒 Formularul este închis momentan.' : '✕ Eroare de server. Încearcă mai târziu.');
+      feedback.textContent = errMsg;
+      feedback.classList.add('err');
+      feedback.style.display = 'block';
+      return false;
+    }
     showSuccess();
   } catch {
-    console.info('[FORJA] Modul static: mesaj contact simulat', { name, email, topic });
-    showSuccess();
+    feedback.textContent = '✕ Nu am putut trimite mesajul. Verifică conexiunea.';
+    feedback.classList.add('err');
+    feedback.style.display = 'block';
   }
   return false;
 }
@@ -360,12 +368,13 @@ function refreshMixerVolumes() {
   ['ms1','ms2','ms3','ms4','ms5'].forEach(setMixerVolume);
 }
 
-window.__FORJA_PUBLIC_SETTINGS = { allowPublicSignup: true, allowWaitlist: true, allowContact: true, maintenanceMode: false };
+window.__FORJA_PUBLIC_SETTINGS = { allowWaitlist: true, allowContact: true, maintenanceMode: false };
 
 function applyPublicSettings(settings = {}) {
   const next = { ...window.__FORJA_PUBLIC_SETTINGS, ...settings };
   window.__FORJA_PUBLIC_SETTINGS = next;
 
+  // === WAITLIST disabled ===
   if (!next.allowWaitlist) {
     const emailInput = document.getElementById('notifyEmail');
     const btn = document.getElementById('notifyBtn');
@@ -382,48 +391,79 @@ function applyPublicSettings(settings = {}) {
       btn.textContent = 'WAITLIST ÎNCHIS';
     }
     if (success) {
-      success.textContent = 'Waitlist-ul este închis momentan.';
+      success.textContent = '🔒 Waitlist-ul este închis momentan. Revenim curând!';
       success.style.display = 'block';
       success.style.color = '#ff6b47';
     }
   }
 
-  if (!next.allowPublicSignup) {
-    document.querySelectorAll('a[href*="/login"][href*="tab=register"]').forEach((link) => {
-      link.setAttribute('aria-disabled', 'true');
-      link.dataset.signupDisabled = 'true';
-      link.style.pointerEvents = 'none';
-      link.style.opacity = '0.55';
-      link.style.filter = 'grayscale(0.2)';
-      link.title = 'Înregistrările publice sunt închise momentan';
+  // === CONTACT disabled ===
+  if (!next.allowContact) {
+    // Disable contact buttons / footer trigger
+    document.querySelectorAll('[onclick*="openContact"], [onclick*="contactModal"]').forEach((element) => {
+      if (element.dataset.contactDisabled === 'true') return; // already done
+      element.disabled = true;
+      element.style.opacity = '0.55';
+      element.style.cursor = 'not-allowed';
+      element.title = 'Formularul de contact este închis momentan';
+      element.dataset.contactDisabled = 'true';
+      // Prevent the click from doing anything
+      element.addEventListener('click', (e) => { e.preventDefault(); e.stopImmediatePropagation(); }, true);
     });
-    document.querySelectorAll('button[onclick*="/login"][onclick*="tab=register"]').forEach((button) => {
-      button.disabled = true;
-      button.style.opacity = '0.55';
-      button.style.cursor = 'not-allowed';
-      button.title = 'Înregistrările publice sunt închise momentan';
-    });
+    // If modal already open, lock it
+    const modal = document.getElementById('contactModal');
+    if (modal) {
+      const submit = modal.querySelector('button[type="submit"], button[onclick*="submitContact"]');
+      if (submit) {
+        submit.disabled = true;
+        submit.style.opacity = '0.55';
+        submit.textContent = '🔒 CONTACT ÎNCHIS';
+      }
+      const feedback = document.getElementById('contactFeedback');
+      if (feedback) {
+        feedback.textContent = '🔒 Formularul de contact este închis momentan.';
+        feedback.style.color = '#ff6b47';
+        feedback.style.display = 'block';
+      }
+    }
   }
 
-  if (next.maintenanceMode && !document.getElementById('forjaMaintenanceBanner')) {
-    const banner = document.createElement('div');
-    banner.id = 'forjaMaintenanceBanner';
-    banner.textContent = 'FORJA este momentan în mentenanță. Unele fluxuri publice pot fi limitate.';
-    banner.style.position = 'fixed';
-    banner.style.left = '50%';
-    banner.style.top = '18px';
-    banner.style.transform = 'translateX(-50%)';
-    banner.style.zIndex = '9999';
-    banner.style.padding = '10px 16px';
-    banner.style.borderRadius = '999px';
-    banner.style.background = 'rgba(0,0,0,0.82)';
-    banner.style.border = '1px solid rgba(255,188,125,0.35)';
-    banner.style.color = '#ffe0bf';
-    banner.style.fontFamily = 'var(--font-mono)';
-    banner.style.fontSize = '11px';
-    banner.style.letterSpacing = '0.08em';
-    banner.style.textTransform = 'uppercase';
-    document.body.appendChild(banner);
+  // === MAINTENANCE mode → full-page overlay ===
+  if (next.maintenanceMode) {
+    if (!document.getElementById('forjaMaintenanceOverlay')) {
+      const overlay = document.createElement('div');
+      overlay.id = 'forjaMaintenanceOverlay';
+      overlay.style.cssText = `
+        position: fixed; inset: 0; z-index: 99999;
+        background: rgba(8, 10, 12, 0.92);
+        backdrop-filter: blur(8px);
+        display: flex; align-items: center; justify-content: center;
+        padding: 24px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+      `;
+      overlay.innerHTML = `
+        <div style="max-width: 520px; width: 100%; text-align: center; color: #fff;">
+          <div style="font-size: 64px; margin-bottom: 16px;">🔧</div>
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 44px; font-weight: 900; letter-spacing: 1px; margin-bottom: 12px; line-height: 1;">
+            FORJA E ÎN MENTENANȚĂ
+          </div>
+          <div style="font-size: 15px; line-height: 1.6; color: rgba(255,255,255,0.78); margin-bottom: 24px;">
+            Lucrăm la îmbunătățiri. Platforma va fi disponibilă în scurt timp. Mulțumim pentru răbdare.
+          </div>
+          <div style="display: inline-block; padding: 10px 20px; background: rgba(184,237,0,0.15); border: 1px solid #B8ED00; border-radius: 999px; color: #B8ED00; font-family: 'Plus Jakarta Sans', monospace; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;">
+            Revenim curând
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      // Block scroll
+      document.body.style.overflow = 'hidden';
+    }
+  } else {
+    // Maintenance turned OFF — remove overlay if exists
+    const existing = document.getElementById('forjaMaintenanceOverlay');
+    if (existing) existing.remove();
+    document.body.style.overflow = '';
   }
 }
 
@@ -466,11 +506,19 @@ function notifyMe() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, type: 'android' })
   }).then(async (res) => {
-    if (!res.ok) throw new Error('no-server');
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      const errMsg = errData?.error || (res.status === 403 ? '🔒 Waitlist-ul este închis momentan.' : '✕ Eroare server. Încearcă din nou.');
+      success.textContent = errMsg;
+      success.style.display = 'block';
+      success.style.color = '#ff6b47';
+      return;
+    }
     showSuccess();
   }).catch(() => {
-    console.info('[FORJA] Modul static: inscriere waitlist simulata', email);
-    showSuccess();
+    success.textContent = '✕ Nu am putut trimite. Verifică conexiunea.';
+    success.style.display = 'block';
+    success.style.color = '#ff6b47';
   }).finally(() => {
     btn.disabled = false;
   });

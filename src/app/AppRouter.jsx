@@ -86,7 +86,7 @@ export default function AppRouter() {
               <Route path="feed" element={<FeedPage />} />
               <Route path="teams" element={<PlanLock requiredPlan="TEAM"><TeamsPage /></PlanLock>} />
               <Route path="challenges" element={<ChallengePage />} />
-              <Route path="chat" element={<ChatPage />} />
+              <Route path="chat" element={<PlanLock requiredPlan="TEAM"><ChatPage /></PlanLock>} />
               <Route path="profile" element={<ProfilePage />} />
               <Route path="public-profile" element={<ProProfilePage />} />
               <Route path="achievements" element={<PlanLock requiredPlan="PRO"><AchievementsPage /></PlanLock>} />
@@ -143,7 +143,6 @@ export default function AppRouter() {
               <Route index element={<AdminOverviewPage />} />
               <Route path="users" element={<AdminUsersPage />} />
               <Route path="inbox" element={<AdminInboxPage />} />
-              <Route path="dm" element={<DirectMessagesPage />} />
               <Route path="settings" element={<AdminSettingsPage />} />
               <Route path="security" element={<AdminSecurityPage />} />
               <Route path="manage" element={<AdminManagePage />} />

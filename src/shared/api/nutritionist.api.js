@@ -7,6 +7,8 @@ export const getNutClient = (id) => api.get(`${ENDPOINTS.nutritionist.clients}/$
 export const getNutTemplates = () => api.get(ENDPOINTS.nutritionist.templates);
 export const nutCreateClient = (data) => api.post(ENDPOINTS.nutritionist.clients, data);
 export const nutCreateTemplate = (data) => api.post(ENDPOINTS.nutritionist.templates, data);
+export const nutUpdateTemplate = (id, data) => api.put(`${ENDPOINTS.nutritionist.templates}/${id}`, data);
+export const nutDeleteTemplate = (id) => api.delete(`${ENDPOINTS.nutritionist.templates}/${id}`);
 export const nutApplyTemplate = (id, clientIds) =>
   api.post(`${ENDPOINTS.nutritionist.templates}/${id}/apply`, { clientIds });
 export const nutInviteClient = (data) => api.post(ENDPOINTS.nutritionist.clients + '/invite', data);

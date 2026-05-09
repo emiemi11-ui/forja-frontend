@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getUser, getGoals, putGoals, patchUser, setSteps, uploadAvatar, getMyProfessionals, removeProfessionalLink, startConversation } from '../../../shared/api/index.js';
+import { getUser, getGoals, putGoals, patchUser, setSteps, uploadAvatar, getMyProfessionals, removeProfessionalLink, acceptProfessionalInvite, rejectProfessionalInvite, startConversation } from '../../../shared/api/index.js';
+import { changePassword } from '../../../shared/api/auth.api.js';
 import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
 import { useAuth } from '../../../features/auth/context/AuthContext.jsx';
 import Modal, { ModalField, ModalInput, ModalActions } from '../../../shared/ui/Modal.jsx';
@@ -15,6 +16,9 @@ export default function ProfilePage() {
   const [userForm, setUserForm] = useState({});
   const [showStepsModal, setShowStepsModal] = useState(false);
   const [stepsInput, setStepsInput] = useState('');
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [pwdForm, setPwdForm] = useState({ current: '', next: '', confirm: '' });
+  const [pwdSaving, setPwdSaving] = useState(false);
   const [professionals, setProfessionals] = useState({ coaches: [], nutritionists: [] });
   const { toast, showToast }    = useToast();
   const { logout, updateUser } = useAuth();
@@ -35,6 +39,27 @@ export default function ProfilePage() {
     try {
       await removeProfessionalLink(type, linkId);
       showToast('✅ Legătură eliminată');
+      load();
+    } catch (e) {
+      showToast(e.response?.data?.error || '❌ Eroare', '❌');
+    }
+  };
+
+  const handleAcceptProfessional = async (type, linkId, name) => {
+    try {
+      await acceptProfessionalInvite(type, linkId);
+      showToast(`✅ Invitație acceptată — ${name} este acum ${type === 'COACH' ? 'coach-ul' : 'nutriționistul'} tău`);
+      load();
+    } catch (e) {
+      showToast(e.response?.data?.error || '❌ Eroare', '❌');
+    }
+  };
+
+  const handleRejectProfessional = async (type, linkId, name) => {
+    if (!confirm(`Refuzi invitația de la ${name}?`)) return;
+    try {
+      await rejectProfessionalInvite(type, linkId);
+      showToast('Invitație refuzată');
       load();
     } catch (e) {
       showToast(e.response?.data?.error || '❌ Eroare', '❌');
@@ -76,6 +101,32 @@ export default function ProfilePage() {
     load();
   };
 
+  const handlePasswordChange = async () => {
+    if (!pwdForm.current || !pwdForm.next || !pwdForm.confirm) {
+      showToast('Completează toate câmpurile', '⚠️');
+      return;
+    }
+    if (pwdForm.next.length < 6) {
+      showToast('Parola nouă: minim 6 caractere', '⚠️');
+      return;
+    }
+    if (pwdForm.next !== pwdForm.confirm) {
+      showToast('Parolele noi nu coincid', '⚠️');
+      return;
+    }
+    setPwdSaving(true);
+    try {
+      await changePassword(pwdForm.current, pwdForm.next);
+      showToast('✅ Parola a fost schimbată!');
+      setShowPasswordModal(false);
+      setPwdForm({ current: '', next: '', confirm: '' });
+    } catch (error) {
+      showToast(error.response?.data?.error || '❌ Eroare la schimbarea parolei', '❌');
+    } finally {
+      setPwdSaving(false);
+    }
+  };
+
   if (!userData || !goals) return (
     <AnimatedPage>
       <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 16 }}>
@@ -115,6 +166,40 @@ export default function ProfilePage() {
         <ModalActions>
           <button className="btn btn-outline btn-sm" onClick={() => setShowStepsModal(false)}>Anulează</button>
           <button className="btn btn-black" onClick={handleLogSteps}>✅ Salvează</button>
+        </ModalActions>
+      </Modal>
+
+      {/* Password Modal */}
+      <Modal open={showPasswordModal} onClose={() => { setShowPasswordModal(false); setPwdForm({ current: '', next: '', confirm: '' }); }} title="🔐 Schimbă parola">
+        <ModalField label="Parola actuală">
+          <ModalInput
+            type="password"
+            placeholder="Parola pe care o folosești acum"
+            value={pwdForm.current}
+            onChange={e => setPwdForm(prev => ({ ...prev, current: e.target.value }))}
+            autoFocus
+          />
+        </ModalField>
+        <ModalField label="Parola nouă (minim 6 caractere)">
+          <ModalInput
+            type="password"
+            placeholder="Noua parolă"
+            value={pwdForm.next}
+            onChange={e => setPwdForm(prev => ({ ...prev, next: e.target.value }))}
+          />
+        </ModalField>
+        <ModalField label="Confirmă parola nouă">
+          <ModalInput
+            type="password"
+            placeholder="Repetă noua parolă"
+            value={pwdForm.confirm}
+            onChange={e => setPwdForm(prev => ({ ...prev, confirm: e.target.value }))}
+            onKeyDown={e => e.key === 'Enter' && handlePasswordChange()}
+          />
+        </ModalField>
+        <ModalActions>
+          <button className="btn btn-outline btn-sm" onClick={() => { setShowPasswordModal(false); setPwdForm({ current: '', next: '', confirm: '' }); }}>Anulează</button>
+          <button className="btn btn-black" onClick={handlePasswordChange} disabled={pwdSaving}>{pwdSaving ? '⏳ Salvez...' : '🔐 Schimbă parola'}</button>
         </ModalActions>
       </Modal>
 
@@ -235,6 +320,11 @@ export default function ProfilePage() {
             <div><div className="pl-txt">Echipele mele</div><div className="pl-sub">{userData.teamName || 'Nicio echipă'}</div></div>
             <span style={{ color: 'var(--c-ink3)' }}>›</span>
           </div>
+          <div className="prof-link" onClick={() => setShowPasswordModal(true)}>
+            <div className="pli">🔐</div>
+            <div><div className="pl-txt">Schimbă parola</div><div className="pl-sub">Actualizează parola contului</div></div>
+            <span style={{ color: 'var(--c-ink3)' }}>›</span>
+          </div>
           <div className="prof-link" style={{ color: 'var(--c-coral)' }} onClick={() => { logout(); navigate('/login'); }}>
             <div className="pli">↪️</div>
             <div><div className="pl-txt">Logout</div><div className="pl-sub">Deconectare</div></div>
@@ -319,6 +409,8 @@ export default function ProfilePage() {
                           type="COACH"
                           onMessage={() => handleMessageProfessional(link.professional.id)}
                           onRemove={() => handleRemoveProfessional('COACH', link.linkId, link.professional.name)}
+                          onAccept={() => handleAcceptProfessional('COACH', link.linkId, link.professional.name)}
+                          onReject={() => handleRejectProfessional('COACH', link.linkId, link.professional.name)}
                         />
                       ))}
                     </div>
@@ -335,6 +427,8 @@ export default function ProfilePage() {
                           type="NUTRITIONIST"
                           onMessage={() => handleMessageProfessional(link.professional.id)}
                           onRemove={() => handleRemoveProfessional('NUTRITIONIST', link.linkId, link.professional.name)}
+                          onAccept={() => handleAcceptProfessional('NUTRITIONIST', link.linkId, link.professional.name)}
+                          onReject={() => handleRejectProfessional('NUTRITIONIST', link.linkId, link.professional.name)}
                         />
                       ))}
                     </div>
@@ -350,7 +444,7 @@ export default function ProfilePage() {
 }
 
 // Helper component pentru o linie din lista de profesionisti
-function ProfessionalRow({ link, type, onMessage, onRemove }) {
+function ProfessionalRow({ link, type, onMessage, onRemove, onAccept, onReject }) {
   const p = link.professional;
   const isPending = link.status === 'PENDING';
   const isWaitingMe = link.status === 'PENDING_ATHLETE' || link.status === 'PENDING_CLIENT';
@@ -358,11 +452,11 @@ function ProfessionalRow({ link, type, onMessage, onRemove }) {
 
   let badge = null;
   if (isAccepted) badge = <span style={{ background: 'var(--c-lime)', color: 'var(--c-ink)', padding: '2px 8px', borderRadius: 4, fontSize: 9, fontWeight: 700, fontFamily: 'var(--fm)', letterSpacing: 1 }}>ACTIV</span>;
-  else if (isPending) badge = <span style={{ background: '#fef3c7', color: '#92400e', padding: '2px 8px', borderRadius: 4, fontSize: 9, fontWeight: 700, fontFamily: 'var(--fm)', letterSpacing: 1 }}>ÎN AȘTEPTARE</span>;
+  else if (isPending) badge = <span style={{ background: '#fef3c7', color: '#92400e', padding: '2px 8px', borderRadius: 4, fontSize: 9, fontWeight: 700, fontFamily: 'var(--fm)', letterSpacing: 1 }}>CEREREA TA — ÎN AȘTEPTARE</span>;
   else if (isWaitingMe) badge = <span style={{ background: '#dbeafe', color: '#1e40af', padding: '2px 8px', borderRadius: 4, fontSize: 9, fontWeight: 700, fontFamily: 'var(--fm)', letterSpacing: 1 }}>TE-A INVITAT</span>;
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--c-bg)' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--c-bg)', flexWrap: 'wrap' }}>
       <div style={{
         width: 40, height: 40, borderRadius: '50%',
         background: p.avatarUrl ? `url(${p.avatarUrl}) center/cover` : 'var(--c-blue, #3b82f6)',
@@ -372,16 +466,39 @@ function ProfessionalRow({ link, type, onMessage, onRemove }) {
       }}>
         {!p.avatarUrl && (p.name?.[0] || p.email?.[0] || '?').toUpperCase()}
       </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ flex: 1, minWidth: 120 }}>
         <div style={{ fontFamily: 'var(--fd)', fontWeight: 700, fontSize: 14, marginBottom: 2 }}>{p.name}</div>
         <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
           <span style={{ fontSize: 11, color: 'var(--c-ink3)' }}>{p.specialization || (type === 'COACH' ? 'Antrenor' : 'Nutriționist')}</span>
           {badge}
         </div>
       </div>
-      <div style={{ display: 'flex', gap: 6 }}>
-        <button className="btn btn-outline btn-sm" onClick={onMessage} title="Trimite mesaj">💬</button>
-        <button className="btn btn-outline btn-sm" onClick={onRemove} title={isAccepted ? 'Desfă legătura' : 'Anulează cererea'} style={{ color: '#dc2626' }}>✕</button>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        {isWaitingMe ? (
+          <>
+            <button
+              className="btn btn-sm"
+              onClick={onAccept}
+              style={{ background: 'var(--c-lime)', color: 'var(--c-ink)', border: 'none', fontWeight: 800, padding: '6px 14px', fontSize: 12 }}
+              title="Acceptă invitația"
+            >
+              ✓ Acceptă
+            </button>
+            <button
+              className="btn btn-outline btn-sm"
+              onClick={onReject}
+              style={{ color: '#dc2626', borderColor: '#dc2626' }}
+              title="Refuză invitația"
+            >
+              ✕ Refuză
+            </button>
+          </>
+        ) : (
+          <>
+            <button className="btn btn-outline btn-sm" onClick={onMessage} title="Trimite mesaj">💬</button>
+            <button className="btn btn-outline btn-sm" onClick={onRemove} title={isAccepted ? 'Desfă legătura' : 'Anulează cererea'} style={{ color: '#dc2626' }}>✕</button>
+          </>
+        )}
       </div>
     </div>
   );

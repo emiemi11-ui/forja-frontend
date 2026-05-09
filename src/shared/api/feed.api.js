@@ -20,8 +20,14 @@ export const rejectJoinRequest = (teamId, requestId) => api.post(`/teams/${teamI
 export const updateTeamMember = (teamId, userId, action) => api.patch(`/teams/${teamId}/members/${userId}`, { action });
 export const deleteComment = (id) => api.delete(`/feed/comments/${id}`);
 
-export const getChallenges = () => api.get('/challenges');
+export const getChallenges = (params = {}) => {
+  const query = params.teamId ? `?teamId=${encodeURIComponent(params.teamId)}` : '';
+  return api.get(`/challenges${query}`);
+};
 export const createChallenge = (data) => api.post('/challenges', data);
 export const joinChallenge = (id) => api.post(`/challenges/${id}/join`);
 export const updateProgress = (id, progress) => api.patch(`/challenges/${id}/progress`, { progress });
 export const getLeaderboard = (id) => api.get(`/challenges/${id}/leaderboard`);
+export const toggleChallengeActivity = (challengeId, activityId) =>
+  api.post(`/challenges/${challengeId}/activities/${activityId}/toggle`);
+export const deleteChallenge = (id) => api.delete(`/challenges/${id}`);

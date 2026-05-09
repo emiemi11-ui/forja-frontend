@@ -5,7 +5,6 @@ import { AnimatedPage } from '../../../shared/ui/animations/index.jsx';
 
 export default function AdminSettingsPage() {
   const [form, setForm] = useState({
-    allowPublicSignup: true,
     allowWaitlist: true,
     allowContact: true,
     maintenanceMode: false,
@@ -22,7 +21,6 @@ export default function AdminSettingsPage() {
         if (!mounted) return;
         const s = data.settings || {};
         setForm({
-          allowPublicSignup: s.allowPublicSignup ?? true,
           allowWaitlist: s.allowWaitlist ?? true,
           allowContact: s.allowContact ?? true,
           maintenanceMode: s.maintenanceMode ?? false,
@@ -62,10 +60,6 @@ export default function AdminSettingsPage() {
   return (
     <div className="admin-page">
       <AdminPanel title="Feature flags" actions={<button className="admin-btn primary" onClick={save} disabled={saving}>{saving ? 'Salvez...' : 'Salveaza'}</button>}>
-        <div className="admin-switch-row">
-          <div className="admin-switch-copy"><strong>Public signup</strong><p>Permite inregistrari noi fara invitatie.</p></div>
-          <div className={`admin-toggle${form.allowPublicSignup ? ' active' : ''}`} onClick={() => toggle('allowPublicSignup')} />
-        </div>
         <div className="admin-switch-row">
           <div className="admin-switch-copy"><strong>Waitlist</strong><p>Formularul de inscriere din landing.</p></div>
           <div className={`admin-toggle${form.allowWaitlist ? ' active' : ''}`} onClick={() => toggle('allowWaitlist')} />
