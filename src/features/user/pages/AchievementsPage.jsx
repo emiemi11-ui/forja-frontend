@@ -9,7 +9,6 @@ const BADGE_CATALOG = [
   { id: 'b2', name: '30 Zile Streak', img: '/img/badge-streak-30.svg', desc: 'Antrenament 30 zile consecutive' },
   { id: 'b3', name: 'Primul Antrenament', img: '/img/badge-first-workout.svg', desc: 'Ai completat primul antrenament' },
   { id: 'b4', name: '100 Exercitii', img: '/img/badge-100-exercises.svg', desc: '100 exercitii completate total' },
-  { id: 'b5', name: 'Lider Echipa', img: '/img/badge-team-leader.svg', desc: 'Fii #1 in clasamentul echipei' },
   { id: 'b6', name: 'Nutritie Master', img: '/img/badge-nutrition-master.svg', desc: '30 zile de logging complet' },
   { id: 'b7', name: 'Somn Pro', img: '/img/badge-sleep-pro.svg', desc: 'Scor somn >85 timp de 14 zile' },
   { id: 'b8', name: 'Maratonist', img: '/img/badge-marathon.svg', desc: '42.195 pasi intr-o singura zi' },

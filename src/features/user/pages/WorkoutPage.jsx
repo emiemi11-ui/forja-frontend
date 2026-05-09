@@ -80,10 +80,11 @@ export default function Workout() {
   const [editingEx, setEditingEx] = useState(null); // { id, sets, reps, weight, restSec }
   const [savingEdit, setSavingEdit] = useState(false);
   const handleEditClick = (ex) => {
+    console.log('[WorkoutPage] handleEditClick fired', ex);
     // ex.sets este string formatat "4×8" — folosim ex.setsTotal (numarul brut)
     const rawSets = Number(ex.setsTotal) || Number(ex.sets) || 3;
     const rawReps = Number(ex.reps) || 10;
-    setEditingEx({
+    const next = {
       id: ex.id,
       name: ex.name,
       muscle: ex.muscle || 'General',
@@ -91,7 +92,9 @@ export default function Workout() {
       reps: rawReps,
       weight: Number(ex.weight) || 0,
       restSec: Number(ex.restSec) || 90,
-    });
+    };
+    console.log('[WorkoutPage] setting editingEx to', next);
+    setEditingEx(next);
   };
   const handleEditSave = async () => {
     if (!editingEx || savingEdit) return;
@@ -376,14 +379,12 @@ export default function Workout() {
             {plan.length === 0 ? (
               <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--c-ink3)', fontSize: 13 }}>Niciun exercitiu in plan.<br />Selecteaza din librarie</div>
             ) : plan.map((ex, idx) => (
-              <motion.div key={ex.id} className="pex-row"
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.04 }}
-                whileHover={{ x: 3, background: 'var(--c-bg)' }}>
-                <motion.div className={`pex-cb${ex.done ? ' on' : ' off'}`}
-                  whileTap={{ scale: 0.8 }}
-                  onClick={() => handleToggle(ex.id)}>{ex.done ? '✓' : ''}</motion.div>
+              <div key={ex.id} className="pex-row" style={{ position: 'relative', zIndex: 1 }}>
+                <div className={`pex-cb${ex.done ? ' on' : ' off'}`}
+                  onClick={() => handleToggle(ex.id)}
+                  role="button"
+                  tabIndex={0}
+                  style={{ cursor: 'pointer' }}>{ex.done ? '✓' : ''}</div>
                 {ex.img && <img src={ex.img} alt="" style={{ width:32, height:32, borderRadius:8, objectFit:'cover', flexShrink:0 }} />}
                 <div style={{ flex: 1 }}>
                   <div className="pex-nm" style={{ textDecoration: ex.done ? 'line-through' : 'none', opacity: ex.done ? .5 : 1 }}>{ex.name}</div>
@@ -392,14 +393,15 @@ export default function Workout() {
                   </div>
                 </div>
                 <button
-                  onClick={() => handleEditClick(ex)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', fontSize: 14, color: 'var(--c-ink3)' }}
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleEditClick(ex); }}
+                  style={{ background: 'rgba(184,237,0,0.15)', border: '1.5px solid var(--c-lime)', cursor: 'pointer', padding: '6px 12px', fontSize: 14, color: 'var(--c-lime-d, #4d7a00)', borderRadius: 8, fontWeight: 700, position: 'relative', zIndex: 2 }}
                   title="Editează"
                 >
-                  ✏️
+                  ✏️ Edit
                 </button>
-                <button className="pex-rm" onClick={() => handleDelete(ex.id)}>✕</button>
-              </motion.div>
+                <button type="button" className="pex-rm" onClick={(e) => { e.stopPropagation(); handleDelete(ex.id); }} style={{ position: 'relative', zIndex: 2 }}>✕</button>
+              </div>
             ))}
             <div style={{ padding: '11px 16px', display: 'flex', gap: 7, background: 'var(--c-bg)', borderTop: '1px solid var(--c-border)' }}>
               <button className="btn btn-black btn-sm" style={{ flex: 1 }} onClick={handleBulkDone} disabled={plan.length === 0 || done === plan.length}>✓ Toate done</button>
@@ -410,20 +412,17 @@ export default function Workout() {
       </div>
 
       {/* === EDIT EXERCITIU MODAL === */}
-      <AnimatePresence>
       {editingEx && (
-        <motion.div
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        <div
           onClick={() => setEditingEx(null)}
           style={{
-            position: 'fixed', inset: 0, zIndex: 9999,
+            position: 'fixed', inset: 0, zIndex: 99999,
             background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
           }}>
-          <motion.div
-            initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }}
+          <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: 'var(--c-surface)', borderRadius: 18, padding: 28, maxWidth: 420, width: '100%',
+              background: 'var(--c-surface, #fff)', borderRadius: 18, padding: 28, maxWidth: 420, width: '100%',
               boxShadow: '0 20px 60px rgba(0,0,0,0.4)', border: '2px solid var(--c-lime)',
             }}>
             <h3 style={{ fontFamily: 'var(--fd)', fontSize: 22, fontWeight: 900, marginTop: 0, marginBottom: 6 }}>
@@ -464,19 +463,18 @@ export default function Workout() {
             })()}
 
             <div style={{ display: 'flex', gap: 8, marginTop: 22 }}>
-              <button onClick={() => setEditingEx(null)}
+              <button type="button" onClick={() => setEditingEx(null)}
                 style={{ flex: 1, padding: '12px', borderRadius: 10, border: '1.5px solid var(--c-border)', background: 'transparent', color: 'var(--c-ink)', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
                 Anulează
               </button>
-              <button onClick={handleEditSave} disabled={savingEdit}
+              <button type="button" onClick={handleEditSave} disabled={savingEdit}
                 style={{ flex: 1, padding: '12px', borderRadius: 10, border: 'none', background: 'var(--c-lime)', color: '#000', fontWeight: 800, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
                 {savingEdit ? 'Salvez...' : '✅ Salvează'}
               </button>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
-      </AnimatePresence>
     </AnimatedPage>
   );
 }
