@@ -80,13 +80,17 @@ export default function Workout() {
   const [editingEx, setEditingEx] = useState(null); // { id, sets, reps, weight, restSec }
   const [savingEdit, setSavingEdit] = useState(false);
   const handleEditClick = (ex) => {
+    // ex.sets este string formatat "4×8" — folosim ex.setsTotal (numarul brut)
+    const rawSets = Number(ex.setsTotal) || Number(ex.sets) || 3;
+    const rawReps = Number(ex.reps) || 10;
     setEditingEx({
       id: ex.id,
       name: ex.name,
-      sets: ex.sets || 3,
-      reps: ex.reps || 10,
-      weight: ex.weight || 0,
-      restSec: ex.restSec || 90,
+      muscle: ex.muscle || 'General',
+      sets: rawSets,
+      reps: rawReps,
+      weight: Number(ex.weight) || 0,
+      restSec: Number(ex.restSec) || 90,
     });
   };
   const handleEditSave = async () => {
@@ -384,7 +388,7 @@ export default function Workout() {
                 <div style={{ flex: 1 }}>
                   <div className="pex-nm" style={{ textDecoration: ex.done ? 'line-through' : 'none', opacity: ex.done ? .5 : 1 }}>{ex.name}</div>
                   <div style={{ fontSize: 11, color: 'var(--c-ink3)', fontFamily: 'var(--fm)', marginTop: 2 }}>
-                    {ex.sets || 3}x{ex.reps || 10}{ex.weight ? ` · ${ex.weight}kg` : ''} · pauză {ex.restSec || 90}s
+                    {ex.setsTotal || 3}×{ex.reps || 10}{ex.weight ? ` · ${ex.weight}kg` : ''} · pauză {ex.restSec || 90}s
                   </div>
                 </div>
                 <button
@@ -427,21 +431,24 @@ export default function Workout() {
             </h3>
             <div style={{ fontSize: 13, color: 'var(--c-ink3)', marginBottom: 18 }}>{editingEx.name}</div>
 
+            {(() => {
+              const isCardio = editingEx.muscle === 'Cardio';
+              return (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
-                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--fm)' }}>Seturi</label>
+                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--fm)' }}>{isCardio ? 'Sesiuni' : 'Seturi'}</label>
                 <input type="number" min="1" max="20" value={editingEx.sets}
                   onChange={(e) => setEditingEx({ ...editingEx, sets: Math.max(1, Math.min(20, parseInt(e.target.value) || 1)) })}
                   style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1.5px solid var(--c-border)', fontSize: 14, fontFamily: 'var(--fb)', background: 'var(--c-bg)', boxSizing: 'border-box', marginTop: 4 }} />
               </div>
               <div>
-                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--fm)' }}>Repetări</label>
+                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--fm)' }}>{isCardio ? 'Minute / sesiune' : 'Repetări'}</label>
                 <input type="number" min="1" max="100" value={editingEx.reps}
                   onChange={(e) => setEditingEx({ ...editingEx, reps: Math.max(1, Math.min(100, parseInt(e.target.value) || 1)) })}
                   style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1.5px solid var(--c-border)', fontSize: 14, fontFamily: 'var(--fb)', background: 'var(--c-bg)', boxSizing: 'border-box', marginTop: 4 }} />
               </div>
               <div>
-                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--fm)' }}>Greutate (kg)</label>
+                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--fm)' }}>{isCardio ? 'Distanță (km)' : 'Greutate (kg)'}</label>
                 <input type="number" min="0" max="500" step="0.5" value={editingEx.weight}
                   onChange={(e) => setEditingEx({ ...editingEx, weight: Math.max(0, Math.min(500, parseFloat(e.target.value) || 0)) })}
                   style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1.5px solid var(--c-border)', fontSize: 14, fontFamily: 'var(--fb)', background: 'var(--c-bg)', boxSizing: 'border-box', marginTop: 4 }} />
@@ -453,6 +460,8 @@ export default function Workout() {
                   style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1.5px solid var(--c-border)', fontSize: 14, fontFamily: 'var(--fb)', background: 'var(--c-bg)', boxSizing: 'border-box', marginTop: 4 }} />
               </div>
             </div>
+              );
+            })()}
 
             <div style={{ display: 'flex', gap: 8, marginTop: 22 }}>
               <button onClick={() => setEditingEx(null)}

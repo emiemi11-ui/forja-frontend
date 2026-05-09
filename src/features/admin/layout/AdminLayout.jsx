@@ -13,7 +13,6 @@ const NAV = [
   { section: 'Moderare' },
   { to: '/admin/manage', label: 'Echipe & Postari', Icon: ShieldCheck },
   { section: 'Sistem' },
-  { to: '/admin/settings', label: 'Setări', Icon: Settings },
   { to: '/admin/security', label: 'Audit log', Icon: ShieldCheck },
 ];
 
@@ -21,7 +20,6 @@ const TITLES = {
   '/admin': 'Overview',
   '/admin/users': 'Utilizatori',
   '/admin/inbox': 'Inbox',
-  '/admin/settings': 'Setări',
   '/admin/manage': 'Echipe & Postari',
   '/admin/security': 'Audit log',
 };

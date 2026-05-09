@@ -36,7 +36,6 @@ import AdminLayout from '../features/admin/layout/AdminLayout.jsx';
 import AdminOverviewPage from '../features/admin/pages/AdminOverviewPage.jsx';
 import AdminUsersPage from '../features/admin/pages/AdminUsersPage.jsx';
 import AdminInboxPage from '../features/admin/pages/AdminInboxPage.jsx';
-import AdminSettingsPage from '../features/admin/pages/AdminSettingsPage.jsx';
 import AdminSecurityPage from '../features/admin/pages/AdminSecurityPage.jsx';
 import AdminManagePage from '../features/admin/pages/AdminManagePage.jsx';
 import DirectMessagesPage from '../features/shared/pages/DirectMessagesPage.jsx';
@@ -143,7 +142,6 @@ export default function AppRouter() {
               <Route index element={<AdminOverviewPage />} />
               <Route path="users" element={<AdminUsersPage />} />
               <Route path="inbox" element={<AdminInboxPage />} />
-              <Route path="settings" element={<AdminSettingsPage />} />
               <Route path="security" element={<AdminSecurityPage />} />
               <Route path="manage" element={<AdminManagePage />} />
             </Route>

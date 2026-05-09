@@ -9,6 +9,8 @@ export const getCoachWorkout = (id) => api.get(`${ENDPOINTS.coach.workouts}/${id
 export const getCoachMessages = () => api.get(ENDPOINTS.coach.messages);
 export const coachInviteAthlete = (data) => api.post(`${ENDPOINTS.coach.athletes}/invite`, data);
 export const coachCreateWorkout = (data) => api.post(ENDPOINTS.coach.workouts, data);
+export const coachUpdateWorkout = (id, data) => api.put(`${ENDPOINTS.coach.workouts}/${id}`, data);
+export const coachDeleteWorkout = (id) => api.delete(`${ENDPOINTS.coach.workouts}/${id}`);
 export const coachReplyMessage = (id, msg) =>
   api.post(`${ENDPOINTS.coach.messages}/${id}/reply`, { msg });
 export const coachReadMessage = (id) =>

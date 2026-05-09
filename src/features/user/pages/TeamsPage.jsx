@@ -351,7 +351,6 @@ export default function TeamsPage() {
           {detail.description && <p style={{ fontSize: 15, lineHeight: 1.7, color: 'var(--c-ink2)', marginBottom: 16 }}>{detail.description}</p>}
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 24 }}>
             <span style={{ padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 700, background: 'var(--c-lime-bg)', color: 'var(--c-lime-d)', fontFamily: 'var(--fm)' }}>{detail.postsCount || 0} postări</span>
-            <span style={{ padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 700, background: 'var(--c-blue-bg)', color: 'var(--c-blue)', fontFamily: 'var(--fm)' }}>{detail.challengesCount || 0} challenges</span>
             <span style={{ padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 700, background: detail.isPublic ? 'var(--c-lime-bg)' : 'var(--c-coral-bg)', color: detail.isPublic ? 'var(--c-lime-d)' : 'var(--c-coral)', fontFamily: 'var(--fm)' }}>{detail.isPublic ? 'Publică' : 'Privată'}</span>
             {detail.isMember ? (
               <button onClick={() => handleLeave(detail.id)} disabled={busy} style={{ marginLeft: 'auto', padding: '6px 18px', borderRadius: 8, border: '1.5px solid var(--c-border)', background: 'transparent', fontWeight: 700, fontSize: 12, cursor: 'pointer', color: 'var(--c-coral)' }}>Părăsește</button>

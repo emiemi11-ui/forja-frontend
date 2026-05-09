@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
-import { getCoachWorkouts, getCoachWorkout, coachCreateWorkout, coachAssignWorkout, getCoachAthletes, getExLib } from '../../../shared/api/index.js';
+import { getCoachWorkouts, getCoachWorkout, coachCreateWorkout, coachUpdateWorkout, coachDeleteWorkout, coachAssignWorkout, getCoachAthletes, getExLib } from '../../../shared/api/index.js';
 import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
 import Drawer from '../../../shared/ui/Drawer.jsx';
 import Modal, { ModalField, ModalInput, ModalSelect, ModalActions } from '../../../shared/ui/Modal.jsx';
 import { AnimatedPage } from '../../../shared/ui/animations/index.jsx';
+import { useConfirm } from '../../../shared/ui/ConfirmModal.jsx';
 
 function CoachAv({ av, col, size = 36 }) {
   return (
@@ -23,6 +24,7 @@ export default function CoachWorkoutsPage() {
   const [athletes, setAthletes] = useState([]);
   const [loading, setLoading] = useState(false);
   const { toast, showToast } = useToast();
+  const confirm = useConfirm();
 
   // Plan editor state
   const [editName, setEditName] = useState('');
@@ -99,13 +101,36 @@ export default function CoachWorkoutsPage() {
     if (editExercises.length === 0) { showToast('Adaugă cel puțin un exercițiu', '⚠️'); return; }
     setLoading(true);
     try {
-      await coachCreateWorkout({ name: editName, category: editCategory, exercises: editExercises });
-      showToast('✅ Plan salvat cu succes!');
+      const payload = { name: editName, category: editCategory, exercises: editExercises };
+      if (editMode === 'create') {
+        await coachCreateWorkout(payload);
+        showToast('✅ Plan creat cu succes!');
+      } else {
+        await coachUpdateWorkout(editMode, payload);
+        showToast('✅ Plan actualizat!');
+      }
       setShowCreate(false);
       load();
     } catch (e) {
       showToast(e.response?.data?.error || '❌ Eroare', '❌');
     } finally { setLoading(false); }
+  };
+
+  const handleDeletePlan = (plan) => {
+    confirm(
+      `Șterge planul "${plan.name}"? Va dispărea definitiv. Atleții care îl au atribuit își vor păstra exercițiile deja făcute, dar nu vor mai vedea planul.`,
+      async () => {
+        try {
+          await coachDeleteWorkout(plan.id);
+          showToast('🗑️ Plan șters');
+          setSelected(null);
+          setDrawerData(null);
+          load();
+        } catch (e) {
+          showToast(e.response?.data?.error || '❌ Eroare la ștergere', '❌');
+        }
+      },
+    );
   };
 
   const openDrawer = async (w) => {
@@ -202,13 +227,13 @@ export default function CoachWorkoutsPage() {
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: compact ? 'repeat(3, minmax(0, 1fr))' : 'repeat(3, auto)', gap: 6, alignItems: 'center', width: compact ? '100%' : 'auto' }}>
                         <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 8, color: 'var(--c-ink3)', fontFamily: 'var(--fm)' }}>SETURI</div>
+                          <div style={{ fontSize: 8, color: 'var(--c-ink3)', fontFamily: 'var(--fm)' }}>{ex.muscle === 'Cardio' ? 'SESIUNI' : 'SETURI'}</div>
                           <input type="number" value={ex.sets} onChange={e => updateEx(ex.id, 'sets', e.target.value)} min={1} max={10}
                             style={{ width: compact ? '100%' : 44, padding: '4px 6px', borderRadius: 6, border: '1px solid var(--c-border)', textAlign: 'center', fontSize: 14, fontWeight: 800, fontFamily: 'var(--fd)', background: 'var(--c-bg)', boxSizing: 'border-box' }} />
                         </div>
                         <span style={{ color: 'var(--c-ink3)' }}>×</span>
                         <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 8, color: 'var(--c-ink3)', fontFamily: 'var(--fm)' }}>REPS</div>
+                          <div style={{ fontSize: 8, color: 'var(--c-ink3)', fontFamily: 'var(--fm)' }}>{ex.muscle === 'Cardio' ? 'MIN' : 'REPS'}</div>
                           <input type="number" value={ex.reps} onChange={e => updateEx(ex.id, 'reps', e.target.value)} min={1} max={100}
                             style={{ width: compact ? '100%' : 44, padding: '4px 6px', borderRadius: 6, border: '1px solid var(--c-border)', textAlign: 'center', fontSize: 14, fontWeight: 800, fontFamily: 'var(--fd)', background: 'var(--c-bg)', boxSizing: 'border-box' }} />
                         </div>
@@ -288,9 +313,16 @@ export default function CoachWorkoutsPage() {
                 ))}
               </div>
             ) : null}
-            <div style={{ marginTop: 20, display: 'flex', gap: 8 }}>
+            <div style={{ marginTop: 20, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               <button className="btn btn-black btn-sm" style={{ flex: 1 }} onClick={() => openEditor(selected)}>✏️ Editează</button>
               <button className="btn btn-outline btn-sm" style={{ flex: 1 }} onClick={() => { setShowAssign(true); setAssignTargets([]); }}>📤 Atribuie</button>
+              <button
+                className="btn btn-sm"
+                style={{ padding: '8px 14px', borderRadius: 8, border: '1.5px solid var(--c-coral)', background: 'transparent', color: 'var(--c-coral)', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}
+                onClick={() => handleDeletePlan(selected)}
+              >
+                🗑️ Șterge
+              </button>
             </div>
           </div>
         )}
