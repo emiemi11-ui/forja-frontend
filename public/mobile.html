@@ -258,10 +258,57 @@
   <p style="font-size:16px;opacity:0.45;margin-bottom:32px;max-width:500px;margin-left:auto;margin-right:auto;">Introdu email-ul tău și te notificăm când aplicația e disponibilă pe Google Play. Primii 100 primesc acces gratuit 3 luni.</p>
   <div style="display:flex;gap:12px;max-width:500px;margin:0 auto;flex-wrap:wrap;justify-content:center;">
     <input id="earlyEmail" type="email" placeholder="email@exemplu.ro" style="flex:1;min-width:240px;padding:16px 20px;border-radius:14px;border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:#fff;font-size:16px;font-family:var(--font-body);outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--lime)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
-    <button onclick="const em=document.getElementById('earlyEmail');if(em.value.includes('@')){this.textContent='✅ Înscris!';this.style.background='#15803d';em.disabled=true;}else{em.style.borderColor='var(--coral)';}" style="padding:16px 32px;border-radius:14px;border:none;background:var(--lime);color:#000;font-family:var(--font-display);font-size:18px;font-weight:800;cursor:pointer;letter-spacing:0.5px;white-space:nowrap;transition:transform 0.2s;" onmouseenter="this.style.transform='scale(1.03)'" onmouseleave="this.style.transform=''">VREAU ACCES EARLY →</button>
+    <button id="earlyBtn" onclick="forjaSubmitEarlyAccess(this)" style="padding:16px 32px;border-radius:14px;border:none;background:var(--lime);color:#000;font-family:var(--font-display);font-size:18px;font-weight:800;cursor:pointer;letter-spacing:0.5px;white-space:nowrap;transition:transform 0.2s;" onmouseenter="this.style.transform='scale(1.03)'" onmouseleave="this.style.transform=''">VREAU ACCES EARLY →</button>
   </div>
+  <div id="earlyFeedback" style="margin-top:12px;font-size:13px;display:none;"></div>
   <div style="margin-top:16px;font-size:12px;opacity:0.25;">Nu trimitem spam. Doar notificarea când e gata.</div>
 </section>
+
+<script>
+async function forjaSubmitEarlyAccess(btn) {
+  const em = document.getElementById('earlyEmail');
+  const fb = document.getElementById('earlyFeedback');
+  const value = (em.value || '').trim();
+  if (!value.includes('@')) {
+    em.style.borderColor = 'var(--coral)';
+    fb.textContent = '✕ Email invalid';
+    fb.style.color = 'var(--coral)';
+    fb.style.display = 'block';
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = '⏳ Se trimite...';
+  try {
+    const res = await fetch('/api/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: value, type: 'android' })
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      btn.textContent = 'VREAU ACCES EARLY →';
+      btn.disabled = false;
+      fb.textContent = errData?.error || (res.status === 403 ? '🔒 Waitlist închis momentan.' : '✕ Eroare server.');
+      fb.style.color = 'var(--coral)';
+      fb.style.display = 'block';
+      return;
+    }
+    btn.textContent = '✅ Înscris!';
+    btn.style.background = '#15803d';
+    btn.style.color = '#fff';
+    em.disabled = true;
+    fb.textContent = '🎉 Te notificăm când e gata.';
+    fb.style.color = 'var(--lime)';
+    fb.style.display = 'block';
+  } catch (e) {
+    btn.textContent = 'VREAU ACCES EARLY →';
+    btn.disabled = false;
+    fb.textContent = '✕ Verifică conexiunea.';
+    fb.style.color = 'var(--coral)';
+    fb.style.display = 'block';
+  }
+}
+</script>
 
 </body>
 </html>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getAdminUsers, deleteUser, getPasswordResetRequests, generateTempPassword } from '../../../shared/api/index.js';
+import { getAdminUsers, deleteUser } from '../../../shared/api/index.js';
 import { AdminPanel, EmptyState, StatusPill } from '../components/AdminUi.jsx';
 import { useConfirm } from '../../../shared/ui/ConfirmModal.jsx';
 
@@ -22,9 +22,6 @@ export default function AdminUsersPage() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
-  const [resetRequests, setResetRequests] = useState([]);
-  const [generatedPassword, setGeneratedPassword] = useState(null); // { email, tempPassword }
-  const [generatingFor, setGeneratingFor] = useState('');
   const confirm = useConfirm();
 
   useEffect(() => {
@@ -43,35 +40,6 @@ export default function AdminUsersPage() {
       mounted = false;
     };
   }, [query, role, refreshKey]);
-
-  // Load password reset requests
-  useEffect(() => {
-    let mounted = true;
-    getPasswordResetRequests()
-      .then(({ data: rows }) => { if (mounted) setResetRequests(rows || []); })
-      .catch(() => { if (mounted) setResetRequests([]); });
-    return () => { mounted = false; };
-  }, [refreshKey]);
-
-  const handleGenerateTempPassword = async (userId, userName) => {
-    confirm(`Generezi o parolă temporară pentru "${userName}"? Parola va fi afișată o singură dată.`, async () => {
-      setGeneratingFor(userId);
-      try {
-        const { data } = await generateTempPassword(userId);
-        setGeneratedPassword({
-          email: data.user?.email,
-          name: data.user?.name,
-          tempPassword: data.tempPassword,
-        });
-        setRefreshKey((c) => c + 1);
-      } catch (err) {
-        alert(err.response?.data?.error || 'Eroare la generare.');
-      } finally {
-        setGeneratingFor('');
-      }
-    });
-  };
-
 
   const grouped = useMemo(() => data.users.reduce((acc, user) => {
     acc[user.role] = (acc[user.role] || 0) + 1;
@@ -120,100 +88,6 @@ export default function AdminUsersPage() {
           <StatusPill tone="alert">ADMIN: {grouped.ADMIN || 0}</StatusPill>
         </div>
       </AdminPanel>
-
-      {/* === PASSWORD RESET REQUESTS === */}
-      {resetRequests.length > 0 && (
-        <AdminPanel title={`🔑 Cereri resetare parolă (${resetRequests.filter(r => r.status === 'PENDING').length} pending)`}>
-          <div className="admin-table-wrap">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Utilizator</th>
-                  <th>Cerută</th>
-                  <th>Status</th>
-                  <th>Acțiune</th>
-                </tr>
-              </thead>
-              <tbody>
-                {resetRequests.slice(0, 20).map((req) => (
-                  <tr key={req.id}>
-                    <td>
-                      <strong>{req.user?.name || '—'}</strong>
-                      <div className="admin-caption">{req.user?.email || 'utilizator șters'}</div>
-                    </td>
-                    <td>{formatDate(req.requestedAt)}</td>
-                    <td>
-                      {req.status === 'PENDING' ? (
-                        <StatusPill tone="alert">PENDING</StatusPill>
-                      ) : (
-                        <StatusPill tone="success">REZOLVAT</StatusPill>
-                      )}
-                    </td>
-                    <td>
-                      {req.status === 'PENDING' && req.userId && (
-                        <button
-                          style={{ fontSize: 11, padding: '6px 12px', borderRadius: 6, border: '1px solid var(--c-blue)', background: 'rgba(26,82,255,0.1)', cursor: 'pointer', fontWeight: 700, color: 'var(--c-blue)' }}
-                          onClick={() => handleGenerateTempPassword(req.userId, req.user?.name || req.user?.email)}
-                          disabled={generatingFor === req.userId}
-                        >
-                          {generatingFor === req.userId ? '...' : '🔑 Generează parolă'}
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </AdminPanel>
-      )}
-
-      {/* === TEMP PASSWORD MODAL === */}
-      {generatedPassword && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 9999,
-          background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
-        }}
-          onClick={() => setGeneratedPassword(null)}>
-          <div style={{
-            background: 'var(--c-surface)', borderRadius: 16, padding: 32, maxWidth: 480, width: '100%',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.4)', border: '2px solid var(--c-lime)',
-          }}
-            onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ fontFamily: 'var(--fd)', fontSize: 24, fontWeight: 900, marginTop: 0, marginBottom: 12 }}>
-              🔑 Parolă temporară generată
-            </h2>
-            <p style={{ color: 'var(--c-ink3)', fontSize: 13, marginBottom: 16 }}>
-              Trimite parola manual lui <strong>{generatedPassword.name}</strong> ({generatedPassword.email}).
-              <br />Userul va putea face login cu aceasta și o poate schimba după aceea.
-            </p>
-            <div style={{
-              background: 'var(--c-bg)', borderRadius: 12, padding: 20, marginBottom: 16,
-              fontFamily: 'monospace', fontSize: 22, fontWeight: 700, textAlign: 'center',
-              border: '1.5px dashed var(--c-lime)', letterSpacing: 2, color: 'var(--c-ink)',
-            }}>
-              {generatedPassword.tempPassword}
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button
-                style={{ flex: 1, padding: '12px', borderRadius: 10, border: 'none', background: 'var(--c-lime)', color: '#000', fontWeight: 800, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}
-                onClick={() => {
-                  navigator.clipboard?.writeText(generatedPassword.tempPassword);
-                  alert('Parola copiată în clipboard');
-                }}
-              >
-                📋 Copiază parola
-              </button>
-              <button
-                style={{ flex: 1, padding: '12px', borderRadius: 10, border: '1.5px solid var(--c-border)', background: 'transparent', color: 'var(--c-ink)', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}
-                onClick={() => setGeneratedPassword(null)}
-              >
-                Închide
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <AdminPanel title="Utilizatori">
         {error ? <EmptyState title="Eroare" text={error} /> : data.users.length ? (

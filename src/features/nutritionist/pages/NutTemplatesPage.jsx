@@ -328,21 +328,19 @@ export default function NutTemplatesPage() {
     }
   };
 
-  const handleDeleteTemplate = async (template) => {
-    const ok = await confirm({
-      title: 'Șterge template-ul?',
-      message: `Template-ul "${template.name || 'acesta'}" va fi șters definitiv. Clienții care îl au asignat își vor păstra mesele deja înregistrate, dar nu vor mai vedea planul ca activ.`,
-      confirmText: 'Șterge',
-      tone: 'danger',
-    });
-    if (!ok) return;
-    try {
-      await nutDeleteTemplate(template.id);
-      showToast('🗑️ Template șters');
-      await load();
-    } catch (error) {
-      showToast(error.response?.data?.error || '❌ Eroare la ștergere', '❌');
-    }
+  const handleDeleteTemplate = (template) => {
+    confirm(
+      `Șterge template-ul "${template.name || 'acesta'}"? Va dispărea definitiv. Clienții care îl au asignat își vor păstra mesele deja înregistrate, dar nu vor mai vedea planul ca activ.`,
+      async () => {
+        try {
+          await nutDeleteTemplate(template.id);
+          showToast('🗑️ Template șters');
+          await load();
+        } catch (error) {
+          showToast(error.response?.data?.error || '❌ Eroare la ștergere', '❌');
+        }
+      },
+    );
   };
 
   const handleApply = async () => {

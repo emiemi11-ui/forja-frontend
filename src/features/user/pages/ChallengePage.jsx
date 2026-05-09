@@ -137,21 +137,19 @@ export default function ChallengePage() {
     }
   };
 
-  const handleDelete = async (challenge) => {
-    const ok = await confirm({
-      title: 'Șterge challenge?',
-      message: `"${challenge.title}" va fi șters definitiv pentru toți participanții.`,
-      confirmText: 'Șterge',
-      tone: 'danger',
-    });
-    if (!ok) return;
-    try {
-      await deleteChallenge(challenge.id);
-      showToast('🗑️ Challenge șters');
-      load();
-    } catch (error) {
-      showToast(error.response?.data?.error || '❌ Eroare', '❌');
-    }
+  const handleDelete = (challenge) => {
+    confirm(
+      `Șterge challenge "${challenge.title}"? Va fi șters definitiv pentru toți participanții.`,
+      async () => {
+        try {
+          await deleteChallenge(challenge.id);
+          showToast('🗑️ Challenge șters');
+          load();
+        } catch (error) {
+          showToast(error.response?.data?.error || '❌ Eroare', '❌');
+        }
+      },
+    );
   };
 
   const handleLeaderboard = async (challenge) => {

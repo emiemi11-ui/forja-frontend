@@ -18,6 +18,8 @@ import { Save, Plus, Heart, Trash2, Image } from 'lucide-react';
 import { AnimatedPage } from '../../../shared/ui/animations/index.jsx';
 import { useConfirm } from '../../../shared/ui/ConfirmModal.jsx';
 import ImageUploadButton from '../../../shared/ui/ImageUploadButton.jsx';
+import { changePassword } from '../../../shared/api/auth.api.js';
+import Modal, { ModalField, ModalInput, ModalActions } from '../../../shared/ui/Modal.jsx';
 
 const DEFAULT_COVERS = [
   '/img/ext/u-a7ebdd7ec1.jpg',
@@ -45,6 +47,10 @@ export default function ProProfilePage() {
   const [teamLoading, setTeamLoading] = useState(false);
 
   const [tab, setTab] = useState(user?.role === 'USER' ? 'teams' : 'profile');
+
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [pwdForm, setPwdForm] = useState({ current: '', next: '', confirm: '' });
+  const [pwdSaving, setPwdSaving] = useState(false);
 
   const [profile, setProfile] = useState(null);
   const [bio, setBio] = useState('');
@@ -181,6 +187,32 @@ export default function ProProfilePage() {
       showToast(error.response?.data?.error || '❌ Nu am putut salva profilul.', '❌');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    if (!pwdForm.current || !pwdForm.next || !pwdForm.confirm) {
+      showToast('Completează toate câmpurile', '⚠️');
+      return;
+    }
+    if (pwdForm.next.length < 6) {
+      showToast('Parola nouă: minim 6 caractere', '⚠️');
+      return;
+    }
+    if (pwdForm.next !== pwdForm.confirm) {
+      showToast('Parolele noi nu coincid', '⚠️');
+      return;
+    }
+    setPwdSaving(true);
+    try {
+      await changePassword(pwdForm.current, pwdForm.next);
+      showToast('✅ Parola a fost schimbată!');
+      setShowPasswordModal(false);
+      setPwdForm({ current: '', next: '', confirm: '' });
+    } catch (error) {
+      showToast(error.response?.data?.error || '❌ Eroare la schimbarea parolei', '❌');
+    } finally {
+      setPwdSaving(false);
     }
   };
 
@@ -428,6 +460,21 @@ export default function ProProfilePage() {
             </div>
           </div>
 
+          <div className="card" style={{ padding: 16 }}>
+            <div style={{ fontFamily: 'var(--fm)', fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--c-ink3)', marginBottom: 8 }}>
+              🔐 CONT & SECURITATE
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>Parola contului</div>
+                <div style={{ fontSize: 12, color: 'var(--c-ink3)', marginTop: 2 }}>Schimb-o periodic pentru securitate.</div>
+              </div>
+              <button className="btn btn-outline btn-sm" onClick={() => setShowPasswordModal(true)}>
+                🔐 Schimbă parola
+              </button>
+            </div>
+          </div>
+
           <button className="btn btn-lime" style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: 16 }} onClick={handleSaveProfile} disabled={saving}>
             {saving ? 'Se salvează...' : <><Save size={16} /> SALVEAZĂ PROFILUL</>}
           </button>
@@ -665,6 +712,46 @@ export default function ProProfilePage() {
           </div>
         </div>
       )}
+
+      {/* Password Modal */}
+      <Modal
+        open={showPasswordModal}
+        onClose={() => { setShowPasswordModal(false); setPwdForm({ current: '', next: '', confirm: '' }); }}
+        title="🔐 Schimbă parola"
+      >
+        <ModalField label="Parola actuală">
+          <ModalInput
+            type="password"
+            placeholder="Parola pe care o folosești acum"
+            value={pwdForm.current}
+            onChange={(e) => setPwdForm((prev) => ({ ...prev, current: e.target.value }))}
+            autoFocus
+          />
+        </ModalField>
+        <ModalField label="Parola nouă (minim 6 caractere)">
+          <ModalInput
+            type="password"
+            placeholder="Noua parolă"
+            value={pwdForm.next}
+            onChange={(e) => setPwdForm((prev) => ({ ...prev, next: e.target.value }))}
+          />
+        </ModalField>
+        <ModalField label="Confirmă parola nouă">
+          <ModalInput
+            type="password"
+            placeholder="Repetă noua parolă"
+            value={pwdForm.confirm}
+            onChange={(e) => setPwdForm((prev) => ({ ...prev, confirm: e.target.value }))}
+            onKeyDown={(e) => e.key === 'Enter' && handlePasswordChange()}
+          />
+        </ModalField>
+        <ModalActions>
+          <button className="btn btn-outline btn-sm" onClick={() => { setShowPasswordModal(false); setPwdForm({ current: '', next: '', confirm: '' }); }}>Anulează</button>
+          <button className="btn btn-black" onClick={handlePasswordChange} disabled={pwdSaving}>
+            {pwdSaving ? '⏳ Salvez...' : '🔐 Schimbă parola'}
+          </button>
+        </ModalActions>
+      </Modal>
     </AnimatedPage>
   );
 }
