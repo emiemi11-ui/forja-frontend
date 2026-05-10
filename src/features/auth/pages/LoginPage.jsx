@@ -55,9 +55,9 @@ const DEMO_ROLES_RAW = [
   },
 ];
 
-const DEMO_ROLES = DEMO_ROLES_RAW;
+const DEMO_ROLES = DEMO_ROLES_RAW.filter((role) => role.backendRole !== 'ADMIN');
 const SHOW_DEMO = DEMO_ROLES.length > 0;
-const FALLBACK_DEMO_ROLE = DEMO_ROLES_RAW[0];
+const FALLBACK_DEMO_ROLE = DEMO_ROLES[0];
 
 const PLAN_TILES = [
   {

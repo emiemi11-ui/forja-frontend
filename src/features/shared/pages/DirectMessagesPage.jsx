@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
-import { getConversations, getConversation, sendDirectMessage, startConversation } from '../../../shared/api/index.js';
+import { getConversations, getConversation, sendDirectMessage, startConversation, markConversationRead } from '../../../shared/api/index.js';
 import { useAuth } from '../../auth/context/AuthContext.jsx';
 import { getStoredToken } from '../../auth/model/authStorage.js';
 import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
@@ -77,6 +77,11 @@ export default function DirectMessagesPage() {
             if (prev.some((m) => m.id === message.id)) return prev; // dedup
             return [...prev, message];
           });
+          // Daca mesajul e de la celalalt user si convo e deschisa, marcheaza imediat ca read
+          // (asta declanseaza messages:seen catre sender pt indicator real-time)
+          if (!message.isMe) {
+            markConversationRead(conversationId).catch(() => {});
+          }
         }
         return curConvo;
       });

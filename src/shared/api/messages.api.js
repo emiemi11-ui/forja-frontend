@@ -6,3 +6,4 @@ export const startConversation = (targetUserId) => api.post(ENDPOINTS.messages.s
 export const getConversation = (id) => api.get(ENDPOINTS.messages.detail(id));
 export const sendDirectMessage = (id, message) => api.post(ENDPOINTS.messages.send(id), { message });
 export const getUnreadCount = () => api.get(ENDPOINTS.messages.unreadCount);
+export const markConversationRead = (id) => api.post(`/messages/${id}/mark-read`);

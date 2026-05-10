@@ -157,6 +157,19 @@
   margin-top: 14px;
 }
 
+@media (max-width: 768px) {
+  .admin-kpis-inline { gap: 6px; }
+  .admin-pill { font-size: 9px; padding: 3px 8px; letter-spacing: 0.5px; }
+  .admin-table th, .admin-table td { padding: 10px 6px; font-size: 12px; }
+  .admin-table { min-width: 480px; }
+  .adm-page { padding: 0 6px !important; }
+}
+
+@media (max-width: 480px) {
+  .admin-pill { font-size: 8.5px; padding: 3px 6px; }
+  .admin-kpis-inline .admin-pill { white-space: nowrap; }
+}
+
 .admin-btn,
 .admin-switch {
   border: 1px solid var(--c-border);

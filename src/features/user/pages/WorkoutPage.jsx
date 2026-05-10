@@ -116,9 +116,11 @@ export default function Workout() {
     // ex.sets este string formatat "4×8" — folosim ex.setsTotal (numarul brut)
     const rawSets = Number(ex.setsTotal) || Number(ex.sets) || 3;
     const rawReps = Number(ex.reps) || 10;
-    // Captureaza pozitia butonului ca sa pozitionam modal-ul ca popover langa el
+    // Pe mobil: forteaza modal centrat (anchor positioning iese din ecran).
+    // Pe desktop: foloseste anchor pentru popover langa buton.
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 600;
     let anchor = null;
-    if (event?.currentTarget?.getBoundingClientRect) {
+    if (!isMobile && event?.currentTarget?.getBoundingClientRect) {
       const rect = event.currentTarget.getBoundingClientRect();
       anchor = { top: rect.top + rect.height + 8, left: Math.max(10, rect.right - 380), bottom: rect.top };
     }
@@ -493,7 +495,9 @@ export default function Workout() {
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: 'var(--c-surface, #fff)', borderRadius: 18, padding: 22, maxWidth: 380, width: editingEx.anchor ? 380 : '100%',
+              background: 'var(--c-surface, #fff)', borderRadius: 18, padding: 22,
+              maxWidth: 380, width: editingEx.anchor ? 380 : 'min(95vw, 380px)',
+              maxHeight: '90vh', overflow: 'auto',
               boxShadow: '0 20px 60px rgba(0,0,0,0.4)', border: '2px solid var(--c-lime)',
               ...(editingEx.anchor ? {
                 position: 'absolute',

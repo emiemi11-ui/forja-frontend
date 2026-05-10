@@ -1214,7 +1214,7 @@ body::after {
   .btn-nav-ghost{padding:6px 10px;font-size:11px}
   .btn-nav-cta{padding:6px 14px;font-size:11px}
 
-  .hero-h1{font-size:clamp(28px,8vw,48px) !important;letter-spacing:-0.5px !important}
+  .hero-h1{font-size:clamp(26px,7.5vw,44px) !important;letter-spacing:-0.5px !important;line-height:1.05 !important;word-break:break-word !important}
   .hero-sub{font-size:13px !important;line-height:1.6 !important}
   #hero{padding:80px 14px 40px !important}
 
@@ -1414,7 +1414,7 @@ body::after {
 @keyframes planRotate { to { transform: rotate(360deg); } }
 
 /* MODALE ACTIVE */
-.site-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:1200;padding:24px}
+.site-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:10001;padding:24px}
 .site-modal.open{display:flex}
 .site-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(10px)}
 .site-modal-card{position:relative;z-index:1;width:min(92vw,620px);max-height:min(88vh,820px);overflow:auto;background:#121211;border:1px solid rgba(255,255,255,.08);border-radius:28px;box-shadow:0 30px 100px rgba(0,0,0,.45);padding:26px}
