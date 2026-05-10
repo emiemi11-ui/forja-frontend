@@ -28,7 +28,7 @@ export default function ProfilePage() {
     const [u, g, pros] = await Promise.all([getUser(), getGoals(), getMyProfessionals().catch(() => ({ data: { coaches: [], nutritionists: [] } }))]);
     setUserData(u.data);
     const avatarThemeMatch = /[?&]background=([^&]+)/.exec(u.data.avatarUrl || '');
-    setUserForm({ name: u.data.name, weight: u.data.weight || '', avatar: u.data.avatar, avatarUrl: u.data.avatarUrl || '', avatarTheme: avatarThemeMatch ? decodeURIComponent(avatarThemeMatch[1]) : '' });
+    setUserForm({ name: u.data.name, email: u.data.email || '', weight: u.data.weight || '', height: u.data.height || '', goal: u.data.goal || '', avatar: u.data.avatar, avatarUrl: u.data.avatarUrl || '', avatarTheme: avatarThemeMatch ? decodeURIComponent(avatarThemeMatch[1]) : '' });
     setGoals(g.data || {});
     setProfessionals(pros.data || { coaches: [], nutritionists: [] });
   };
@@ -82,13 +82,25 @@ export default function ProfilePage() {
   };
 
   const handleSaveUser = async () => {
-    const patch = { name: userForm.name, weight: parseFloat(userForm.weight) || undefined, avatar: userForm.avatar, avatarUrl: userForm.avatarUrl || undefined };
-    await patchUser(patch);
-    // Update user in auth context + localStorage
-    updateUser({ name: patch.name, weight: patch.weight, avatarUrl: patch.avatarUrl });
-    showToast('✅ Profil actualizat!');
-    setEditingUser(false);
-    load();
+    try {
+      const patch = {
+        name: userForm.name,
+        email: userForm.email,
+        weight: parseFloat(userForm.weight) || undefined,
+        height: parseFloat(userForm.height) || undefined,
+        goal: userForm.goal || undefined,
+        avatar: userForm.avatar,
+        avatarUrl: userForm.avatarUrl || undefined,
+      };
+      const { data: updated } = await patchUser(patch);
+      // Update user in auth context + localStorage
+      updateUser({ name: updated.name, email: updated.email, weight: updated.weight, height: updated.height, goal: updated.goal, avatarUrl: updated.avatarUrl });
+      showToast('✅ Profil actualizat!');
+      setEditingUser(false);
+      load();
+    } catch (e) {
+      showToast(e.response?.data?.error || '❌ Eroare la salvare', '❌');
+    }
   };
 
   const handleLogSteps = async () => {
@@ -274,12 +286,38 @@ export default function ProfilePage() {
                   })}
                 </div>
                 <input
-                  type="number"
-                  value={userForm.weight}
-                  onChange={e => setUserForm(f => ({ ...f, weight: e.target.value }))}
-                  placeholder="Greutate (kg)"
+                  type="email"
+                  value={userForm.email}
+                  onChange={e => setUserForm(f => ({ ...f, email: e.target.value }))}
+                  placeholder="Email"
                   style={{ width: '100%', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '8px 12px', color: '#fff', fontSize: 13, marginBottom: 10, boxSizing: 'border-box', fontFamily: 'var(--fm)' }}
                 />
+                <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+                  <input
+                    type="number"
+                    value={userForm.weight}
+                    onChange={e => setUserForm(f => ({ ...f, weight: e.target.value }))}
+                    placeholder="Greutate (kg)"
+                    style={{ flex: 1, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '8px 12px', color: '#fff', fontSize: 13, boxSizing: 'border-box', fontFamily: 'var(--fm)' }}
+                  />
+                  <input
+                    type="number"
+                    value={userForm.height}
+                    onChange={e => setUserForm(f => ({ ...f, height: e.target.value }))}
+                    placeholder="Înălțime (cm)"
+                    style={{ flex: 1, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '8px 12px', color: '#fff', fontSize: 13, boxSizing: 'border-box', fontFamily: 'var(--fm)' }}
+                  />
+                </div>
+                <select
+                  value={userForm.goal}
+                  onChange={e => setUserForm(f => ({ ...f, goal: e.target.value }))}
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '8px 12px', color: '#fff', fontSize: 13, marginBottom: 10, boxSizing: 'border-box', fontFamily: 'var(--fm)' }}
+                >
+                  <option value="" style={{ color: '#000' }}>— Obiectiv principal —</option>
+                  {['Forță', 'Masă musculară', 'Slăbire', 'Rezistență', 'Sănătate generală'].map(g => (
+                    <option key={g} value={g} style={{ color: '#000' }}>{g}</option>
+                  ))}
+                </select>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button className="btn btn-outline btn-sm" style={{ flex: 1 }} onClick={() => setEditingUser(false)}>Anulează</button>
                   <button className="btn btn-black btn-sm" style={{ flex: 1 }} onClick={handleSaveUser}>✅ Salvează</button>

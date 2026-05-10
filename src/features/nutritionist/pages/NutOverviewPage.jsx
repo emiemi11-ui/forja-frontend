@@ -32,7 +32,7 @@ export default function NutOverviewPage() {
   if (!overview) return (
     <AnimatedPage>
       <div className="forja-skeleton" style={{ height: 150, borderRadius: 20, marginBottom: 24 }} />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 24 }}>
         {[1,2,3].map(i => <div key={i} className="forja-skeleton" style={{ height: 100, borderRadius: 16 }} />)}
       </div>
     </AnimatedPage>
@@ -81,7 +81,7 @@ export default function NutOverviewPage() {
         </div>
       </HeroSection>
 
-      <StaggerGrid style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
+      <StaggerGrid style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 24 }}>
         {[
           { icon: <Users size={20} />, val: overview.total_clients, label: 'Clienti', color: 'var(--c-lime-d)', onClick: () => navigate('/nutritionist/clients') },
           { icon: <FileText size={20} />, val: overview.plans_created, label: 'Template-uri', color: 'var(--c-blue)', onClick: () => navigate('/nutritionist/templates') },
@@ -100,7 +100,7 @@ export default function NutOverviewPage() {
         ))}
       </StaggerGrid>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginBottom: 20 }}>
         <ScrollReveal direction="left">
           <div className="card card-glow" style={{ padding: 20 }}>
             <div style={{ fontFamily: 'var(--fm)', fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--c-ink3)', marginBottom: 16 }}>Compliance clienti</div>
@@ -141,7 +141,7 @@ export default function NutOverviewPage() {
         </ScrollReveal>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
         <ScrollReveal>
           <div className="card card-glow card-inner-glow" style={{ padding: 20 }}>
             <div style={{ fontFamily: 'var(--fm)', fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--c-ink3)', marginBottom: 14 }}>Clientii tai</div>

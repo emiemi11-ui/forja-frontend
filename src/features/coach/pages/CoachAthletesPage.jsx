@@ -188,7 +188,7 @@ export default function CoachAthletesPage() {
               )}
             </div>
             {/* Stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 10, marginBottom: 20 }}>
               {[
                 { lbl: 'Greutate', val: selected.weight + ' kg', color: 'var(--c-ink)' },
               ].map(s => (

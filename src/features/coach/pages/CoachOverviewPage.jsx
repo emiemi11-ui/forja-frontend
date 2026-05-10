@@ -73,7 +73,7 @@ export default function CoachOverviewPage() {
       </HeroSection>
 
       {/* KPI CARDS */}
-      <StaggerGrid style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
+      <StaggerGrid style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
         {[
           { icon: <Users size={20} />, val: accepted.length, label: 'Atleti activi', color: 'var(--c-lime-d)', extra: pending.length > 0 ? `+${pending.length} pending` : null, onClick: () => navigate('/coach/athletes') },
           { icon: <Dumbbell size={20} />, val: workouts.length, label: 'Planuri create', color: 'var(--c-blue)', onClick: () => navigate('/coach/workouts') },
@@ -95,7 +95,7 @@ export default function CoachOverviewPage() {
         ))}
       </StaggerGrid>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginBottom: 20 }}>
         {/* COMPLIANCE CHART */}
         <ScrollReveal direction="left">
           <div className="card card-glow" style={{ padding: 20 }}>
@@ -137,7 +137,7 @@ export default function CoachOverviewPage() {
         </ScrollReveal>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
         {/* Recent athlete activity */}
         <ScrollReveal>
           <div className="card card-glow card-inner-glow" style={{ padding: 20 }}>

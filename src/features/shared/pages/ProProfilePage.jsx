@@ -53,6 +53,9 @@ export default function ProProfilePage() {
   const [pwdSaving, setPwdSaving] = useState(false);
 
   const [profile, setProfile] = useState(null);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [specialization, setSpecialization] = useState('');
   const [bio, setBio] = useState('');
   const [benefits, setBenefits] = useState([]);
   const [newBenefit, setNewBenefit] = useState('');
@@ -126,6 +129,9 @@ export default function ProProfilePage() {
       ]);
 
       setProfile(profileData);
+      setName(profileData?.name || '');
+      setEmail(profileData?.email || '');
+      setSpecialization(profileData?.specialization || '');
       setBio(profileData?.bio || '');
       setBenefits(parseBenefits(profileData?.certifications));
       setCoverImg(profileData?.avatarUrl || '');
@@ -176,6 +182,9 @@ export default function ProProfilePage() {
     setSaving(true);
     try {
       const payload = {
+        name,
+        email,
+        specialization,
         bio,
         avatarUrl: coverImg || null,
         certifications: benefits.join('\n'),
@@ -435,6 +444,27 @@ export default function ProProfilePage() {
                 ))}
               </div>
             )}
+          </div>
+
+          <div className="card" style={{ padding: 16 }}>
+            <div style={{ fontFamily: 'var(--fm)', fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--c-ink3)', marginBottom: 12 }}>
+              👤 INFORMAȚII CONT
+            </div>
+            <label style={{ fontSize: 11, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontWeight: 700, fontFamily: 'var(--fm)' }}>Nume complet</label>
+            <input value={name} onChange={(e) => setName(e.target.value)}
+              style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid var(--c-border)', fontSize: 14, fontFamily: 'var(--fb)', background: 'var(--c-bg)', boxSizing: 'border-box', marginTop: 4, marginBottom: 12 }} />
+            <label style={{ fontSize: 11, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontWeight: 700, fontFamily: 'var(--fm)' }}>Email</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+              style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid var(--c-border)', fontSize: 14, fontFamily: 'var(--fb)', background: 'var(--c-bg)', boxSizing: 'border-box', marginTop: 4, marginBottom: 12 }} />
+            <label style={{ fontSize: 11, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontWeight: 700, fontFamily: 'var(--fm)' }}>Specializare</label>
+            <select value={specialization} onChange={(e) => setSpecialization(e.target.value)}
+              style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid var(--c-border)', fontSize: 14, fontFamily: 'var(--fb)', background: 'var(--c-bg)', boxSizing: 'border-box', marginTop: 4 }}>
+              <option value="">— Alege —</option>
+              {(user?.role === 'NUTRITIONIST'
+                ? ['Sport', 'Slăbire', 'Masă musculară', 'Dietetică clinică', 'Vegan/Vegetarian']
+                : ['Powerlifting', 'Bodybuilding', 'CrossFit', 'Funcțional', 'Cardio', 'General']
+              ).map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
           </div>
 
           <div className="card" style={{ padding: 16 }}>

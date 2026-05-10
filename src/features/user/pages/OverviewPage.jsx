@@ -82,7 +82,7 @@ function KpiCards({ data, onWaterClick, onNavNutrition, onNavSleep }) {
   ];
 
   return (
-    <StaggerGrid className="ov-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 20 }}>
+    <StaggerGrid className="ov-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 20 }}>
       {kpis.map((k, i) => (
         <TiltCard key={i} intensity={4}>
           <div className="kpi card-inner-glow" style={{ cursor: k.onClick ? 'pointer' : 'default', borderTop: `3px solid ${k.borderColor}` }} onClick={k.onClick}>
@@ -191,7 +191,7 @@ export default function Overview() {
     <AnimatedPage>
       <div className="forja-skeleton" style={{ height: 160, borderRadius: 20, marginBottom: 24 }} />
       <SkeletonGrid count={4} columns={4} />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginTop: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14, marginTop: 20 }}>
         <div className="forja-skeleton" style={{ height: 300, borderRadius: 16 }} />
         <div className="forja-skeleton" style={{ height: 300, borderRadius: 16 }} />
       </div>
@@ -212,7 +212,7 @@ export default function Overview() {
         onNavNutrition={() => navigate('/app/nutrition')}
         onNavSleep={() => navigate('/app/sleep')} />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 18, alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14, marginBottom: 18, alignItems: 'start' }}>
         <ScrollReveal direction="left">
           <div className="card card-glow card-inner-glow">
             <div className="card-hd">

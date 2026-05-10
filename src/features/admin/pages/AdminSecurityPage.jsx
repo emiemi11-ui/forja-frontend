@@ -23,7 +23,7 @@ export default function AdminSecurityPage() {
       <h2 style={{ fontFamily: 'var(--fd)', fontSize: 28, fontWeight: 900, marginBottom: 4 }}>Audit Log</h2>
       <p style={{ fontSize: 13, color: 'var(--c-ink3)', marginBottom: 20 }}>Toate acțiunile de pe platformă</p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 20 }}>
         {[
           { label: 'Total events', val: audit.length, color: 'var(--c-ink)' },
           { label: 'Auth', val: audit.filter((event) => event.type === 'auth').length, color: '#15803D' },

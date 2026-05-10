@@ -83,11 +83,11 @@ export default function MyPlansPage() {
     <AnimatedPage>
       <div style={{ marginBottom: 20 }}>
         <div style={{ fontFamily: 'var(--fm)', fontSize: 10, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--c-lime-d)', fontWeight: 700 }}>planuri asignate</div>
-        <h1 style={{ fontFamily: 'var(--fd)', fontSize: 32, fontWeight: 900, letterSpacing: .5, color: 'var(--c-ink)', lineHeight: 1, margin: '4px 0 0' }}>PLANURILE MELE</h1>
+        <h1 style={{ fontFamily: 'var(--fd)', fontSize: 'clamp(24px, 5vw, 32px)', fontWeight: 900, letterSpacing: .5, color: 'var(--c-ink)', lineHeight: 1, margin: '4px 0 0' }}>PLANURILE MELE</h1>
         <p style={{ fontFamily: 'var(--fb)', fontSize: 13, color: 'var(--c-ink3)', marginTop: 4 }}>Planuri reale venite din contul tău, de la coach-ul și nutriționistul tău.</p>
       </div>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
         <button className={`chip${tab === 'workout' ? ' on' : ''}`} onClick={() => setTab('workout')} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <Dumbbell size={14} /> Antrenament ({workoutPlans.length})
         </button>
