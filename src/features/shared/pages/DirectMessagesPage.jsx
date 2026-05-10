@@ -7,6 +7,21 @@ import { getStoredToken } from '../../auth/model/authStorage.js';
 import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
 import { AnimatedPage } from '../../../shared/ui/animations/index.jsx';
 
+function formatDateLabel(date) {
+  if (!date || !(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+  const today = new Date();
+  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+  const isSameDay = (a, b) => a.getDate() === b.getDate() && a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
+  if (isSameDay(date, today)) return 'Astăzi';
+  if (isSameDay(date, yesterday)) return 'Ieri';
+  // Daca e in saptamana asta, ziua saptamanii
+  const daysDiff = Math.round((today.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+  if (daysDiff > 0 && daysDiff < 7) {
+    return date.toLocaleDateString('ro-RO', { weekday: 'long' });
+  }
+  return date.toLocaleDateString('ro-RO', { day: '2-digit', month: 'long', year: 'numeric' });
+}
+
 export default function DirectMessagesPage() {
   const [conversations, setConversations] = useState([]);
   const [activeConvo, setActiveConvo] = useState(null);
@@ -67,8 +82,26 @@ export default function DirectMessagesPage() {
       });
       loadConversations();
     });
+    // Cand celalalt user vede mesajele mele -> updatez seen=true pe toate
+    socket.on('messages:seen', ({ conversationId }) => {
+      setActiveConvo((curConvo) => {
+        if (curConvo?.id === conversationId) {
+          setMessages((prev) => prev.map((m) => m.isMe ? { ...m, seen: true } : m));
+        }
+        return curConvo;
+      });
+    });
+    // Presence updates - cineva s-a conectat / deconectat
+    socket.on('presence:online', ({ userId }) => {
+      setActiveConvo((cur) => cur && cur.other?.id === userId ? { ...cur, other: { ...cur.other, isOnline: true } } : cur);
+      setConversations((prev) => prev.map((c) => c.other?.id === userId ? { ...c, other: { ...c.other, isOnline: true } } : c));
+    });
+    socket.on('presence:offline', ({ userId }) => {
+      setActiveConvo((cur) => cur && cur.other?.id === userId ? { ...cur, other: { ...cur.other, isOnline: false } } : cur);
+      setConversations((prev) => prev.map((c) => c.other?.id === userId ? { ...c, other: { ...c.other, isOnline: false } } : c));
+    });
     return () => { socket.disconnect(); socketRef.current = null; };
-  }, [loadConversations]); // <- NU mai depinde de activeConvo.id
+  }, [loadConversations]);
 
   const openConvo = async (convoId) => {
     try {
@@ -188,20 +221,45 @@ export default function DirectMessagesPage() {
 
             {/* Messages */}
             <div style={{ flex: 1, overflow: 'auto', padding: '16px 20px' }}>
-              {messages.map(m => (
-                <div key={m.id} style={{ display: 'flex', justifyContent: m.isMe ? 'flex-end' : 'flex-start', marginBottom: 8 }}>
-                  <div style={{
-                    maxWidth: '70%', padding: '10px 14px', borderRadius: 14,
-                    background: m.isMe ? 'var(--c-ink)' : 'var(--c-surface)',
-                    color: m.isMe ? '#fff' : 'var(--c-ink)',
-                    border: m.isMe ? 'none' : '1px solid var(--c-border)',
-                    fontSize: 14, lineHeight: 1.5,
-                  }}>
-                    {m.message}
-                    <div style={{ fontSize: 10, color: m.isMe ? 'rgba(255,255,255,0.4)' : 'var(--c-ink3)', marginTop: 4, textAlign: 'right' }}>{m.time}</div>
-                  </div>
-                </div>
-              ))}
+              {(() => {
+                let lastDateLabel = null;
+                return messages.map((m) => {
+                  const dateObj = m.createdAt ? new Date(m.createdAt) : null;
+                  const dateLabel = dateObj ? formatDateLabel(dateObj) : null;
+                  const showSeparator = dateLabel && dateLabel !== lastDateLabel;
+                  if (showSeparator) lastDateLabel = dateLabel;
+                  return (
+                    <div key={m.id}>
+                      {showSeparator && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '14px 0 8px' }}>
+                          <div style={{ flex: 1, height: 1, background: 'var(--c-border)' }} />
+                          <div style={{ fontSize: 11, color: 'var(--c-ink3)', fontFamily: 'var(--fm)', fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase' }}>{dateLabel}</div>
+                          <div style={{ flex: 1, height: 1, background: 'var(--c-border)' }} />
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', justifyContent: m.isMe ? 'flex-end' : 'flex-start', marginBottom: 8 }}>
+                        <div style={{
+                          maxWidth: '70%', padding: '10px 14px', borderRadius: 14,
+                          background: m.isMe ? 'var(--c-ink)' : 'var(--c-surface)',
+                          color: m.isMe ? '#fff' : 'var(--c-ink)',
+                          border: m.isMe ? 'none' : '1px solid var(--c-border)',
+                          fontSize: 14, lineHeight: 1.5,
+                        }}>
+                          {m.message}
+                          <div style={{ fontSize: 10, color: m.isMe ? 'rgba(255,255,255,0.5)' : 'var(--c-ink3)', marginTop: 4, textAlign: 'right', display: 'flex', justifyContent: 'flex-end', gap: 4, alignItems: 'center' }}>
+                            <span>{m.time}</span>
+                            {m.isMe && (
+                              <span style={{ color: m.seen ? '#3FA9FF' : 'rgba(255,255,255,0.5)' }} title={m.seen ? 'Citit' : 'Trimis'}>
+                                {m.seen ? '✓✓' : '✓'}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
               <div ref={msgsEndRef} />
             </div>
 

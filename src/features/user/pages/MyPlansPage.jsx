@@ -18,6 +18,10 @@ export default function MyPlansPage() {
   }, []);
 
   const workoutPlans = useMemo(() => {
+    // Backend returneaza acum dashboard.workoutPlans (lista cu coach + self)
+    if (Array.isArray(dashboard?.workoutPlans) && dashboard.workoutPlans.length > 0) {
+      return dashboard.workoutPlans;
+    }
     if (!dashboard?.assignedWorkoutPlan) return [];
     return [dashboard.assignedWorkoutPlan];
   }, [dashboard]);

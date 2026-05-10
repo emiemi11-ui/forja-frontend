@@ -3,6 +3,20 @@ import { getChat, sendChat, getTeams } from '../../../shared/api/index.js';
 import { useAuth } from '../../../features/auth/context/AuthContext.jsx';
 import { AnimatedPage } from '../../../shared/ui/animations/index.jsx';
 
+function formatDateLabel(date) {
+  if (!date || !(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+  const today = new Date();
+  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+  const isSameDay = (a, b) => a.getDate() === b.getDate() && a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
+  if (isSameDay(date, today)) return 'Astăzi';
+  if (isSameDay(date, yesterday)) return 'Ieri';
+  const daysDiff = Math.round((today.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+  if (daysDiff > 0 && daysDiff < 7) {
+    return date.toLocaleDateString('ro-RO', { weekday: 'long' });
+  }
+  return date.toLocaleDateString('ro-RO', { day: '2-digit', month: 'long', year: 'numeric' });
+}
+
 const CHAT_PHOTOS = {
   M: '/img/ext/u-ce999c14f0.jpg',
   A: '/img/ext/u-cac95b1201.jpg',
@@ -186,22 +200,40 @@ export default function ChatPage() {
                 Niciun mesaj încă. Fii primul care scrie! 🚀
               </div>
             )}
-            {messages.map((message) => (
-              <div key={message.id} style={{ display: 'flex', justifyContent: message.isMe ? 'flex-end' : 'flex-start', marginBottom: 12, gap: 8, alignItems: 'flex-end' }}>
-                {!message.isMe && (
-                  <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', background: 'var(--c-surface)', border: '1px solid var(--c-border)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {CHAT_PHOTOS[message.avatar] ? <img src={CHAT_PHOTOS[message.avatar]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(event) => { event.target.style.display = 'none'; }} /> : <span style={{ fontSize: 11, fontWeight: 700 }}>{message.avatar}</span>}
+            {(() => {
+              let lastDateLabel = null;
+              return messages.map((message) => {
+                const dateObj = message.createdAt ? new Date(message.createdAt) : null;
+                const dateLabel = dateObj ? formatDateLabel(dateObj) : null;
+                const showSeparator = dateLabel && dateLabel !== lastDateLabel;
+                if (showSeparator) lastDateLabel = dateLabel;
+                return (
+                  <div key={message.id}>
+                    {showSeparator && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '14px 0 8px' }}>
+                        <div style={{ flex: 1, height: 1, background: 'var(--c-border)' }} />
+                        <div style={{ fontSize: 11, color: 'var(--c-ink3)', fontFamily: 'var(--fm)', fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase' }}>{dateLabel}</div>
+                        <div style={{ flex: 1, height: 1, background: 'var(--c-border)' }} />
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', justifyContent: message.isMe ? 'flex-end' : 'flex-start', marginBottom: 12, gap: 8, alignItems: 'flex-end' }}>
+                      {!message.isMe && (
+                        <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', background: 'var(--c-surface)', border: '1px solid var(--c-border)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {CHAT_PHOTOS[message.avatar] ? <img src={CHAT_PHOTOS[message.avatar]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(event) => { event.target.style.display = 'none'; }} /> : <span style={{ fontSize: 11, fontWeight: 700 }}>{message.avatar}</span>}
+                        </div>
+                      )}
+                      <div>
+                        {!message.isMe && <div style={{ fontSize: 11, color: 'var(--c-ink3)', marginBottom: 2, fontWeight: 600 }}>{message.from || message.sender}</div>}
+                        <div style={{ maxWidth: 320, padding: '10px 14px', borderRadius: message.isMe ? '14px 14px 4px 14px' : '14px 14px 14px 4px', background: message.isMe ? 'var(--c-ink)' : 'var(--c-surface)', color: message.isMe ? '#fff' : 'var(--c-ink)', border: message.isMe ? 'none' : '1px solid var(--c-border)', fontSize: 14, lineHeight: 1.5 }}>
+                          {message.msg || message.text || message.content}
+                        </div>
+                        <div style={{ fontSize: 10, color: 'var(--c-ink3)', marginTop: 3, textAlign: message.isMe ? 'right' : 'left', fontFamily: 'var(--fm)' }}>{message.time}</div>
+                      </div>
+                    </div>
                   </div>
-                )}
-                <div>
-                  {!message.isMe && <div style={{ fontSize: 11, color: 'var(--c-ink3)', marginBottom: 2, fontWeight: 600 }}>{message.from || message.sender}</div>}
-                  <div style={{ maxWidth: 320, padding: '10px 14px', borderRadius: message.isMe ? '14px 14px 4px 14px' : '14px 14px 14px 4px', background: message.isMe ? 'var(--c-ink)' : 'var(--c-surface)', color: message.isMe ? '#fff' : 'var(--c-ink)', border: message.isMe ? 'none' : '1px solid var(--c-border)', fontSize: 14, lineHeight: 1.5 }}>
-                    {message.msg || message.text || message.content}
-                  </div>
-                  <div style={{ fontSize: 10, color: 'var(--c-ink3)', marginTop: 3, textAlign: message.isMe ? 'right' : 'left', fontFamily: 'var(--fm)' }}>{message.time}</div>
-                </div>
-              </div>
-            ))}
+                );
+              });
+            })()}
             <div ref={msgsEndRef} />
           </div>
 

@@ -204,6 +204,7 @@ export default function Login() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [resettingPassword, setResettingPassword] = useState(false);
+  const [forgotSuccess, setForgotSuccess] = useState(false);
 
   const activeRole = useMemo(
     () => DEMO_ROLES.find((role) => role.id === selectedRole) || DEMO_ROLES_RAW.find((role) => role.id === selectedRole) || FALLBACK_DEMO_ROLE,
@@ -250,6 +251,7 @@ export default function Login() {
   const handleForgotPassword = async () => {
     setError('');
     setSuccess(false);
+    setForgotSuccess(false);
     if (!email.trim()) {
       setError('Introdu emailul contului pentru resetarea parolei.');
       return;
@@ -257,7 +259,7 @@ export default function Login() {
     setResettingPassword(true);
     try {
       const { data } = await requestPasswordReset(email.trim());
-      setSuccess(Boolean(data?.ok));
+      if (data?.ok) setForgotSuccess(true);
     } catch (err) {
       setError(err.response?.data?.error || 'Nu am putut înregistra cererea de resetare.');
     } finally {
@@ -534,6 +536,33 @@ export default function Login() {
 
             {error && <div className="forja-alert error">{error}</div>}
             {success && <div className="forja-alert success">Redirecționare...</div>}
+            {forgotSuccess && (
+              <div style={{ marginTop: 12, padding: 16, borderRadius: 12, background: 'rgba(184,237,0,0.08)', border: '1.5px solid var(--c-lime, #B8ED00)' }}>
+                <div style={{ fontFamily: 'var(--fd, sans-serif)', fontSize: 16, fontWeight: 800, marginBottom: 12, color: 'var(--c-ink, #000)' }}>
+                  📨 Cerere de resetare înregistrată
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                    <div style={{ flexShrink: 0, width: 24, height: 24, borderRadius: '50%', background: 'var(--c-lime, #B8ED00)', color: '#000', fontWeight: 800, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--fm, monospace)' }}>1</div>
+                    <div style={{ fontSize: 13, lineHeight: 1.5, color: 'var(--c-ink2, #333)' }}>
+                      <strong>Verifică-ți adresa de email</strong> pentru a primi parola nouă generată de admin.
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                    <div style={{ flexShrink: 0, width: 24, height: 24, borderRadius: '50%', background: 'var(--c-lime, #B8ED00)', color: '#000', fontWeight: 800, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--fm, monospace)' }}>2</div>
+                    <div style={{ fontSize: 13, lineHeight: 1.5, color: 'var(--c-ink2, #333)' }}>
+                      <strong>Folosește parola nouă</strong> generată pentru a intra în cont.
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                    <div style={{ flexShrink: 0, width: 24, height: 24, borderRadius: '50%', background: 'var(--c-lime, #B8ED00)', color: '#000', fontWeight: 800, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--fm, monospace)' }}>3</div>
+                    <div style={{ fontSize: 13, lineHeight: 1.5, color: 'var(--c-ink2, #333)' }}>
+                      <strong>Schimbă-ți parola</strong> din meniul Profil → 🔐 Schimbă parola, după ce te-ai logat.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </section>
       </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getExercises, getExLib, addExercise, toggleExercise, updateExercise, deleteExercise, bulkDoneExercises, clearExercises, getWorkoutCurrent, startWorkout, completeSet, finishWorkout, abandonWorkout } from '../../../shared/api/index.js';
+import { getExercises, getExLib, addExercise, toggleExercise, updateExercise, deleteExercise, bulkDoneExercises, clearExercises, getWorkoutCurrent, startWorkout, completeSet, finishWorkout, abandonWorkout, getCoachPlan } from '../../../shared/api/index.js';
 import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
 import { useConfirm } from '../../../shared/ui/ConfirmModal.jsx';
 import BodyMap from '../../../shared/ui/BodyMap.jsx';
@@ -37,7 +38,18 @@ export default function Workout() {
   const loadPlan = useCallback(async () => { const r = await getExercises(); setPlan(r.data); }, []);
   const loadLib = useCallback(async () => { const r = await getExLib(query || undefined, muscle !== 'Toate' ? muscle : undefined); setLib(r.data); }, [query, muscle]);
 
-  useEffect(() => { loadPlan(); }, []);
+  // Plan atribuit de coach (separat de planul propriu)
+  const [coachPlan, setCoachPlan] = useState(null);
+  const loadCoachPlan = useCallback(async () => {
+    try {
+      const r = await getCoachPlan();
+      setCoachPlan(r.data?.plan || null);
+    } catch {
+      setCoachPlan(null);
+    }
+  }, []);
+
+  useEffect(() => { loadPlan(); loadCoachPlan(); }, []);
   useEffect(() => { loadLib(); }, [query, muscle]);
 
   useEffect(() => {
@@ -54,6 +66,26 @@ export default function Workout() {
       }
     }).catch(() => {});
   }, []);
+
+  // Asculta evenimentul cand coach-ul atribuie un plan nou — refresh imediat
+  useEffect(() => {
+    let socket = null;
+    (async () => {
+      try {
+        const { io } = await import('socket.io-client');
+        const { getStoredToken } = await import('../../auth/model/authStorage.js');
+        const token = getStoredToken();
+        if (!token) return;
+        const socketUrl = import.meta.env.VITE_API_URL || window.location.origin;
+        socket = io(socketUrl, { auth: { token }, transports: ['websocket', 'polling'] });
+        socket.on('coach:plan:assigned', ({ planName, coachName }) => {
+          showToast(`📋 ${coachName} ți-a atribuit planul „${planName}"!`);
+          loadCoachPlan();
+        });
+      } catch {}
+    })();
+    return () => { socket?.disconnect?.(); };
+  }, [loadCoachPlan, showToast]);
 
   useEffect(() => {
     if (running) { timerRef.current = setInterval(() => setTimerSec(s => s + 1), 1000); }
@@ -79,11 +111,17 @@ export default function Workout() {
   // === EDIT EXERCITIU ===
   const [editingEx, setEditingEx] = useState(null); // { id, sets, reps, weight, restSec }
   const [savingEdit, setSavingEdit] = useState(false);
-  const handleEditClick = (ex) => {
+  const handleEditClick = (ex, event) => {
     console.log('[WorkoutPage] handleEditClick fired', ex);
     // ex.sets este string formatat "4×8" — folosim ex.setsTotal (numarul brut)
     const rawSets = Number(ex.setsTotal) || Number(ex.sets) || 3;
     const rawReps = Number(ex.reps) || 10;
+    // Captureaza pozitia butonului ca sa pozitionam modal-ul ca popover langa el
+    let anchor = null;
+    if (event?.currentTarget?.getBoundingClientRect) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      anchor = { top: rect.top + rect.height + 8, left: Math.max(10, rect.right - 380), bottom: rect.top };
+    }
     const next = {
       id: ex.id,
       name: ex.name,
@@ -92,6 +130,7 @@ export default function Workout() {
       reps: rawReps,
       weight: Number(ex.weight) || 0,
       restSec: Number(ex.restSec) || 90,
+      anchor,
     };
     console.log('[WorkoutPage] setting editingEx to', next);
     setEditingEx(next);
@@ -371,6 +410,36 @@ export default function Workout() {
               </>
             )}
           </div>
+
+          {/* === Planul de la coach (separate de planul propriu) === */}
+          {coachPlan && coachPlan.exercises?.length > 0 && (
+            <div style={{ background: 'linear-gradient(135deg, rgba(184,237,0,0.06), rgba(26,82,255,0.06))', border: '2px solid var(--c-lime)', borderRadius: 14, padding: 14, marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                <div>
+                  <div style={{ fontFamily: 'var(--fm)', fontSize: 9, fontWeight: 800, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--c-lime-d, #4d7a00)' }}>📋 De la coach: {coachPlan.coachName}</div>
+                  <div style={{ fontFamily: 'var(--fd)', fontSize: 18, fontWeight: 900, marginTop: 2 }}>{coachPlan.name}</div>
+                </div>
+                <span style={{ padding: '4px 10px', borderRadius: 6, fontSize: 10, fontWeight: 800, background: 'var(--c-lime)', color: '#000', fontFamily: 'var(--fm)' }}>
+                  {coachPlan.exercises.length} EX.
+                </span>
+              </div>
+              {coachPlan.exercises.map((ex) => (
+                <div key={ex.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderTop: '1px solid rgba(184,237,0,0.15)' }}>
+                  {ex.img && <img src={ex.img} alt="" style={{ width: 28, height: 28, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} />}
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: 13 }}>{ex.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--c-ink3)', fontFamily: 'var(--fm)', marginTop: 2 }}>
+                      {ex.setsTotal || 3}×{ex.reps || 10}{ex.weight ? ` · ${ex.weight}kg` : ''} · pauză {ex.restSec || 90}s
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <div style={{ marginTop: 10, fontSize: 11, color: 'var(--c-ink3)', fontStyle: 'italic', textAlign: 'center' }}>
+                Plan stabilit de coach. Apare separat de planul tău personal.
+              </div>
+            </div>
+          )}
+
           <div className="plan-panel">
             <div className="plan-banner">
               <span className="plan-title">Planul de azi</span>
@@ -394,7 +463,7 @@ export default function Workout() {
                 </div>
                 <button
                   type="button"
-                  onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleEditClick(ex); }}
+                  onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleEditClick(ex, e); }}
                   style={{ background: 'rgba(184,237,0,0.15)', border: '1.5px solid var(--c-lime)', cursor: 'pointer', padding: '6px 12px', fontSize: 14, color: 'var(--c-lime-d, #4d7a00)', borderRadius: 8, fontWeight: 700, position: 'relative', zIndex: 2 }}
                   title="Editează"
                 >
@@ -411,19 +480,26 @@ export default function Workout() {
         </div>
       </div>
 
-      {/* === EDIT EXERCITIU MODAL === */}
-      {editingEx && (
+      {/* === EDIT EXERCITIU MODAL — Portal in document.body, popover langa exercitiu daca avem anchor === */}
+      {editingEx && createPortal(
         <div
           onClick={() => setEditingEx(null)}
           style={{
             position: 'fixed', inset: 0, zIndex: 99999,
-            background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+            background: editingEx.anchor ? 'transparent' : 'rgba(0,0,0,0.7)',
+            display: editingEx.anchor ? 'block' : 'flex',
+            alignItems: 'center', justifyContent: 'center', padding: editingEx.anchor ? 0 : 20,
           }}>
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: 'var(--c-surface, #fff)', borderRadius: 18, padding: 28, maxWidth: 420, width: '100%',
+              background: 'var(--c-surface, #fff)', borderRadius: 18, padding: 22, maxWidth: 380, width: editingEx.anchor ? 380 : '100%',
               boxShadow: '0 20px 60px rgba(0,0,0,0.4)', border: '2px solid var(--c-lime)',
+              ...(editingEx.anchor ? {
+                position: 'absolute',
+                top: Math.min(window.innerHeight - 380, editingEx.anchor.top) + 'px',
+                left: Math.max(10, Math.min(window.innerWidth - 390, editingEx.anchor.left)) + 'px',
+              } : {}),
             }}>
             <h3 style={{ fontFamily: 'var(--fd)', fontSize: 22, fontWeight: 900, marginTop: 0, marginBottom: 6 }}>
               ✏️ Editează exercițiu
@@ -473,7 +549,8 @@ export default function Workout() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </AnimatedPage>
   );
