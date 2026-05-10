@@ -28,6 +28,9 @@ export const bulkDoneExercises = () =>
 export const clearExercises = () =>
   api.delete(ENDPOINTS.athlete.exercises);
 
+// Returns plan assigned by coach (separate from user's own plan)
+export const getCoachPlan = () => api.get('/athlete/coach-plan');
+
 export const getMeals = () => api.get(ENDPOINTS.athlete.meals);
 export const addMeal = (foodId, meal) =>
   api.post(ENDPOINTS.athlete.meals, { foodId, meal });
