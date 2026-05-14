@@ -165,9 +165,74 @@
   .adm-page { padding: 0 6px !important; }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .admin-pill { font-size: 8.5px; padding: 3px 6px; }
   .admin-kpis-inline .admin-pill { white-space: nowrap; }
+
+  /* === MOBILE TABLE -> CARDS ===
+     Pe ecrane sub 768px, transformam tabelul in carduri stackate vertical */
+  .admin-table-wrap { overflow: visible !important; }
+  .admin-table {
+    display: block !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+  .admin-table thead {
+    display: none !important; /* ascunde header-ul tabelar */
+  }
+  .admin-table tbody { display: block !important; width: 100% !important; }
+  .admin-table tr {
+    display: block !important;
+    background: var(--c-surface, #fff);
+    border: 1.5px solid var(--c-border, #e5e7eb);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .admin-table td {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    padding: 6px 0 !important;
+    border-bottom: 1px dashed rgba(0,0,0,0.05) !important;
+    font-size: 13px !important;
+    text-align: right;
+    word-break: break-word;
+  }
+  .admin-table td:last-child {
+    border-bottom: none !important;
+    padding-top: 10px !important;
+    justify-content: flex-start !important;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  /* Prima celula (Nume) ca antet de card */
+  .admin-table td:first-child {
+    display: block !important;
+    border-bottom: 2px solid var(--c-lime, #b8ed00) !important;
+    padding-bottom: 10px !important;
+    margin-bottom: 6px;
+    text-align: left;
+    font-size: 14px !important;
+  }
+  /* Eticheta cu numele coloanei in fata fiecarei valori */
+  .admin-table td::before {
+    content: attr(data-label);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--c-ink3, #9ca3af);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+  .admin-table td:first-child::before { display: none; }
+  .admin-table td:last-child::before {
+    display: block;
+    width: 100%;
+    margin-bottom: 4px;
+  }
 }
 
 .admin-btn,
