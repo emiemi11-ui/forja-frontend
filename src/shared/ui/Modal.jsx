@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import '../styles/modal.css';
 
 export default function Modal({ open, onClose, title, children, maxWidth = 480 }) {
@@ -10,13 +11,15 @@ export default function Modal({ open, onClose, title, children, maxWidth = 480 }
 
   if (!open) return null;
 
-  return (
+  // CRITICAL: render via createPortal direct in <body> ca sa scapam de orice parent transformat
+  // (framer-motion's AnimatedPage rupea position: fixed la modal-uri imbricate)
+  return createPortal(
     <div
       style={{
         position: 'fixed', inset: 0,
         background: 'rgba(0,0,0,0.7)',
         backdropFilter: 'blur(6px)',
-        zIndex: 500,
+        zIndex: 99999,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 16,
       }}
@@ -55,7 +58,8 @@ export default function Modal({ open, onClose, title, children, maxWidth = 480 }
         </div>
       </div>
       
-    </div>
+    </div>,
+    document.body
   );
 }
 

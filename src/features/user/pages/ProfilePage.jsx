@@ -445,6 +445,15 @@ export default function ProfilePage() {
             </div>
           </div>
 
+          {/* PRIMUL - cel mai important: schimba abonamentul */}
+          <div className="prof-link" style={{ background: userData.plan === 'FREE' ? 'rgba(184,237,0,0.06)' : (userData.plan === 'TEAM' ? 'rgba(123,47,190,0.06)' : 'rgba(26,82,255,0.06)'), border: '1.5px solid', borderColor: userData.plan === 'FREE' ? 'var(--c-lime)' : (userData.plan === 'TEAM' ? 'var(--c-purple)' : 'var(--c-blue)') }} onClick={() => setShowPlanModal(true)}>
+            <div className="pli">💎</div>
+            <div>
+              <div className="pl-txt">Planul meu — <strong style={{ color: userData.plan === 'FREE' ? 'var(--c-lime-d)' : (userData.plan === 'TEAM' ? 'var(--c-purple)' : 'var(--c-blue)') }}>{userData.plan}</strong></div>
+              <div className="pl-sub">{userData.plan === 'FREE' ? 'Upgrade la PRO sau TEAM' : 'Schimbă planul sau anulează'}</div>
+            </div>
+            <span style={{ color: 'var(--c-ink3)' }}>›</span>
+          </div>
           <div className="prof-link" onClick={() => setEditingUser(e => !e)}>
             <div className="pli">✏️</div>
             <div><div className="pl-txt">Editează profil</div><div className="pl-sub">Nume, greutate, avatar</div></div>
@@ -458,14 +467,6 @@ export default function ProfilePage() {
           <div className="prof-link" onClick={() => navigate('/app/teams')}>
             <div className="pli">🏆</div>
             <div><div className="pl-txt">Echipele mele</div><div className="pl-sub">{userData.teamName || 'Nicio echipă'}</div></div>
-            <span style={{ color: 'var(--c-ink3)' }}>›</span>
-          </div>
-          <div className="prof-link" style={{ background: userData.plan === 'FREE' ? 'rgba(184,237,0,0.06)' : (userData.plan === 'TEAM' ? 'rgba(123,47,190,0.06)' : 'rgba(26,82,255,0.06)'), border: '1.5px solid', borderColor: userData.plan === 'FREE' ? 'var(--c-lime)' : (userData.plan === 'TEAM' ? 'var(--c-purple)' : 'var(--c-blue)') }} onClick={() => setShowPlanModal(true)}>
-            <div className="pli">💎</div>
-            <div>
-              <div className="pl-txt">Planul meu — <strong style={{ color: userData.plan === 'FREE' ? 'var(--c-lime-d)' : (userData.plan === 'TEAM' ? 'var(--c-purple)' : 'var(--c-blue)') }}>{userData.plan}</strong></div>
-              <div className="pl-sub">{userData.plan === 'FREE' ? 'Upgrade la PRO sau TEAM' : 'Schimbă planul sau anulează'}</div>
-            </div>
             <span style={{ color: 'var(--c-ink3)' }}>›</span>
           </div>
           <div className="prof-link" onClick={() => setShowPasswordModal(true)}>
