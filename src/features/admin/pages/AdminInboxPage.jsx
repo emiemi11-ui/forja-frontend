@@ -61,7 +61,7 @@ export default function AdminInboxPage() {
   const [resetRequests, setResetRequests] = useState([]);
   const [upgradeRequests, setUpgradeRequests] = useState([]);
   const [downgrades, setDowngrades] = useState([]);
-  const [filter, setFilter] = useState('toate');
+  const [filter, setFilter] = useState('necitite');
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -166,14 +166,23 @@ export default function AdminInboxPage() {
     });
   };
 
-  const filtered = filter === 'toate' ? inbox : (filter === 'reset' || filter === 'upgrade' || filter === 'downgrade') ? [] : inbox.filter((message) => message.type === filter);
+  // FILTER LOGIC:
+  // - 'necitite' = TOATE mesajele necitite (status === 'nou')  — pleacă de aici când le deschizi
+  // - 'contact' / 'early-access' = pe categorie, ascunde rezolvatele automat
+  // - 'reset' / 'upgrade' / 'downgrade' = secțiuni dedicate
+  let filtered = [];
+  if (filter === 'necitite') {
+    filtered = inbox.filter((m) => m.status === 'nou');
+  } else if (filter === 'contact') {
+    filtered = inbox.filter((m) => m.type === 'contact' && m.status !== 'resolved');
+  } else if (filter === 'early-access') {
+    filtered = inbox.filter((m) => m.type === 'early-access' && m.status !== 'resolved');
+  }
   // REGULĂ STRICTĂ:
-  // - NEREZOLVAT = status !== 'resolved' (nou + citit)
-  // - NECITIT = status === 'nou'
-  const contactUnresolved = inbox.filter((m) => m.type === 'contact' && m.status !== 'resolved').length;
-  const earlyUnresolved = inbox.filter((m) => m.type === 'early-access' && m.status !== 'resolved').length;
   const contactTotal = inbox.filter((m) => m.type === 'contact').length;
   const earlyTotal = inbox.filter((m) => m.type === 'early-access').length;
+  const contactUnresolved = inbox.filter((m) => m.type === 'contact' && m.status !== 'resolved').length;
+  const earlyUnresolved = inbox.filter((m) => m.type === 'early-access' && m.status !== 'resolved').length;
   const newCount = inbox.filter((m) => m.status === 'nou').length;
   const pendingResets = resetRequests.filter((r) => r.status === 'PENDING').length;
   const pendingUpgrades = upgradeRequests.filter((r) => r.status === 'PENDING').length;
@@ -182,11 +191,14 @@ export default function AdminInboxPage() {
     setSelected(message);
     // Optimistic UI update
     setInbox((current) => current.map((entry) => entry.id === message.id ? { ...entry, status: 'citit' } : entry));
-    // Persist la backend (doar daca era 'nou')
+    // Persist la backend SI refetch dupa pentru sync garantat
     if (message.status === 'nou') {
-      markInboxRead(message.id).catch((e) => {
-        console.warn('[admin/inbox] mark-read failed:', e?.response?.data?.error || e?.message);
-      });
+      markInboxRead(message.id)
+        .then(() => setRefreshKey((c) => c + 1))  // SYNC: refetch dupa salvare
+        .catch((e) => {
+          console.warn('[admin/inbox] mark-read failed:', e?.response?.data?.error || e?.message);
+          setRefreshKey((c) => c + 1);  // refetch oricum, sa ne sincronizam cu DB-ul real
+        });
     }
   };
 
@@ -194,17 +206,18 @@ export default function AdminInboxPage() {
     if (newCount === 0) return;
     try {
       await markAllInboxRead();
-      setInbox((current) => current.map((entry) => ({ ...entry, status: 'citit' })));
       showToast(`✓ ${newCount} mesaje marcate ca citite`);
+      setRefreshKey((c) => c + 1);  // SYNC garantat cu DB
     } catch (e) {
       showToast('❌ Eroare la marcare', '❌');
+      setRefreshKey((c) => c + 1);  // refetch oricum sa fim sincronizati
     }
   };
 
   const handleToggleResolved = async (message, event) => {
     event?.stopPropagation();
-    // Optimistic toggle
     const wasResolved = message.status === 'resolved';
+    // Optimistic toggle pentru feedback instant
     const newStatus = wasResolved ? 'citit' : 'resolved';
     setInbox((current) => current.map((entry) =>
       entry.id === message.id ? { ...entry, status: newStatus } : entry
@@ -212,12 +225,10 @@ export default function AdminInboxPage() {
     try {
       await toggleInboxResolved(message.id);
       showToast(wasResolved ? '↩️ Marcat ca nerezolvat' : '✓ Rezolvat');
+      setRefreshKey((c) => c + 1);  // SYNC garantat cu DB
     } catch (e) {
-      // Revert pe eroare
-      setInbox((current) => current.map((entry) =>
-        entry.id === message.id ? { ...entry, status: message.status } : entry
-      ));
       showToast('❌ Eroare', '❌');
+      setRefreshKey((c) => c + 1);  // refetch sa revenim la starea reala din DB
     }
   };
 
@@ -255,14 +266,14 @@ export default function AdminInboxPage() {
       </div>
 
       <div style={{ fontSize: 11, color: 'var(--c-ink3)', marginBottom: 16, fontStyle: 'italic' }}>
-        💡 Toate cardurile arată DOAR ce necesită acțiune (nerezolvate/pending). Bifează ✓ pe rândurile Contact/Early Access ca să le scoți din numărătoare.
+        💡 Tab-ul „📬 Necitite" arată mesajele neîncă deschise — dispar de acolo când le citești. Tab-urile per categorie arată cele nerezolvate. Bifează ✓ pe rândurile Contact/Early Access ca să le marchezi rezolvate.
       </div>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
         {[
-          ['toate', `Toate (${inbox.length})`],
-          ['contact', `📩 Contact (${contactTotal}${contactUnresolved !== contactTotal ? ` · ${contactUnresolved} de tratat` : ''})`],
-          ['early-access', `📱 Early Access (${earlyTotal}${earlyUnresolved !== earlyTotal ? ` · ${earlyUnresolved} de tratat` : ''})`],
+          ['necitite', `📬 Necitite${newCount ? ` (${newCount})` : ''}`],
+          ['contact', `📩 Contact${contactUnresolved ? ` (${contactUnresolved} de tratat din ${contactTotal})` : ` (${contactTotal})`}`],
+          ['early-access', `📱 Early Access${earlyUnresolved ? ` (${earlyUnresolved} de tratat din ${earlyTotal})` : ` (${earlyTotal})`}`],
           ['reset', `🔑 Cereri parolă${pendingResets ? ` (${pendingResets})` : ''}`],
           ['upgrade', `💎 Cereri upgrade${pendingUpgrades ? ` (${pendingUpgrades})` : ''}`],
           ['downgrade', '⬇️ Downgrade-uri'],
@@ -272,7 +283,7 @@ export default function AdminInboxPage() {
             {label}
           </button>
         ))}
-        {newCount > 0 && (filter === 'toate' || filter === 'contact' || filter === 'early-access') && (
+        {newCount > 0 && filter === 'necitite' && (
           <button onClick={handleMarkAllRead}
             style={{ marginLeft: 'auto', padding: '6px 12px', borderRadius: 8, border: '1px dashed var(--c-ink3)', background: 'transparent', fontSize: 11, fontWeight: 600, cursor: 'pointer', color: 'var(--c-ink3)' }}>
             ✓ Marchează toate citite
