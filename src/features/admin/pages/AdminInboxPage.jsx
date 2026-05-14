@@ -167,17 +167,23 @@ export default function AdminInboxPage() {
   };
 
   // FILTER LOGIC:
-  // - 'necitite' = TOATE mesajele necitite (status === 'nou')  — pleacă de aici când le deschizi
-  // - 'contact' / 'early-access' = pe categorie, ascunde rezolvatele automat
+  // - 'necitite' = doar status === 'nou' (mesaje neîncă deschise)
+  // - 'contact' / 'early-access' = TOATE pe categorie (inclusiv rezolvate, stilizate diferit)
   // - 'reset' / 'upgrade' / 'downgrade' = secțiuni dedicate
   let filtered = [];
   if (filter === 'necitite') {
     filtered = inbox.filter((m) => m.status === 'nou');
   } else if (filter === 'contact') {
-    filtered = inbox.filter((m) => m.type === 'contact' && m.status !== 'resolved');
+    filtered = inbox.filter((m) => m.type === 'contact');
   } else if (filter === 'early-access') {
-    filtered = inbox.filter((m) => m.type === 'early-access' && m.status !== 'resolved');
+    filtered = inbox.filter((m) => m.type === 'early-access');
   }
+  // Sortez: nerezolvate sus, rezolvate jos (in fiecare grupa ordonate dupa data)
+  filtered = [...filtered].sort((a, b) => {
+    const aRes = a.status === 'resolved' ? 1 : 0;
+    const bRes = b.status === 'resolved' ? 1 : 0;
+    return aRes - bRes;
+  });
   // REGULĂ STRICTĂ:
   const contactTotal = inbox.filter((m) => m.type === 'contact').length;
   const earlyTotal = inbox.filter((m) => m.type === 'early-access').length;
