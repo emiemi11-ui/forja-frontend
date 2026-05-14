@@ -29,7 +29,7 @@ export const getCoachPlan = () => api.get('/athlete/coach-plan');
 
 // === UPGRADE PLAN ===
 export const requestUpgrade = (plan, email) => api.post('/upgrade/request', { plan, email });
-export const cancelSubscription = () => api.post('/upgrade/cancel');
+export const cancelSubscription = (targetPlan = 'FREE') => api.post('/upgrade/cancel', { targetPlan });
 export const getMyUpgradeRequest = () => api.get('/upgrade/my-request');
 // Admin
 export const adminListUpgrades = () => api.get('/upgrade/admin/list');

@@ -268,13 +268,34 @@ export default function ProfilePage() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+          {/* TEAM → downgrade la PRO (intermediar) */}
+          {userData?.plan === 'TEAM' && (
+            <button
+              onClick={() => {
+                setShowPlanModal(false);
+                confirm('Treci de pe TEAM pe PRO? Vei pierde accesul la echipe nelimitate și chat de echipă, dar păstrezi restul funcționalităților PRO.', async () => {
+                  try {
+                    await cancelSubscription('PRO');
+                    showToast('✅ Plan schimbat la PRO.');
+                    load();
+                    updateUser({ plan: 'PRO' });
+                  } catch (e) {
+                    showToast(e.response?.data?.error || '❌ Eroare', '❌');
+                  }
+                });
+              }}
+              style={{ padding: 12, borderRadius: 10, border: '1.5px solid var(--c-blue)', background: 'rgba(26,82,255,0.04)', color: 'var(--c-blue)', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
+              ⬇️ Downgrade la PRO — 29 lei/lună
+            </button>
+          )}
+          {/* TEAM sau PRO → anulează total */}
           {userData?.plan !== 'FREE' && (
             <button
               onClick={() => {
                 setShowPlanModal(false);
-                confirm('Ești sigur că vrei să anulezi abonamentul? Vei trece imediat pe planul FREE și pierzi accesul la funcționalitățile premium.', async () => {
+                confirm('Ești sigur că vrei să anulezi abonamentul complet? Vei trece pe planul FREE și pierzi accesul la TOATE funcționalitățile premium.', async () => {
                   try {
-                    await cancelSubscription();
+                    await cancelSubscription('FREE');
                     showToast('✅ Abonamentul a fost anulat. Ești acum pe FREE.');
                     load();
                     updateUser({ plan: 'FREE' });
@@ -284,16 +305,18 @@ export default function ProfilePage() {
                 });
               }}
               style={{ padding: 12, borderRadius: 10, border: '1.5px solid var(--c-coral)', background: 'transparent', color: 'var(--c-coral)', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
-              ⬇️ Downgrade la FREE — anulează abonamentul
+              ⬇️ Anulează abonamentul — Downgrade la FREE
             </button>
           )}
-          {userData?.plan !== 'PRO' && !pendingRequest && (
+          {/* Upgrade catre PRO (daca nu sunt deja PRO/TEAM) */}
+          {userData?.plan === 'FREE' && !pendingRequest && (
             <button
               onClick={() => { setShowPlanModal(false); setUpgradeTargetPlan('PRO'); setShowUpgradeModal(true); }}
               style={{ padding: 12, borderRadius: 10, border: '1.5px solid var(--c-blue)', background: 'rgba(26,82,255,0.04)', color: 'var(--c-blue)', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
               ⬆️ Upgrade la PRO — 29 lei/lună
             </button>
           )}
+          {/* Upgrade catre TEAM (daca nu sunt deja TEAM) */}
           {userData?.plan !== 'TEAM' && !pendingRequest && (
             <button
               onClick={() => { setShowPlanModal(false); setUpgradeTargetPlan('TEAM'); setShowUpgradeModal(true); }}
