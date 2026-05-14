@@ -229,12 +229,25 @@ export default function AdminInboxPage() {
       entry.id === message.id ? { ...entry, status: newStatus } : entry
     ));
     try {
-      await toggleInboxResolved(message.id);
-      showToast(wasResolved ? '↩️ Marcat ca nerezolvat' : '✓ Rezolvat');
-      setRefreshKey((c) => c + 1);  // SYNC garantat cu DB
+      const res = await toggleInboxResolved(message.id);
+      console.log('[resolve] success:', res.data);
+      showToast(wasResolved ? '↩️ Marcat ca nerezolvat' : '✓ Rezolvat — salvat în DB');
+      setRefreshKey((c) => c + 1);  // SYNC cu DB
     } catch (e) {
-      showToast('❌ Eroare', '❌');
-      setRefreshKey((c) => c + 1);  // refetch sa revenim la starea reala din DB
+      console.error('[resolve] FAILED:', {
+        status: e?.response?.status,
+        data: e?.response?.data,
+        message: e?.message,
+        url: e?.config?.url,
+      });
+      const httpStatus = e?.response?.status;
+      const errMsg = httpStatus === 404
+        ? '❌ Backend nu are endpoint /resolve — Railway nu a deployed încă!'
+        : httpStatus === 401
+        ? '❌ Neautorizat — relogare'
+        : `❌ ${e?.response?.data?.error || e?.message || 'Eroare necunoscută'}`;
+      showToast(errMsg, '❌');
+      setRefreshKey((c) => c + 1);
     }
   };
 
