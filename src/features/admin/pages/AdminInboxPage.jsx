@@ -46,7 +46,7 @@ function normalizeInboxItem(item) {
     subject: item?.subject || 'Mesaj',
     message: item?.message || '',
     date: item?.date || '',
-    status: rawStatus.includes('read') || rawStatus.includes('citit') ? 'citit' : 'nou',
+    status: rawStatus === 'resolved' ? 'resolved' : (rawStatus.includes('read') || rawStatus.includes('citit') ? 'citit' : 'nou'),
     createdAt: item?.createdAt || null,
   };
 }
@@ -72,7 +72,9 @@ export default function AdminInboxPage() {
 
   useEffect(() => {
     let mounted = true;
-    setLoading(true);
+    // Marcam loading=true DOAR la primul fetch (refreshKey === 0)
+    // La refetch-uri subsequent (resolve, mark-read, etc.) pastram lista vizibila
+    if (refreshKey === 0) setLoading(true);
     Promise.all([
       getAdminInbox().catch(() => ({ data: [] })),
       getPasswordResetRequests().catch(() => ({ data: [] })),
@@ -284,10 +286,6 @@ export default function AdminInboxPage() {
         </div>
       </div>
 
-      <div style={{ fontSize: 11, color: 'var(--c-ink3)', marginBottom: 16, fontStyle: 'italic' }}>
-        💡 Tab-ul „📬 Necitite" arată mesajele neîncă deschise — dispar de acolo când le citești. Tab-urile per categorie arată cele nerezolvate. Bifează ✓ pe rândurile Contact/Early Access ca să le marchezi rezolvate.
-      </div>
-
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
         {[
           ['necitite', `📬 Necitite${newCount ? ` (${newCount})` : ''}`],
@@ -302,12 +300,6 @@ export default function AdminInboxPage() {
             {label}
           </button>
         ))}
-        {newCount > 0 && filter === 'necitite' && (
-          <button onClick={handleMarkAllRead}
-            style={{ marginLeft: 'auto', padding: '6px 12px', borderRadius: 8, border: '1px dashed var(--c-ink3)', background: 'transparent', fontSize: 11, fontWeight: 600, cursor: 'pointer', color: 'var(--c-ink3)' }}>
-            ✓ Marchează toate citite
-          </button>
-        )}
       </div>
 
       {/* === UPGRADE REQUESTS TAB === */}
