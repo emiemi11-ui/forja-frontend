@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { io } from 'socket.io-client';
-import { getAdminInbox, getPasswordResetRequests, generateTempPassword, adminListUpgrades, adminListDowngrades, adminApproveUpgrade, adminRejectUpgrade, markInboxRead, markAllInboxRead } from '../../../shared/api/index.js';
+import { getAdminInbox, getPasswordResetRequests, generateTempPassword, adminListUpgrades, adminListDowngrades, adminApproveUpgrade, adminRejectUpgrade, markInboxRead, markAllInboxRead, toggleInboxResolved } from '../../../shared/api/index.js';
 import { useConfirm } from '../../../shared/ui/ConfirmModal.jsx';
 import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
 
@@ -167,12 +167,16 @@ export default function AdminInboxPage() {
   };
 
   const filtered = filter === 'toate' ? inbox : (filter === 'reset' || filter === 'upgrade' || filter === 'downgrade') ? [] : inbox.filter((message) => message.type === filter);
-  const contactCount = inbox.filter((message) => message.type === 'contact').length;
-  const earlyCount = inbox.filter((message) => message.type === 'early-access').length;
-  const newCount = inbox.filter((message) => message.status === 'nou').length;
+  // REGULĂ STRICTĂ:
+  // - NEREZOLVAT = status !== 'resolved' (nou + citit)
+  // - NECITIT = status === 'nou'
+  const contactUnresolved = inbox.filter((m) => m.type === 'contact' && m.status !== 'resolved').length;
+  const earlyUnresolved = inbox.filter((m) => m.type === 'early-access' && m.status !== 'resolved').length;
+  const contactTotal = inbox.filter((m) => m.type === 'contact').length;
+  const earlyTotal = inbox.filter((m) => m.type === 'early-access').length;
+  const newCount = inbox.filter((m) => m.status === 'nou').length;
   const pendingResets = resetRequests.filter((r) => r.status === 'PENDING').length;
   const pendingUpgrades = upgradeRequests.filter((r) => r.status === 'PENDING').length;
-  const downgradeCount = downgrades.length;
 
   const openMessage = (message) => {
     setSelected(message);
@@ -197,39 +201,68 @@ export default function AdminInboxPage() {
     }
   };
 
+  const handleToggleResolved = async (message, event) => {
+    event?.stopPropagation();
+    // Optimistic toggle
+    const wasResolved = message.status === 'resolved';
+    const newStatus = wasResolved ? 'citit' : 'resolved';
+    setInbox((current) => current.map((entry) =>
+      entry.id === message.id ? { ...entry, status: newStatus } : entry
+    ));
+    try {
+      await toggleInboxResolved(message.id);
+      showToast(wasResolved ? '↩️ Marcat ca nerezolvat' : '✓ Rezolvat');
+    } catch (e) {
+      // Revert pe eroare
+      setInbox((current) => current.map((entry) =>
+        entry.id === message.id ? { ...entry, status: message.status } : entry
+      ));
+      showToast('❌ Eroare', '❌');
+    }
+  };
+
   return (
     <div className="adm-page">
       <Toast toast={toast} />
       <h2 style={{ fontFamily: 'var(--fd)', fontSize: 28, fontWeight: 900, marginBottom: 20 }}>Inbox</h2>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 24 }}>
-        <div className="card" style={{ padding: '16px', textAlign: 'center' }}>
-          <div style={{ fontFamily: 'var(--fd)', fontSize: 28, fontWeight: 900, color: newCount > 0 ? 'var(--c-coral)' : 'var(--c-lime-d)' }}>{newCount}</div>
-          <div style={{ fontFamily: 'var(--fm)', fontSize: 9, letterSpacing: 1, color: 'var(--c-ink3)' }}>MESAJE NOI</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 12 }}>
+        <div className="card" style={{ padding: '16px', textAlign: 'center', borderTop: newCount > 0 ? '3px solid var(--c-coral)' : '3px solid var(--c-border)' }}>
+          <div style={{ fontFamily: 'var(--fd)', fontSize: 28, fontWeight: 900, color: newCount > 0 ? 'var(--c-coral)' : 'var(--c-ink3)' }}>{newCount}</div>
+          <div style={{ fontFamily: 'var(--fm)', fontSize: 9, letterSpacing: 1, color: 'var(--c-ink3)', marginTop: 4 }}>📩 MESAJE NOI</div>
+          <div style={{ fontSize: 9, color: 'var(--c-ink3)', marginTop: 2 }}>necitite</div>
         </div>
-        <div className="card" style={{ padding: '16px', textAlign: 'center' }}>
-          <div style={{ fontFamily: 'var(--fd)', fontSize: 28, fontWeight: 900, color: 'var(--c-blue)' }}>{contactCount}</div>
-          <div style={{ fontFamily: 'var(--fm)', fontSize: 9, letterSpacing: 1, color: 'var(--c-ink3)' }}>DIN CONTACT</div>
+        <div className="card" style={{ padding: '16px', textAlign: 'center', borderTop: contactUnresolved > 0 ? '3px solid var(--c-blue)' : '3px solid var(--c-border)' }}>
+          <div style={{ fontFamily: 'var(--fd)', fontSize: 28, fontWeight: 900, color: contactUnresolved > 0 ? 'var(--c-blue)' : 'var(--c-ink3)' }}>{contactUnresolved}</div>
+          <div style={{ fontFamily: 'var(--fm)', fontSize: 9, letterSpacing: 1, color: 'var(--c-ink3)', marginTop: 4 }}>📩 DIN CONTACT</div>
+          <div style={{ fontSize: 9, color: 'var(--c-ink3)', marginTop: 2 }}>nerezolvate</div>
         </div>
-        <div className="card" style={{ padding: '16px', textAlign: 'center' }}>
-          <div style={{ fontFamily: 'var(--fd)', fontSize: 28, fontWeight: 900, color: '#7B2FBE' }}>{earlyCount}</div>
-          <div style={{ fontFamily: 'var(--fm)', fontSize: 9, letterSpacing: 1, color: 'var(--c-ink3)' }}>EARLY ACCESS</div>
+        <div className="card" style={{ padding: '16px', textAlign: 'center', borderTop: earlyUnresolved > 0 ? '3px solid #7B2FBE' : '3px solid var(--c-border)' }}>
+          <div style={{ fontFamily: 'var(--fd)', fontSize: 28, fontWeight: 900, color: earlyUnresolved > 0 ? '#7B2FBE' : 'var(--c-ink3)' }}>{earlyUnresolved}</div>
+          <div style={{ fontFamily: 'var(--fm)', fontSize: 9, letterSpacing: 1, color: 'var(--c-ink3)', marginTop: 4 }}>📱 EARLY ACCESS</div>
+          <div style={{ fontSize: 9, color: 'var(--c-ink3)', marginTop: 2 }}>nerezolvate</div>
         </div>
-        <div className="card" style={{ padding: '16px', textAlign: 'center' }}>
-          <div style={{ fontFamily: 'var(--fd)', fontSize: 28, fontWeight: 900, color: pendingResets > 0 ? 'var(--c-coral)' : 'var(--c-ink2)' }}>{pendingResets}</div>
-          <div style={{ fontFamily: 'var(--fm)', fontSize: 9, letterSpacing: 1, color: 'var(--c-ink3)' }}>CERERI PAROLĂ</div>
+        <div className="card" style={{ padding: '16px', textAlign: 'center', borderTop: pendingResets > 0 ? '3px solid var(--c-coral)' : '3px solid var(--c-border)' }}>
+          <div style={{ fontFamily: 'var(--fd)', fontSize: 28, fontWeight: 900, color: pendingResets > 0 ? 'var(--c-coral)' : 'var(--c-ink3)' }}>{pendingResets}</div>
+          <div style={{ fontFamily: 'var(--fm)', fontSize: 9, letterSpacing: 1, color: 'var(--c-ink3)', marginTop: 4 }}>🔑 CERERI PAROLĂ</div>
+          <div style={{ fontSize: 9, color: 'var(--c-ink3)', marginTop: 2 }}>pending</div>
         </div>
-        <div className="card" style={{ padding: '16px', textAlign: 'center' }}>
-          <div style={{ fontFamily: 'var(--fd)', fontSize: 28, fontWeight: 900, color: pendingUpgrades > 0 ? 'var(--c-coral)' : 'var(--c-ink2)' }}>{pendingUpgrades}</div>
-          <div style={{ fontFamily: 'var(--fm)', fontSize: 9, letterSpacing: 1, color: 'var(--c-ink3)' }}>UPGRADE-URI</div>
+        <div className="card" style={{ padding: '16px', textAlign: 'center', borderTop: pendingUpgrades > 0 ? '3px solid var(--c-coral)' : '3px solid var(--c-border)' }}>
+          <div style={{ fontFamily: 'var(--fd)', fontSize: 28, fontWeight: 900, color: pendingUpgrades > 0 ? 'var(--c-coral)' : 'var(--c-ink3)' }}>{pendingUpgrades}</div>
+          <div style={{ fontFamily: 'var(--fm)', fontSize: 9, letterSpacing: 1, color: 'var(--c-ink3)', marginTop: 4 }}>💎 UPGRADE-URI</div>
+          <div style={{ fontSize: 9, color: 'var(--c-ink3)', marginTop: 2 }}>de aprobat</div>
         </div>
+      </div>
+
+      <div style={{ fontSize: 11, color: 'var(--c-ink3)', marginBottom: 16, fontStyle: 'italic' }}>
+        💡 Toate cardurile arată DOAR ce necesită acțiune (nerezolvate/pending). Bifează ✓ pe rândurile Contact/Early Access ca să le scoți din numărătoare.
       </div>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
         {[
-          ['toate', 'Toate'],
-          ['contact', '📩 Contact'],
-          ['early-access', '📱 Early Access'],
+          ['toate', `Toate (${inbox.length})`],
+          ['contact', `📩 Contact (${contactTotal}${contactUnresolved !== contactTotal ? ` · ${contactUnresolved} de tratat` : ''})`],
+          ['early-access', `📱 Early Access (${earlyTotal}${earlyUnresolved !== earlyTotal ? ` · ${earlyUnresolved} de tratat` : ''})`],
           ['reset', `🔑 Cereri parolă${pendingResets ? ` (${pendingResets})` : ''}`],
           ['upgrade', `💎 Cereri upgrade${pendingUpgrades ? ` (${pendingUpgrades})` : ''}`],
           ['downgrade', '⬇️ Downgrade-uri'],
@@ -384,22 +417,53 @@ export default function AdminInboxPage() {
             <div className="card" style={{ padding: 24, textAlign: 'center' }}><div className="spinner" /></div>
           ) : filtered.length === 0 ? (
             <div className="card" style={{ padding: 24, fontSize: 12, color: 'var(--c-ink3)' }}>Nu există mesaje pentru filtrul curent.</div>
-          ) : filtered.map((message) => (
-            <div key={message.id} className="card" onClick={() => openMessage(message)}
-              style={{ padding: '14px 20px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 14, borderLeft: message.status === 'nou' ? '3px solid var(--c-coral)' : '3px solid transparent' }}>
-              <div style={{ width: 36, height: 36, borderRadius: '50%', background: message.type === 'contact' ? 'var(--c-blue-bg)' : 'rgba(123,47,190,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>
-                {message.type === 'contact' ? '📩' : '📱'}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 700, fontSize: 13 }}>{message.type === 'contact' ? message.name : message.email}</div>
-                <div style={{ fontSize: 11, color: 'var(--c-ink3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{message.subject} — {message.message}</div>
-              </div>
-              <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <div style={{ fontSize: 10, color: 'var(--c-ink3)', fontFamily: 'var(--fm)' }}>{message.date}</div>
-                {message.status === 'nou' && <span style={{ fontSize: 9, padding: '2px 8px', borderRadius: 4, background: 'var(--c-coral)', color: '#fff', fontWeight: 700 }}>NOU</span>}
+          ) : filtered.map((message) => {
+            const isResolved = message.status === 'resolved';
+            const isNew = message.status === 'nou';
+            return (
+            <div key={message.id} className="card"
+              style={{
+                padding: '14px 20px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 14,
+                borderLeft: isNew ? '3px solid var(--c-coral)' : (isResolved ? '3px solid var(--c-lime)' : '3px solid transparent'),
+                opacity: isResolved ? 0.55 : 1,
+                background: isResolved ? 'var(--c-bg)' : undefined,
+              }}>
+              {/* CHECKBOX rezolvat */}
+              <label
+                onClick={(e) => e.stopPropagation()}
+                style={{ flexShrink: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 4 }}
+                title={isResolved ? 'Marchează ca nerezolvat' : 'Marchează ca rezolvat'}
+              >
+                <input
+                  type="checkbox"
+                  checked={isResolved}
+                  onChange={(e) => handleToggleResolved(message, e)}
+                  style={{ width: 18, height: 18, cursor: 'pointer', accentColor: 'var(--c-lime)' }}
+                />
+              </label>
+              <div onClick={() => openMessage(message)} style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1, minWidth: 0 }}>
+                <div style={{ width: 36, height: 36, borderRadius: '50%', background: message.type === 'contact' ? 'var(--c-blue-bg)' : 'rgba(123,47,190,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>
+                  {message.type === 'contact' ? '📩' : '📱'}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: 13, textDecoration: isResolved ? 'line-through' : 'none' }}>
+                    {message.type === 'contact' ? message.name : message.email}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--c-ink3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{message.subject} — {message.message}</div>
+                </div>
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <div style={{ fontSize: 10, color: 'var(--c-ink3)', fontFamily: 'var(--fm)' }}>{message.date}</div>
+                  {isNew && <span style={{ fontSize: 9, padding: '2px 8px', borderRadius: 4, background: 'var(--c-coral)', color: '#fff', fontWeight: 700 }}>NOU</span>}
+                  {isResolved && <span style={{ fontSize: 9, padding: '2px 8px', borderRadius: 4, background: 'var(--c-lime)', color: '#000', fontWeight: 700 }}>REZOLVAT</span>}
+                </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
