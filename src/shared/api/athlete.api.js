@@ -33,6 +33,7 @@ export const cancelSubscription = () => api.post('/upgrade/cancel');
 export const getMyUpgradeRequest = () => api.get('/upgrade/my-request');
 // Admin
 export const adminListUpgrades = () => api.get('/upgrade/admin/list');
+export const adminListDowngrades = () => api.get('/upgrade/admin/downgrades');
 export const adminApproveUpgrade = (id) => api.post(`/upgrade/admin/${id}/approve`);
 export const adminRejectUpgrade = (id, reason) => api.post(`/upgrade/admin/${id}/reject`, { reason });
 export const bulkDoneExercises = () =>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { getAdminInbox, getPasswordResetRequests, generateTempPassword } from '../../../shared/api/index.js';
+import { getAdminInbox, getPasswordResetRequests, generateTempPassword, adminListUpgrades, adminListDowngrades, adminApproveUpgrade, adminRejectUpgrade } from '../../../shared/api/index.js';
 import { useConfirm } from '../../../shared/ui/ConfirmModal.jsx';
+import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
 
 function normalizeInboxResponse(payload) {
   if (Array.isArray(payload)) return payload.map(normalizeInboxItem);
@@ -57,6 +58,8 @@ function formatDate(iso) {
 export default function AdminInboxPage() {
   const [inbox, setInbox] = useState([]);
   const [resetRequests, setResetRequests] = useState([]);
+  const [upgradeRequests, setUpgradeRequests] = useState([]);
+  const [downgrades, setDowngrades] = useState([]);
   const [filter, setFilter] = useState('toate');
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -64,6 +67,7 @@ export default function AdminInboxPage() {
   const [generatingFor, setGeneratingFor] = useState('');
   const [generatedPassword, setGeneratedPassword] = useState(null);
   const confirm = useConfirm();
+  const { toast, showToast } = useToast();
 
   useEffect(() => {
     let mounted = true;
@@ -71,15 +75,51 @@ export default function AdminInboxPage() {
     Promise.all([
       getAdminInbox().catch(() => ({ data: [] })),
       getPasswordResetRequests().catch(() => ({ data: [] })),
-    ]).then(([inboxRes, resetRes]) => {
+      adminListUpgrades().catch(() => ({ data: { requests: [] } })),
+      adminListDowngrades().catch(() => ({ data: { downgrades: [] } })),
+    ]).then(([inboxRes, resetRes, upgRes, dowRes]) => {
       if (!mounted) return;
       setInbox(normalizeInboxResponse(inboxRes.data));
       setResetRequests(resetRes.data || []);
+      setUpgradeRequests(upgRes.data?.requests || []);
+      setDowngrades(dowRes.data?.downgrades || []);
     }).finally(() => {
       if (mounted) setLoading(false);
     });
     return () => { mounted = false; };
   }, [refreshKey]);
+
+  const handleApproveUpgrade = (req) => {
+    confirm(
+      `Aprobi cererea ${req.requestId} pentru ${req.user?.name || '?'} (${req.toPlan} - ${req.amount} lei)?`,
+      async () => {
+        try {
+          await adminApproveUpgrade(req.id);
+          showToast('✅ Cerere aprobată');
+          setRefreshKey((c) => c + 1);
+        } catch (e) {
+          showToast(e.response?.data?.error || '❌ Eroare', '❌');
+        }
+      }
+    );
+  };
+
+  const handleRejectUpgrade = (req) => {
+    const reason = prompt('Motiv respingere (opțional):');
+    if (reason === null) return;
+    confirm(
+      `Respingi cererea ${req.requestId}?${req.type === 'REGISTER' ? ' Contul rămâne FREE.' : ''}`,
+      async () => {
+        try {
+          await adminRejectUpgrade(req.id, reason);
+          showToast('🚫 Cerere respinsă');
+          setRefreshKey((c) => c + 1);
+        } catch (e) {
+          showToast(e.response?.data?.error || '❌ Eroare', '❌');
+        }
+      }
+    );
+  };
 
   const handleGenerateTempPassword = (userId, userName) => {
     confirm(`Generezi o parolă temporară pentru "${userName}"? Parola va fi afișată o singură dată.`, async () => {
@@ -100,11 +140,13 @@ export default function AdminInboxPage() {
     });
   };
 
-  const filtered = filter === 'toate' ? inbox : filter === 'reset' ? [] : inbox.filter((message) => message.type === filter);
+  const filtered = filter === 'toate' ? inbox : (filter === 'reset' || filter === 'upgrade' || filter === 'downgrade') ? [] : inbox.filter((message) => message.type === filter);
   const contactCount = inbox.filter((message) => message.type === 'contact').length;
   const earlyCount = inbox.filter((message) => message.type === 'early-access').length;
   const newCount = inbox.filter((message) => message.status === 'nou').length;
   const pendingResets = resetRequests.filter((r) => r.status === 'PENDING').length;
+  const pendingUpgrades = upgradeRequests.filter((r) => r.status === 'PENDING').length;
+  const downgradeCount = downgrades.length;
 
   const openMessage = (message) => {
     setSelected(message);
@@ -113,9 +155,10 @@ export default function AdminInboxPage() {
 
   return (
     <div className="adm-page">
+      <Toast toast={toast} />
       <h2 style={{ fontFamily: 'var(--fd)', fontSize: 28, fontWeight: 900, marginBottom: 20 }}>Inbox</h2>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 24 }}>
         <div className="card" style={{ padding: '16px', textAlign: 'center' }}>
           <div style={{ fontFamily: 'var(--fd)', fontSize: 28, fontWeight: 900, color: newCount > 0 ? 'var(--c-coral)' : 'var(--c-lime-d)' }}>{newCount}</div>
           <div style={{ fontFamily: 'var(--fm)', fontSize: 9, letterSpacing: 1, color: 'var(--c-ink3)' }}>MESAJE NOI</div>
@@ -130,18 +173,116 @@ export default function AdminInboxPage() {
         </div>
         <div className="card" style={{ padding: '16px', textAlign: 'center' }}>
           <div style={{ fontFamily: 'var(--fd)', fontSize: 28, fontWeight: 900, color: pendingResets > 0 ? 'var(--c-coral)' : 'var(--c-ink2)' }}>{pendingResets}</div>
-          <div style={{ fontFamily: 'var(--fm)', fontSize: 9, letterSpacing: 1, color: 'var(--c-ink3)' }}>RESETĂRI PAROLĂ</div>
+          <div style={{ fontFamily: 'var(--fm)', fontSize: 9, letterSpacing: 1, color: 'var(--c-ink3)' }}>CERERI PAROLĂ</div>
+        </div>
+        <div className="card" style={{ padding: '16px', textAlign: 'center' }}>
+          <div style={{ fontFamily: 'var(--fd)', fontSize: 28, fontWeight: 900, color: pendingUpgrades > 0 ? 'var(--c-coral)' : 'var(--c-ink2)' }}>{pendingUpgrades}</div>
+          <div style={{ fontFamily: 'var(--fm)', fontSize: 9, letterSpacing: 1, color: 'var(--c-ink3)' }}>UPGRADE-URI</div>
+        </div>
+        <div className="card" style={{ padding: '16px', textAlign: 'center' }}>
+          <div style={{ fontFamily: 'var(--fd)', fontSize: 28, fontWeight: 900, color: 'var(--c-ink2)' }}>{downgradeCount}</div>
+          <div style={{ fontFamily: 'var(--fm)', fontSize: 9, letterSpacing: 1, color: 'var(--c-ink3)' }}>DOWNGRADE-URI</div>
         </div>
       </div>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
-        {[['toate', 'Toate'], ['contact', '📩 Contact'], ['early-access', '📱 Early Access'], ['reset', `🔑 Cereri parolă${pendingResets ? ` (${pendingResets})` : ''}`]].map(([key, label]) => (
+        {[
+          ['toate', 'Toate'],
+          ['contact', '📩 Contact'],
+          ['early-access', '📱 Early Access'],
+          ['reset', `🔑 Cereri parolă${pendingResets ? ` (${pendingResets})` : ''}`],
+          ['upgrade', `💎 Cereri upgrade${pendingUpgrades ? ` (${pendingUpgrades})` : ''}`],
+          ['downgrade', `⬇️ Downgrade-uri${downgradeCount ? ` (${downgradeCount})` : ''}`],
+        ].map(([key, label]) => (
           <button key={key} onClick={() => setFilter(key)}
             style={{ padding: '6px 14px', borderRadius: 8, border: filter === key ? '2px solid var(--c-lime)' : '1px solid var(--c-border)', background: filter === key ? 'var(--c-lime-bg)' : 'transparent', fontSize: 12, fontWeight: 600, cursor: 'pointer', color: 'var(--c-ink)' }}>
             {label}
           </button>
         ))}
       </div>
+
+      {/* === UPGRADE REQUESTS TAB === */}
+      {filter === 'upgrade' && (
+        <div style={{ display: 'grid', gap: 10 }}>
+          {loading ? (
+            <div className="card" style={{ padding: 24, textAlign: 'center' }}><div className="spinner" /></div>
+          ) : upgradeRequests.length === 0 ? (
+            <div className="card" style={{ padding: 32, textAlign: 'center' }}>
+              <div style={{ fontSize: 42, opacity: 0.3, marginBottom: 6 }}>💎</div>
+              <div style={{ fontFamily: 'var(--fd)', fontSize: 16, fontWeight: 700 }}>Nicio cerere de upgrade</div>
+              <div style={{ fontSize: 12, color: 'var(--c-ink3)', marginTop: 4 }}>Cererile vor apărea aici când utilizatorii fac upgrade plan.</div>
+            </div>
+          ) : (
+            upgradeRequests.map(req => (
+              <div key={req.id} className="card" style={{ padding: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 10 }}>
+                  <div>
+                    <div style={{ fontSize: 10, color: 'var(--c-ink3)', fontFamily: 'var(--fm)', letterSpacing: 1 }}>{req.requestId || req.id}</div>
+                    <div style={{ fontFamily: 'var(--fd)', fontSize: 16, fontWeight: 800, marginTop: 2 }}>
+                      {req.user?.name || '(user șters)'}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--c-ink3)' }}>{req.user?.email || req.email}</div>
+                  </div>
+                  <span style={{
+                    padding: '4px 10px', borderRadius: 12, fontSize: 10, fontWeight: 800, alignSelf: 'flex-start',
+                    background: req.status === 'PENDING' ? 'rgba(26,82,255,0.1)' : req.status === 'APPROVED' ? 'rgba(184,237,0,0.15)' : 'rgba(255,68,34,0.1)',
+                    color: req.status === 'PENDING' ? 'var(--c-blue)' : req.status === 'APPROVED' ? 'var(--c-lime-d)' : 'var(--c-coral)',
+                  }}>
+                    {req.status}
+                  </span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8, fontSize: 12, marginBottom: 10 }}>
+                  <div><div style={{ fontSize: 9, color: 'var(--c-ink3)', fontFamily: 'var(--fm)', textTransform: 'uppercase', letterSpacing: 1, fontWeight: 700 }}>Plan</div><strong>{req.fromPlan} → {req.toPlan}</strong></div>
+                  <div><div style={{ fontSize: 9, color: 'var(--c-ink3)', fontFamily: 'var(--fm)', textTransform: 'uppercase', letterSpacing: 1, fontWeight: 700 }}>Sumă</div><strong style={{ color: 'var(--c-lime-d)' }}>{req.amount} lei</strong></div>
+                  <div><div style={{ fontSize: 9, color: 'var(--c-ink3)', fontFamily: 'var(--fm)', textTransform: 'uppercase', letterSpacing: 1, fontWeight: 700 }}>Tip</div>{req.type === 'REGISTER' ? 'La register' : 'Upgrade'}</div>
+                  <div><div style={{ fontSize: 9, color: 'var(--c-ink3)', fontFamily: 'var(--fm)', textTransform: 'uppercase', letterSpacing: 1, fontWeight: 700 }}>Data</div>{formatDate(req.createdAt)}</div>
+                </div>
+                {req.status === 'PENDING' && (
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="btn btn-lime" onClick={() => handleApproveUpgrade(req)} style={{ flex: 1, fontWeight: 800 }}>✅ Confirm plata</button>
+                    <button onClick={() => handleRejectUpgrade(req)} style={{ flex: 1, padding: 10, borderRadius: 10, border: '1.5px solid var(--c-coral)', background: 'transparent', color: 'var(--c-coral)', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>❌ Respinge</button>
+                  </div>
+                )}
+                {req.status === 'REJECTED' && req.reason && (
+                  <div style={{ fontSize: 12, color: 'var(--c-coral)', padding: 8, background: 'rgba(255,68,34,0.05)', borderRadius: 6 }}>
+                    Motiv: {req.reason}
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* === DOWNGRADE HISTORY TAB === */}
+      {filter === 'downgrade' && (
+        <div style={{ display: 'grid', gap: 10 }}>
+          {loading ? (
+            <div className="card" style={{ padding: 24, textAlign: 'center' }}><div className="spinner" /></div>
+          ) : downgrades.length === 0 ? (
+            <div className="card" style={{ padding: 32, textAlign: 'center' }}>
+              <div style={{ fontSize: 42, opacity: 0.3, marginBottom: 6 }}>⬇️</div>
+              <div style={{ fontFamily: 'var(--fd)', fontSize: 16, fontWeight: 700 }}>Niciun downgrade</div>
+              <div style={{ fontSize: 12, color: 'var(--c-ink3)', marginTop: 4 }}>Downgrade-urile sunt instant — vor apărea aici ca istoric.</div>
+            </div>
+          ) : (
+            downgrades.map(d => (
+              <div key={d.id} className="card" style={{ padding: 14 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                  <div>
+                    <div style={{ fontFamily: 'var(--fd)', fontSize: 15, fontWeight: 800 }}>{d.user?.name || '(user șters)'}</div>
+                    <div style={{ fontSize: 12, color: 'var(--c-ink3)' }}>{d.user?.email || '—'}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 14, fontWeight: 700 }}>{d.from} → {d.to}</div>
+                    <div style={{ fontSize: 11, color: 'var(--c-ink3)' }}>{formatDate(d.createdAt)}</div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
 
       {/* === PASSWORD RESET TAB === */}
       {filter === 'reset' && (
