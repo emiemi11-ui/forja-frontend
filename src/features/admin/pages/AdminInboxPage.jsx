@@ -197,10 +197,6 @@ export default function AdminInboxPage() {
           <div style={{ fontFamily: 'var(--fd)', fontSize: 28, fontWeight: 900, color: pendingUpgrades > 0 ? 'var(--c-coral)' : 'var(--c-ink2)' }}>{pendingUpgrades}</div>
           <div style={{ fontFamily: 'var(--fm)', fontSize: 9, letterSpacing: 1, color: 'var(--c-ink3)' }}>UPGRADE-URI</div>
         </div>
-        <div className="card" style={{ padding: '16px', textAlign: 'center' }}>
-          <div style={{ fontFamily: 'var(--fd)', fontSize: 28, fontWeight: 900, color: 'var(--c-ink2)' }}>{downgradeCount}</div>
-          <div style={{ fontFamily: 'var(--fm)', fontSize: 9, letterSpacing: 1, color: 'var(--c-ink3)' }}>DOWNGRADE-URI</div>
-        </div>
       </div>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -210,7 +206,7 @@ export default function AdminInboxPage() {
           ['early-access', '📱 Early Access'],
           ['reset', `🔑 Cereri parolă${pendingResets ? ` (${pendingResets})` : ''}`],
           ['upgrade', `💎 Cereri upgrade${pendingUpgrades ? ` (${pendingUpgrades})` : ''}`],
-          ['downgrade', `⬇️ Downgrade-uri${downgradeCount ? ` (${downgradeCount})` : ''}`],
+          ['downgrade', '⬇️ Downgrade-uri'],
         ].map(([key, label]) => (
           <button key={key} onClick={() => setFilter(key)}
             style={{ padding: '6px 14px', borderRadius: 8, border: filter === key ? '2px solid var(--c-lime)' : '1px solid var(--c-border)', background: filter === key ? 'var(--c-lime-bg)' : 'transparent', fontSize: 12, fontWeight: 600, cursor: 'pointer', color: 'var(--c-ink)' }}>
@@ -356,7 +352,7 @@ export default function AdminInboxPage() {
       )}
 
       {/* === REGULAR INBOX === */}
-      {filter !== 'reset' && (
+      {filter !== 'reset' && filter !== 'upgrade' && filter !== 'downgrade' && (
         <div style={{ display: 'grid', gap: 6 }}>
           {loading ? (
             <div className="card" style={{ padding: 24, textAlign: 'center' }}><div className="spinner" /></div>
