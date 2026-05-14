@@ -1765,6 +1765,26 @@ body::after { display: none !important; }
 }
 .mobile-menu-inner a:hover { background:rgba(0,0,0,0.04); }
 
+/* Register button — culori FORȚATE indiferent de rezolutie (overflow fix between 768-980px) */
+.mobile-menu .btn-nav-cta,
+.mobile-menu-inner .btn-nav-cta,
+.mobile-menu-inner a.btn-nav-cta {
+  color: #ffffff !important;
+  background: #0a0a0a !important;
+}
+.mobile-menu .btn-nav-cta:hover,
+.mobile-menu-inner a.btn-nav-cta:hover {
+  background: #FF4D1C !important;
+  color: #ffffff !important;
+}
+/* Autentificare button — asigura contrast */
+.mobile-menu .btn-nav-ghost,
+.mobile-menu-inner .btn-nav-ghost {
+  color: #0a0a0a !important;
+  background: #ffffff !important;
+  border: 1.5px solid #0a0a0a !important;
+}
+
 @media(max-width:980px) {
   .nav-mid { display:none !important; }
   .nav-right { display:none !important; }
