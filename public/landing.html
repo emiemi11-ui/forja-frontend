@@ -13,11 +13,9 @@
 <!-- SCROLL PROGRESS -->
 <div id="scrollProgress"></div>
 
-<div class="cursor" id="cursor"></div>
-
 <!-- NAV -->
 <nav id="nav">
-  <a href="#" class="nav-logo">F<em>O</em>RJA</a>
+  <a href="/" class="nav-logo">F<em>O</em>RJA</a>
   <div class="nav-mid">
     <a href="#features">Ecosistem</a>
     <a href="#plans">Planuri</a>
@@ -845,8 +843,7 @@ function closeMobileMenu(){ document.getElementById('mobileMenu').classList.remo
 <footer>
   <div class="footer-logo">F<em>O</em>RJA</div>
   <div class="footer-links">
-    <a role="button" tabindex="0" href="#" onclick="event.preventDefault();openInfoModal('about')">Despre noi</a><a role="button" tabindex="0" href="#" onclick="event.preventDefault();openInfoModal('reviews')">Recenzii</a><a role="button" tabindex="0" href="#" onclick="event.preventDefault();openInfoModal('terms')">Termeni</a>
-    <a role="button" tabindex="0" href="#" onclick="event.preventDefault();openInfoModal('privacy')">Confidențialitate</a><a href="/contact">Contact</a><a href="/login?tab=demo">Testează demo</a>
+    <button type="button" class="footer-link-btn" onclick="openInfoModal('about')">Despre noi</button><button type="button" class="footer-link-btn" onclick="openInfoModal('reviews')">Recenzii</button><button type="button" class="footer-link-btn" onclick="openInfoModal('terms')">Termeni</button><button type="button" class="footer-link-btn" onclick="openInfoModal('privacy')">Confidențialitate</button><a href="/contact">Contact</a><a href="/login?tab=demo">Testează demo</a>
   </div>
   <div class="footer-copy">© 2026 FORJA SRL · Toate drepturile rezervate</div>
 </footer>

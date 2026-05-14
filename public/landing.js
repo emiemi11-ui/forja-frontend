@@ -5,11 +5,7 @@
 
 // ── Block 1 ──
 // CURSOR
-const cursor = document.getElementById('cursor');
-document.addEventListener('mousemove', e => {
-  cursor.style.left = e.clientX + 'px';
-  cursor.style.top = e.clientY + 'px';
-});
+// Custom cursor disabled (was buggy, stuck visible on page)
 
 // NAV
 window.addEventListener('scroll', () => {
@@ -203,13 +199,36 @@ function closeSiteModal(id) {
   const el = document.getElementById(id);
   if (!el) return;
   el.classList.remove('open');
+  el.style.display = 'none';
   el.setAttribute('aria-hidden', 'true');
+  // Unblock scroll if no other modal open
+  const anyOpen = document.querySelector('.site-modal.open');
+  if (!anyOpen) {
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+  }
 }
 function openSiteModal(id) {
   const el = document.getElementById(id);
   if (!el) return;
+  // CRITICAL: move modal to <body> direct child, escape ANY transformed parent
+  // (this is THE fix for "modal appears mid-page instead of centered")
+  if (el.parentElement !== document.body) {
+    document.body.appendChild(el);
+  }
   el.classList.add('open');
   el.setAttribute('aria-hidden', 'false');
+  // Force inline styles - cannot be overridden by any CSS conflict
+  el.style.cssText =
+    'position:fixed!important;' +
+    'top:0!important;left:0!important;right:0!important;bottom:0!important;' +
+    'width:100vw!important;height:100vh!important;' +
+    'margin:0!important;padding:24px!important;box-sizing:border-box;' +
+    'display:flex!important;align-items:center!important;justify-content:center!important;' +
+    'z-index:99999!important;overflow-y:auto;';
+  // Block scroll on body + html (so user can't scroll the page behind)
+  document.body.style.overflow = 'hidden';
+  document.documentElement.style.overflow = 'hidden';
 }
 function openInfoModal(type) {
   const cfg = INFO_CONTENT[type] || INFO_CONTENT.about;
