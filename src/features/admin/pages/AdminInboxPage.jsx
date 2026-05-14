@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { io } from 'socket.io-client';
 import { getAdminInbox, getPasswordResetRequests, generateTempPassword, adminListUpgrades, adminListDowngrades, adminApproveUpgrade, adminRejectUpgrade, markInboxRead, markAllInboxRead } from '../../../shared/api/index.js';
 import { useConfirm } from '../../../shared/ui/ConfirmModal.jsx';
 import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
@@ -88,6 +89,31 @@ export default function AdminInboxPage() {
     });
     return () => { mounted = false; };
   }, [refreshKey]);
+
+  // === Real-time updates: ascultam inbox:new pe socket si triggher refresh ===
+  const socketRef = useRef(null);
+  useEffect(() => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!token) return;
+    const socketUrl = import.meta.env.VITE_API_URL || window.location.origin;
+    const socket = io(socketUrl, { auth: { token }, transports: ['websocket', 'polling'] });
+    socketRef.current = socket;
+    socket.on('inbox:new', (data) => {
+      console.log('[admin/inbox] real-time event:', data?.kind);
+      // Trigger refetch (mai simplu decat sa parsam payload-ul)
+      setRefreshKey((c) => c + 1);
+      // Tost de notificare scurt
+      const label = {
+        contact: '📩 Mesaj nou de contact',
+        waitlist: '📱 Early Access nou',
+        upgrade: '💎 Cerere upgrade nouă',
+        downgrade: '⬇️ Downgrade efectuat',
+        'password-reset': '🔑 Cerere parolă nouă',
+      }[data?.kind] || '🔔 Nou în inbox';
+      showToast(label);
+    });
+    return () => { socket.disconnect(); };
+  }, [showToast]);
 
   const handleApproveUpgrade = (req) => {
     confirm(
