@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getAdminInbox, getPasswordResetRequests, generateTempPassword, adminListUpgrades, adminListDowngrades, adminApproveUpgrade, adminRejectUpgrade } from '../../../shared/api/index.js';
+import { getAdminInbox, getPasswordResetRequests, generateTempPassword, adminListUpgrades, adminListDowngrades, adminApproveUpgrade, adminRejectUpgrade, markInboxRead, markAllInboxRead } from '../../../shared/api/index.js';
 import { useConfirm } from '../../../shared/ui/ConfirmModal.jsx';
 import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
 
@@ -150,7 +150,25 @@ export default function AdminInboxPage() {
 
   const openMessage = (message) => {
     setSelected(message);
+    // Optimistic UI update
     setInbox((current) => current.map((entry) => entry.id === message.id ? { ...entry, status: 'citit' } : entry));
+    // Persist la backend (doar daca era 'nou')
+    if (message.status === 'nou') {
+      markInboxRead(message.id).catch((e) => {
+        console.warn('[admin/inbox] mark-read failed:', e?.response?.data?.error || e?.message);
+      });
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    if (newCount === 0) return;
+    try {
+      await markAllInboxRead();
+      setInbox((current) => current.map((entry) => ({ ...entry, status: 'citit' })));
+      showToast(`✓ ${newCount} mesaje marcate ca citite`);
+    } catch (e) {
+      showToast('❌ Eroare la marcare', '❌');
+    }
   };
 
   return (
@@ -185,7 +203,7 @@ export default function AdminInboxPage() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
         {[
           ['toate', 'Toate'],
           ['contact', '📩 Contact'],
@@ -199,6 +217,12 @@ export default function AdminInboxPage() {
             {label}
           </button>
         ))}
+        {newCount > 0 && (filter === 'toate' || filter === 'contact' || filter === 'early-access') && (
+          <button onClick={handleMarkAllRead}
+            style={{ marginLeft: 'auto', padding: '6px 12px', borderRadius: 8, border: '1px dashed var(--c-ink3)', background: 'transparent', fontSize: 11, fontWeight: 600, cursor: 'pointer', color: 'var(--c-ink3)' }}>
+            ✓ Marchează toate citite
+          </button>
+        )}
       </div>
 
       {/* === UPGRADE REQUESTS TAB === */}
