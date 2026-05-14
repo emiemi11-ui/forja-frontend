@@ -16,7 +16,7 @@ export default function AdminSecurityPage() {
   const filtered = filter === 'toate' ? audit : audit.filter((event) => event.type === filter);
   const statusColor = (status) => status === 'SUCCESS' ? '#15803D' : status === 'WARNING' ? 'var(--c-coral)' : status === 'ACTION' ? 'var(--c-blue)' : 'var(--c-ink3)';
   const statusBg = (status) => status === 'SUCCESS' ? 'rgba(21,128,61,0.1)' : status === 'WARNING' ? 'rgba(255,68,34,0.1)' : status === 'ACTION' ? 'rgba(26,82,255,0.1)' : 'rgba(0,0,0,0.05)';
-  const typeIcon = (type) => type === 'auth' ? '🔑' : type === 'moderare' ? '🛡️' : type === 'finante' ? '💳' : '⚙️';
+  const typeIcon = (type) => type === 'auth' ? '🔑' : type === 'finante' ? '💳' : '⚙️';
 
   return (
     <div className="adm-page">
@@ -27,8 +27,8 @@ export default function AdminSecurityPage() {
         {[
           { label: 'Total events', val: audit.length, color: 'var(--c-ink)' },
           { label: 'Auth', val: audit.filter((event) => event.type === 'auth').length, color: '#15803D' },
-          { label: 'Moderare', val: audit.filter((event) => event.type === 'moderare').length, color: 'var(--c-blue)' },
           { label: 'Finanțe', val: audit.filter((event) => event.type === 'finante').length, color: 'var(--c-coral)' },
+          { label: 'Setări', val: audit.filter((event) => event.type === 'setari').length, color: 'var(--c-ink3)' },
         ].map((stat) => (
           <div key={stat.label} className="card" style={{ padding: '14px 16px', textAlign: 'center' }}>
             <div style={{ fontFamily: 'var(--fd)', fontSize: 28, fontWeight: 900, color: stat.color }}>{stat.val}</div>
@@ -38,7 +38,7 @@ export default function AdminSecurityPage() {
       </div>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        {[['toate', 'Toate'], ['auth', '🔑 Auth'], ['moderare', '🛡️ Moderare'], ['finante', '💳 Finanțe'], ['setari', '⚙️ Setări']].map(([key, label]) => (
+        {[['toate', 'Toate'], ['auth', '🔑 Auth'], ['finante', '💳 Finanțe'], ['setari', '⚙️ Setări']].map(([key, label]) => (
           <button key={key} onClick={() => setFilter(key)}
             style={{ padding: '6px 14px', borderRadius: 8, border: filter === key ? '2px solid var(--c-lime)' : '1px solid var(--c-border)', background: filter === key ? 'var(--c-lime-bg)' : 'transparent', fontSize: 12, fontWeight: 600, cursor: 'pointer', color: 'var(--c-ink)' }}>
             {label}
