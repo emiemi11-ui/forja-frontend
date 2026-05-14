@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import RegisterWizard from '../components/RegisterWizard.jsx';
+import UpgradeModal from '../../../shared/ui/UpgradeModal.jsx';
 import { requestPasswordReset } from '../../../shared/api/index.js';
 import { buildDemoAuth } from '../../../shared/api/mockData.js';
 import '../auth.css';
@@ -201,6 +202,7 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [loadingDemo, setLoadingDemo] = useState('');
+  const [pendingUpgrade, setPendingUpgrade] = useState(null); // {requestId, plan, amount, iban, ...}
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [resettingPassword, setResettingPassword] = useState(false);
@@ -469,9 +471,14 @@ export default function Login() {
                   resetFeedback();
                   setLoading(true);
                   try {
-                    const redirect = await register(name, email, password, role, plan, null, extra, { persist: rememberMe });
+                    const result = await register(name, email, password, role, plan, null, extra, { persist: rememberMe });
+                    // Verifica daca a venit ca pending payment
+                    if (typeof result === 'object' && result?.pendingPayment) {
+                      setPendingUpgrade({ ...result.upgradeRequest });
+                      return;
+                    }
                     setSuccess(true);
-                    setTimeout(() => navigate(redirect || '/app'), 600);
+                    setTimeout(() => navigate(result || '/app'), 600);
                   } catch (err) {
                     setError(err?.response?.data?.error || 'Eroare la creare cont');
                   } finally {
@@ -566,6 +573,13 @@ export default function Login() {
           </div>
         </section>
       </div>
+      <UpgradeModal
+        isOpen={Boolean(pendingUpgrade)}
+        onClose={() => { setPendingUpgrade(null); setTab('login'); }}
+        targetPlan={pendingUpgrade?.plan || 'PRO'}
+        currentEmail={pendingUpgrade?.email || ''}
+        preData={pendingUpgrade}
+      />
     </div>
   );
 }

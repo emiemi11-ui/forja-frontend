@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getUser, getGoals, putGoals, patchUser, setSteps, uploadAvatar, getMyProfessionals, removeProfessionalLink, acceptProfessionalInvite, rejectProfessionalInvite, startConversation } from '../../../shared/api/index.js';
+import { getUser, getGoals, putGoals, patchUser, setSteps, uploadAvatar, getMyProfessionals, removeProfessionalLink, acceptProfessionalInvite, rejectProfessionalInvite, startConversation, cancelSubscription, getMyUpgradeRequest } from '../../../shared/api/index.js';
 import { changePassword } from '../../../shared/api/auth.api.js';
 import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
 import { useAuth } from '../../../features/auth/context/AuthContext.jsx';
+import { useConfirm } from '../../../shared/ui/ConfirmModal.jsx';
 import Modal, { ModalField, ModalInput, ModalActions } from '../../../shared/ui/Modal.jsx';
+import UpgradeModal from '../../../shared/ui/UpgradeModal.jsx';
 import { AnimatedPage, ScrollReveal, CountUp } from '../../../shared/ui/animations/index.jsx';
 
 export default function ProfilePage() {
@@ -17,6 +19,11 @@ export default function ProfilePage() {
   const [showStepsModal, setShowStepsModal] = useState(false);
   const [stepsInput, setStepsInput] = useState('');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeTargetPlan, setUpgradeTargetPlan] = useState('PRO');
+  const [pendingRequest, setPendingRequest] = useState(null);
+  const confirm = useConfirm();
   const [pwdForm, setPwdForm] = useState({ current: '', next: '', confirm: '' });
   const [pwdSaving, setPwdSaving] = useState(false);
   const [professionals, setProfessionals] = useState({ coaches: [], nutritionists: [] });
@@ -27,6 +34,14 @@ export default function ProfilePage() {
   const load = async () => {
     const [u, g, pros] = await Promise.all([getUser(), getGoals(), getMyProfessionals().catch(() => ({ data: { coaches: [], nutritionists: [] } }))]);
     setUserData(u.data);
+    // Verifica daca exista cerere upgrade pending
+    getMyUpgradeRequest().then(({ data }) => {
+      if (data?.request && data.request.status === 'PENDING') {
+        setPendingRequest(data.request);
+      } else {
+        setPendingRequest(null);
+      }
+    }).catch(() => {});
     const avatarThemeMatch = /[?&]background=([^&]+)/.exec(u.data.avatarUrl || '');
     setUserForm({ name: u.data.name, email: u.data.email || '', weight: u.data.weight || '', height: u.data.height || '', goal: u.data.goal || '', avatar: u.data.avatar, avatarUrl: u.data.avatarUrl || '', avatarTheme: avatarThemeMatch ? decodeURIComponent(avatarThemeMatch[1]) : '' });
     setGoals(g.data || {});
@@ -215,6 +230,93 @@ export default function ProfilePage() {
         </ModalActions>
       </Modal>
 
+      {/* === PLAN MODAL === */}
+      <Modal open={showPlanModal} onClose={() => setShowPlanModal(false)} title="💎 Planul meu">
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 11, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--fm)', marginBottom: 6 }}>Plan curent</div>
+          <div style={{
+            padding: 16, borderRadius: 12,
+            background: userData?.plan === 'TEAM' ? 'rgba(123,47,190,0.08)' : (userData?.plan === 'PRO' ? 'rgba(26,82,255,0.08)' : 'rgba(184,237,0,0.08)'),
+            border: '2px solid',
+            borderColor: userData?.plan === 'TEAM' ? 'var(--c-purple)' : (userData?.plan === 'PRO' ? 'var(--c-blue)' : 'var(--c-lime)'),
+          }}>
+            <div style={{ fontFamily: 'var(--fd)', fontSize: 28, fontWeight: 900, marginBottom: 4 }}>
+              {userData?.plan || 'FREE'}
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--c-ink3)' }}>
+              {userData?.plan === 'FREE' ? 'Gratuit - funcționalități de bază' :
+               userData?.plan === 'PRO' ? '29 lei/lună - DM, Coach 1:1, statistici avansate' :
+               '49 lei/lună - tot din PRO + echipe nelimitate + chat de echipă'}
+            </div>
+          </div>
+        </div>
+
+        {pendingRequest && (
+          <div style={{ marginBottom: 16, padding: 14, borderRadius: 10, background: 'rgba(255,193,7,0.08)', border: '1.5px solid #ffc107' }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#a08000', marginBottom: 6 }}>
+              ⏳ Cerere în așteptare
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--c-ink2)', lineHeight: 1.5 }}>
+              Ai o cerere de upgrade la <strong>{pendingRequest.toPlan}</strong> ({pendingRequest.amount} lei) trimisă pe {new Date(pendingRequest.createdAt).toLocaleDateString('ro-RO')}.
+              Adminul va aproba după confirmarea plății.
+            </div>
+          </div>
+        )}
+
+        <div style={{ fontSize: 11, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--fm)', marginBottom: 8 }}>
+          Schimbă planul
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+          {userData?.plan !== 'FREE' && (
+            <button
+              onClick={() => {
+                setShowPlanModal(false);
+                confirm('Ești sigur că vrei să anulezi abonamentul? Vei trece imediat pe planul FREE și pierzi accesul la funcționalitățile premium.', async () => {
+                  try {
+                    await cancelSubscription();
+                    showToast('✅ Abonamentul a fost anulat. Ești acum pe FREE.');
+                    load();
+                    updateUser({ plan: 'FREE' });
+                  } catch (e) {
+                    showToast(e.response?.data?.error || '❌ Eroare', '❌');
+                  }
+                });
+              }}
+              style={{ padding: 12, borderRadius: 10, border: '1.5px solid var(--c-coral)', background: 'transparent', color: 'var(--c-coral)', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
+              ⬇️ Downgrade la FREE — anulează abonamentul
+            </button>
+          )}
+          {userData?.plan !== 'PRO' && !pendingRequest && (
+            <button
+              onClick={() => { setShowPlanModal(false); setUpgradeTargetPlan('PRO'); setShowUpgradeModal(true); }}
+              style={{ padding: 12, borderRadius: 10, border: '1.5px solid var(--c-blue)', background: 'rgba(26,82,255,0.04)', color: 'var(--c-blue)', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
+              ⬆️ Upgrade la PRO — 29 lei/lună
+            </button>
+          )}
+          {userData?.plan !== 'TEAM' && !pendingRequest && (
+            <button
+              onClick={() => { setShowPlanModal(false); setUpgradeTargetPlan('TEAM'); setShowUpgradeModal(true); }}
+              style={{ padding: 12, borderRadius: 10, border: '1.5px solid var(--c-purple)', background: 'rgba(123,47,190,0.04)', color: 'var(--c-purple)', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
+              ⬆️ Upgrade la TEAM — 49 lei/lună
+            </button>
+          )}
+        </div>
+
+        <ModalActions>
+          <button className="btn btn-outline btn-sm" onClick={() => setShowPlanModal(false)}>Închide</button>
+        </ModalActions>
+      </Modal>
+
+      {/* === UPGRADE MODAL === */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => { setShowUpgradeModal(false); load(); }}
+        targetPlan={upgradeTargetPlan}
+        currentEmail={userData?.email || ''}
+        onSuccess={() => { load(); }}
+      />
+
       <div className="prof-layout">
         <div className="prof-left-card">
           <div className="prof-hd">
@@ -356,6 +458,14 @@ export default function ProfilePage() {
           <div className="prof-link" onClick={() => navigate('/app/teams')}>
             <div className="pli">🏆</div>
             <div><div className="pl-txt">Echipele mele</div><div className="pl-sub">{userData.teamName || 'Nicio echipă'}</div></div>
+            <span style={{ color: 'var(--c-ink3)' }}>›</span>
+          </div>
+          <div className="prof-link" style={{ background: userData.plan === 'FREE' ? 'rgba(184,237,0,0.06)' : (userData.plan === 'TEAM' ? 'rgba(123,47,190,0.06)' : 'rgba(26,82,255,0.06)'), border: '1.5px solid', borderColor: userData.plan === 'FREE' ? 'var(--c-lime)' : (userData.plan === 'TEAM' ? 'var(--c-purple)' : 'var(--c-blue)') }} onClick={() => setShowPlanModal(true)}>
+            <div className="pli">💎</div>
+            <div>
+              <div className="pl-txt">Planul meu — <strong style={{ color: userData.plan === 'FREE' ? 'var(--c-lime-d)' : (userData.plan === 'TEAM' ? 'var(--c-purple)' : 'var(--c-blue)') }}>{userData.plan}</strong></div>
+              <div className="pl-sub">{userData.plan === 'FREE' ? 'Upgrade la PRO sau TEAM' : 'Schimbă planul sau anulează'}</div>
+            </div>
             <span style={{ color: 'var(--c-ink3)' }}>›</span>
           </div>
           <div className="prof-link" onClick={() => setShowPasswordModal(true)}>

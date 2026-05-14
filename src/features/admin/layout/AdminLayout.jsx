@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../features/auth/context/AuthContext.jsx';
-import { LayoutDashboard, Users, Inbox, Settings, ShieldCheck, LogOut, UserCircle } from 'lucide-react';
+import { LayoutDashboard, Users, Inbox, Settings, ShieldCheck, LogOut, UserCircle, Gem } from 'lucide-react';
 import { ThemeToggle } from '../../../shared/ui/ThemeToggle.jsx';
 import '../admin.css';
 
@@ -10,6 +10,7 @@ const NAV = [
   { to: '/admin', label: 'Overview', Icon: LayoutDashboard },
   { to: '/admin/users', label: 'Utilizatori', Icon: Users },
   { to: '/admin/inbox', label: 'Inbox', Icon: Inbox },
+  { to: '/admin/upgrades', label: 'Cereri upgrade', Icon: Gem },
   { section: 'Moderare' },
   { to: '/admin/manage', label: 'Echipe & Postari', Icon: ShieldCheck },
   { section: 'Sistem' },
@@ -21,6 +22,7 @@ const TITLES = {
   '/admin': 'Overview',
   '/admin/users': 'Utilizatori',
   '/admin/inbox': 'Inbox',
+  '/admin/upgrades': 'Cereri upgrade',
   '/admin/manage': 'Echipe & Postari',
   '/admin/security': 'Audit log',
   '/admin/account': 'Contul meu',

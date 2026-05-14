@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../features/auth/context/AuthContext.jsx';
+import UpgradeModal from './UpgradeModal.jsx';
 
 const PLAN_LEVEL = { FREE: 0, PRO: 1, TEAM: 2 };
 
@@ -43,6 +45,7 @@ const PLAN_FEATURES = {
 export default function PlanLock({ requiredPlan = 'PRO', children }) {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
   // Profesionalii (COACH/NUT/ADMIN) bypass plan locks
   const isProfessional = ['COACH', 'NUTRITIONIST', 'ADMIN'].includes(user?.role);
@@ -141,7 +144,7 @@ export default function PlanLock({ requiredPlan = 'PRO', children }) {
             Anulează oricând
           </div>
           <button
-            onClick={() => navigate('/app/profile?upgrade=' + requiredPlan)}
+            onClick={() => setShowUpgrade(true)}
             style={{
               padding: '14px 28px',
               background: 'var(--c-ink, #111)',
@@ -175,6 +178,12 @@ export default function PlanLock({ requiredPlan = 'PRO', children }) {
           </button>
         </div>
       </div>
+      <UpgradeModal
+        isOpen={showUpgrade}
+        onClose={() => setShowUpgrade(false)}
+        targetPlan={requiredPlan}
+        currentEmail={user?.email || ''}
+      />
     </div>
   );
 }

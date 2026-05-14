@@ -23,13 +23,22 @@ export const updateExercise = (id, data) =>
   api.patch(`${ENDPOINTS.athlete.exercises}/${id}`, data);
 export const deleteExercise = (id) =>
   api.delete(`${ENDPOINTS.athlete.exercises}/${id}`);
+
+// Returns plan assigned by coach (separate from user's own plan)
+export const getCoachPlan = () => api.get('/athlete/coach-plan');
+
+// === UPGRADE PLAN ===
+export const requestUpgrade = (plan, email) => api.post('/upgrade/request', { plan, email });
+export const cancelSubscription = () => api.post('/upgrade/cancel');
+export const getMyUpgradeRequest = () => api.get('/upgrade/my-request');
+// Admin
+export const adminListUpgrades = () => api.get('/upgrade/admin/list');
+export const adminApproveUpgrade = (id) => api.post(`/upgrade/admin/${id}/approve`);
+export const adminRejectUpgrade = (id, reason) => api.post(`/upgrade/admin/${id}/reject`, { reason });
 export const bulkDoneExercises = () =>
   api.patch(`${ENDPOINTS.athlete.exercises}/bulk-done`);
 export const clearExercises = () =>
   api.delete(ENDPOINTS.athlete.exercises);
-
-// Returns plan assigned by coach (separate from user's own plan)
-export const getCoachPlan = () => api.get('/athlete/coach-plan');
 
 export const getMeals = () => api.get(ENDPOINTS.athlete.meals);
 export const addMeal = (foodId, meal) =>

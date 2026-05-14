@@ -263,8 +263,8 @@ export default function Nutrition() {
                   ))}
                 </div>
 
-                {demoMode && (
-                  <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px dashed var(--c-border)' }}>
+                {/* Custom food - vizibil pentru toți utilizatorii */}
+                <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px dashed var(--c-border)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
                       <div>
                         <div style={{ fontWeight: 800, color: 'var(--c-ink)' }}>Alimentul meu</div>
@@ -311,7 +311,6 @@ export default function Nutrition() {
                       )}
                     </AnimatePresence>
                   </div>
-                )}
               </div>
             </div>
           </ScrollReveal>

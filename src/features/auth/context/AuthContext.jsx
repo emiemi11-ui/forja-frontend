@@ -32,6 +32,10 @@ export function AuthProvider({ children }) {
       const { data } = await apiRegister(name, email, password, role, plan, inviteToken, extra, {
         adminBootstrapKey,
       });
+      // Daca contul e in stare PENDING_PAYMENT, NU stocam auth, returnam doar info
+      if (data.pendingPayment) {
+        return { pendingPayment: true, upgradeRequest: data.upgradeRequest };
+      }
       storeAuth(data, persist !== false, { isDemo: false });
       return data.redirect;
     },
