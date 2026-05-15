@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getExercises, getExLib, addExercise, toggleExercise, updateExercise, deleteExercise, bulkDoneExercises, clearExercises, getWorkoutCurrent, startWorkout, completeSet, finishWorkout, abandonWorkout, getCoachPlan } from '../../../shared/api/index.js';
 import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
@@ -17,6 +18,7 @@ function formatTime(s) {
 }
 
 export default function Workout() {
+  const navigate = useNavigate();
   const [plan, setPlan]         = useState([]);
   const [lib, setLib]           = useState([]);
   const [muscle, setMuscle]     = useState('Toate');
@@ -357,119 +359,37 @@ export default function Workout() {
   return (
     <AnimatedPage>
       <Toast toast={toast} />
-      <div className="wk-layout">
-        <div className="wk-col-library">
-          <div className="lib-search">
-            <input className="inp" value={query} onChange={e => setQuery(e.target.value)} placeholder="🔍 Caută exercițiu (ex: squat, bench, plank)..." />
+      <div style={{ maxWidth: 760, margin: '0 auto', padding: '0 0 40px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 8 }}>
+          <div>
+            <div style={{ fontFamily: 'var(--fm)', fontSize: 10, letterSpacing: 1.5, color: 'var(--c-ink3)', textTransform: 'uppercase' }}>ANTRENAMENTE</div>
+            <h1 style={{ fontFamily: 'var(--fd)', fontSize: 32, fontWeight: 900, margin: 0 }}>Alege planul</h1>
           </div>
-          <div className="lib-filters">
-            <BodyMap selected={muscle === 'Toate' ? null : muscle} onSelect={(m) => setMuscle(m || 'Toate')} muscles={MUSCLES.filter(m => m !== 'Toate')} />
-          </div>
-          <div className="lib-grid">
-            <AnimatePresence>
-            {lib.map((ex, idx) => {
-              const inPlan = inPlanIds.has(ex.id);
-              return (
-                <motion.div key={ex.id}
-                  className={`lib-card${inPlan ? ' in' : ''}`}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ delay: idx * 0.03, duration: 0.3 }}
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => !inPlan && handleAdd(ex.id)}
-                  style={{ position: 'relative', overflow: 'hidden' }}>
-                  {ex.img && !ex.img.endsWith('.svg') && <img src={ex.img} alt="" onError={e => { e.target.style.display = 'none'; }} style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', opacity: 0.12, filter:'grayscale(0.5)', zIndex:0 }} />}
-                  <div className="lib-icon" style={{ position:'relative', zIndex:1, width:44, height:44, borderRadius:10, overflow:'hidden', flexShrink:0, background: 'var(--c-bg)' }}>
-                    {ex.img ? <img src={ex.img} alt="" onError={e => { e.target.style.display = 'none'; e.target.parentElement.textContent = ex.icon; }} style={{ width:'100%', height:'100%', objectFit: ex.img.endsWith('.svg') ? 'contain' : 'cover', padding: ex.img.endsWith('.svg') ? '4px' : '0' }} /> : ex.icon}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div className="lib-nm">{ex.name}</div>
-                    <div className="lib-meta">{ex.muscle} · {ex.equip} · {ex.sets} · {ex.detail}</div>
-                  </div>
-                  <div className={`lib-add${inPlan ? ' added' : ''}`}>{inPlan ? '✓' : '+'}</div>
-                </motion.div>
-              );
-            })}
-            </AnimatePresence>
-          </div>
+          <button className="btn btn-outline btn-sm" onClick={() => navigate('/app/workout/edit')}>
+            ✏️ Editează planul meu
+          </button>
         </div>
-        <div className="wk-col-plan">
-          <div className="timer-card" style={{ marginBottom: 14 }}>
-            {plan.length > 0 ? (
-              <>
-                <div style={{ fontFamily: 'var(--fd)', fontSize: 22, fontWeight: 900, color: '#fff', marginBottom: 4 }}>{plan.length} exerciții în plan</div>
-                <div style={{ fontFamily: 'var(--fm)', fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 14 }}>{done}/{plan.length} completate</div>
-                <motion.button className="btn btn-lime btn-ripple"
-                  whileHover={{ scale: 1.02, boxShadow: '0 0 30px rgba(184,237,0,0.3)' }}
-                  whileTap={{ scale: 0.97 }}
-                  style={{ width: '100%', justifyContent: 'center', padding: '14px 20px', fontSize: 16, fontWeight: 900 }} onClick={handleStartWorkout} disabled={done === plan.length}>
-                  {done === plan.length ? '✓ Antrenament complet' : 'START ANTRENAMENT'}
-                </motion.button>
-              </>
-            ) : (
-              <>
-                <div className="timer-disp" style={{ color: 'var(--c-lime)' }}>00:00</div>
-                <div className="timer-sub">Adaugă exerciții pentru a începe</div>
-              </>
-            )}
-          </div>
 
-          {/* PLANUL DE AZI (al atletului) */}
-          <div className="plan-panel">
-            <div className="plan-banner">
-              <span className="plan-title">📓 Planul de azi</span>
-              <span className="plan-prog">{done}/{plan.length} completate</span>
-            </div>
-            {plan.length === 0 ? (
-              <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--c-ink3)', fontSize: 13 }}>Niciun exercitiu in plan.<br />Selecteaza din librarie</div>
-            ) : plan.map((ex, idx) => (
-              <div key={ex.id} className="pex-row" style={{ position: 'relative', zIndex: 1 }}>
-                <div className={`pex-cb${ex.done ? ' on' : ' off'}`}
-                  onClick={() => handleToggle(ex.id)}
-                  role="button"
-                  tabIndex={0}
-                  style={{ cursor: 'pointer' }}>{ex.done ? '✓' : ''}</div>
-                {ex.img && <img src={ex.img} alt="" style={{ width:32, height:32, borderRadius:8, objectFit:'cover', flexShrink:0 }} />}
-                <div style={{ flex: 1 }}>
-                  <div className="pex-nm" style={{ textDecoration: ex.done ? 'line-through' : 'none', opacity: ex.done ? .5 : 1 }}>{ex.name}</div>
-                  <div style={{ fontSize: 11, color: 'var(--c-ink3)', fontFamily: 'var(--fm)', marginTop: 2 }}>
-                    {ex.setsTotal || 3}×{ex.reps || 10}{ex.weight ? ` · ${ex.weight}kg` : ''} · pauză {ex.restSec || 90}s
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleEditClick(ex, e); }}
-                  style={{ background: 'rgba(184,237,0,0.15)', border: '1.5px solid var(--c-lime)', cursor: 'pointer', padding: '6px 12px', fontSize: 14, color: 'var(--c-lime-d, #4d7a00)', borderRadius: 8, fontWeight: 700, position: 'relative', zIndex: 2 }}
-                  title="Editează"
-                >
-                  ✏️ Edit
-                </button>
-                <button type="button" className="pex-rm" onClick={(e) => { e.stopPropagation(); handleDelete(ex.id); }} style={{ position: 'relative', zIndex: 2 }}>✕</button>
-              </div>
-            ))}
-            <div style={{ padding: '11px 16px', display: 'flex', gap: 7, background: 'var(--c-bg)', borderTop: '1px solid var(--c-border)' }}>
-              <button className="btn btn-lime btn-sm" style={{ flex: 1, fontWeight: 800 }} onClick={() => handleStartWorkout('self')} disabled={plan.length === 0 || done === plan.length}>
-                🏋️ START
+        {/* === Planul meu (propriu) === */}
+        <div className="plan-panel" style={{ marginBottom: 18 }}>
+          <div className="plan-banner">
+            <span className="plan-title">📓 Planul meu</span>
+            <span className="plan-prog">{plan.length} ex. · {done}/{plan.length} done</span>
+          </div>
+          {plan.length === 0 ? (
+            <div style={{ padding: 24, textAlign: 'center', color: 'var(--c-ink3)', fontSize: 13 }}>
+              Niciun exercițiu în plan.<br />
+              <button className="btn btn-lime btn-sm" style={{ marginTop: 12 }} onClick={() => navigate('/app/workout/edit')}>
+                ✏️ Editează plan
               </button>
-              <button className="btn btn-black btn-sm" onClick={handleBulkDone} disabled={plan.length === 0 || done === plan.length}>✓ Toate</button>
-              <button className="btn btn-outline btn-sm" onClick={handleClearAll} disabled={plan.length === 0}>🗑</button>
             </div>
-          </div>
-
-          {/* PLANUL DE LA COACH (separat dar acelasi stil) */}
-          {coachPlan && coachPlan.exercises?.length > 0 && (
-            <div className="plan-panel" style={{ marginTop: 16, border: '2px solid var(--c-lime)', background: 'linear-gradient(135deg, rgba(184,237,0,0.04), rgba(26,82,255,0.04))' }}>
-              <div className="plan-banner">
-                <span className="plan-title">📋 Plan de la coach — {coachPlan.coachName}</span>
-                <span className="plan-prog">{coachPlan.exercises.length} ex.</span>
-              </div>
-              {coachPlan.exercises.map((ex) => (
+          ) : (
+            <>
+              {plan.map((ex) => (
                 <div key={ex.id} className="pex-row" style={{ position: 'relative' }}>
                   {ex.img && <img src={ex.img} alt="" style={{ width:32, height:32, borderRadius:8, objectFit:'cover', flexShrink:0 }} />}
                   <div style={{ flex: 1 }}>
-                    <div className="pex-nm">{ex.name}</div>
+                    <div className="pex-nm" style={{ textDecoration: ex.done ? 'line-through' : 'none', opacity: ex.done ? .5 : 1 }}>{ex.name}</div>
                     <div style={{ fontSize: 11, color: 'var(--c-ink3)', fontFamily: 'var(--fm)', marginTop: 2 }}>
                       {ex.setsTotal || 3}×{ex.reps || 10}{ex.weight ? ` · ${ex.weight}kg` : ''} · pauză {ex.restSec || 90}s
                     </div>
@@ -477,95 +397,51 @@ export default function Workout() {
                 </div>
               ))}
               <div style={{ padding: '11px 16px', background: 'var(--c-bg)', borderTop: '1px solid var(--c-border)' }}>
-                <button className="btn btn-lime btn-sm" style={{ width: '100%', justifyContent: 'center', fontWeight: 800 }} onClick={() => handleStartWorkout('coach')}>
-                  🏋️ START ANTRENAMENT COACH
-                </button>
+                <motion.button
+                  className="btn btn-lime"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  style={{ width: '100%', justifyContent: 'center', padding: '14px 20px', fontSize: 16, fontWeight: 900 }}
+                  onClick={() => handleStartWorkout('self')}
+                  disabled={done === plan.length}>
+                  {done === plan.length ? '✓ Plan complet' : '🏋️ START ANTRENAMENT'}
+                </motion.button>
               </div>
-            </div>
+            </>
           )}
         </div>
-      </div>
 
-      {/* === EDIT EXERCITIU MODAL — pe desktop wide popover langa exercitiu, pe mobile/tablet centrat === */}
-      {editingEx && createPortal(
-        (() => {
-          // Pe ecrane mici (< 1024px) ignoram anchor-ul si centram modal-ul
-          const useAnchor = editingEx.anchor && window.innerWidth >= 1024;
-          return (
-        <div
-          onClick={() => setEditingEx(null)}
-          style={{
-            position: 'fixed', inset: 0, zIndex: 99999,
-            background: useAnchor ? 'transparent' : 'rgba(0,0,0,0.7)',
-            display: useAnchor ? 'block' : 'flex',
-            alignItems: 'center', justifyContent: 'center', padding: useAnchor ? 0 : 20,
-          }}>
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: 'var(--c-surface, #fff)', borderRadius: 18, padding: 22,
-              maxWidth: 380, width: useAnchor ? 380 : 'min(95vw, 380px)',
-              maxHeight: '90vh', overflow: 'auto',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.4)', border: '2px solid var(--c-lime)',
-              ...(useAnchor ? {
-                position: 'absolute',
-                top: Math.min(window.innerHeight - 380, editingEx.anchor.top) + 'px',
-                left: Math.max(10, Math.min(window.innerWidth - 390, editingEx.anchor.left)) + 'px',
-              } : {}),
-            }}>
-            <h3 style={{ fontFamily: 'var(--fd)', fontSize: 22, fontWeight: 900, marginTop: 0, marginBottom: 6 }}>
-              ✏️ Editează exercițiu
-            </h3>
-            <div style={{ fontSize: 13, color: 'var(--c-ink3)', marginBottom: 18 }}>{editingEx.name}</div>
-
-            {(() => {
-              const isCardio = editingEx.muscle === 'Cardio';
-              return (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <div>
-                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--fm)' }}>{isCardio ? 'Sesiuni' : 'Seturi'}</label>
-                <input type="number" min="1" max="20" value={editingEx.sets}
-                  onChange={(e) => setEditingEx({ ...editingEx, sets: Math.max(1, Math.min(20, parseInt(e.target.value) || 1)) })}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1.5px solid var(--c-border)', fontSize: 14, fontFamily: 'var(--fb)', background: 'var(--c-bg)', boxSizing: 'border-box', marginTop: 4 }} />
-              </div>
-              <div>
-                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--fm)' }}>{isCardio ? 'Minute / sesiune' : 'Repetări'}</label>
-                <input type="number" min="1" max="100" value={editingEx.reps}
-                  onChange={(e) => setEditingEx({ ...editingEx, reps: Math.max(1, Math.min(100, parseInt(e.target.value) || 1)) })}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1.5px solid var(--c-border)', fontSize: 14, fontFamily: 'var(--fb)', background: 'var(--c-bg)', boxSizing: 'border-box', marginTop: 4 }} />
-              </div>
-              <div>
-                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--fm)' }}>{isCardio ? 'Distanță (km)' : 'Greutate (kg)'}</label>
-                <input type="number" min="0" max="500" step="0.5" value={editingEx.weight}
-                  onChange={(e) => setEditingEx({ ...editingEx, weight: Math.max(0, Math.min(500, parseFloat(e.target.value) || 0)) })}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1.5px solid var(--c-border)', fontSize: 14, fontFamily: 'var(--fb)', background: 'var(--c-bg)', boxSizing: 'border-box', marginTop: 4 }} />
-              </div>
-              <div>
-                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--fm)' }}>Pauză (sec)</label>
-                <input type="number" min="0" max="600" step="15" value={editingEx.restSec}
-                  onChange={(e) => setEditingEx({ ...editingEx, restSec: Math.max(0, Math.min(600, parseInt(e.target.value) || 0)) })}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1.5px solid var(--c-border)', fontSize: 14, fontFamily: 'var(--fb)', background: 'var(--c-bg)', boxSizing: 'border-box', marginTop: 4 }} />
-              </div>
+        {/* === Planul de la coach (separat) === */}
+        {coachPlan && coachPlan.exercises?.length > 0 && (
+          <div className="plan-panel" style={{ marginBottom: 18, border: '2px solid var(--c-lime)', background: 'linear-gradient(135deg, rgba(184,237,0,0.04), rgba(26,82,255,0.04))' }}>
+            <div className="plan-banner">
+              <span className="plan-title">📋 Plan de la coach — {coachPlan.coachName}</span>
+              <span className="plan-prog">{coachPlan.exercises.length} ex.</span>
             </div>
-              );
-            })()}
-
-            <div style={{ display: 'flex', gap: 8, marginTop: 22 }}>
-              <button type="button" onClick={() => setEditingEx(null)}
-                style={{ flex: 1, padding: '12px', borderRadius: 10, border: '1.5px solid var(--c-border)', background: 'transparent', color: 'var(--c-ink)', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
-                Anulează
-              </button>
-              <button type="button" onClick={handleEditSave} disabled={savingEdit}
-                style={{ flex: 1, padding: '12px', borderRadius: 10, border: 'none', background: 'var(--c-lime)', color: '#000', fontWeight: 800, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
-                {savingEdit ? 'Salvez...' : '✅ Salvează'}
-              </button>
+            {coachPlan.exercises.map((ex) => (
+              <div key={ex.id} className="pex-row" style={{ position: 'relative' }}>
+                {ex.img && <img src={ex.img} alt="" style={{ width:32, height:32, borderRadius:8, objectFit:'cover', flexShrink:0 }} />}
+                <div style={{ flex: 1 }}>
+                  <div className="pex-nm">{ex.name}</div>
+                  <div style={{ fontSize: 11, color: 'var(--c-ink3)', fontFamily: 'var(--fm)', marginTop: 2 }}>
+                    {ex.setsTotal || 3}×{ex.reps || 10}{ex.weight ? ` · ${ex.weight}kg` : ''} · pauză {ex.restSec || 90}s
+                  </div>
+                </div>
+              </div>
+            ))}
+            <div style={{ padding: '11px 16px', background: 'var(--c-bg)', borderTop: '1px solid var(--c-border)' }}>
+              <motion.button
+                className="btn btn-lime"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                style={{ width: '100%', justifyContent: 'center', padding: '14px 20px', fontSize: 16, fontWeight: 900 }}
+                onClick={() => handleStartWorkout('coach')}>
+                🏋️ START ANTRENAMENT COACH
+              </motion.button>
             </div>
           </div>
-        </div>
-          );
-        })(),
-        document.body
-      )}
+        )}
+      </div>
     </AnimatedPage>
   );
 }

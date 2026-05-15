@@ -14,6 +14,7 @@ import LoginPage from '../features/auth/pages/LoginPage.jsx';
 import UserLayout from '../features/user/layout/UserLayout.jsx';
 import OverviewPage from '../features/user/pages/OverviewPage.jsx';
 import WorkoutPage from '../features/user/pages/WorkoutPage.jsx';
+import WorkoutEditPage from '../features/user/pages/WorkoutEditPage.jsx';
 import NutritionPage from '../features/user/pages/NutritionPage.jsx';
 import SleepPage from '../features/user/pages/SleepPage.jsx';
 import TeamsPage from '../features/user/pages/TeamsPage.jsx';
@@ -82,6 +83,7 @@ export default function AppRouter() {
             >
               <Route index element={<OverviewPage />} />
               <Route path="workout" element={<WorkoutPage />} />
+              <Route path="workout/edit" element={<WorkoutEditPage />} />
               <Route path="nutrition" element={<NutritionPage />} />
               <Route path="sleep" element={<SleepPage />} />
               <Route path="feed" element={<FeedPage />} />
