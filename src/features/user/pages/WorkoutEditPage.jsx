@@ -194,14 +194,9 @@ export default function WorkoutEdit() {
               </div>
             ) : plan.map((ex) => (
               <div key={ex.id} className="pex-row" style={{ position: 'relative', zIndex: 1 }}>
-                <div className={`pex-cb${ex.done ? ' on' : ' off'}`}
-                  onClick={() => handleToggle(ex.id)}
-                  role="button"
-                  tabIndex={0}
-                  style={{ cursor: 'pointer' }}>{ex.done ? '✓' : ''}</div>
                 {ex.img && <img src={ex.img} alt="" style={{ width:32, height:32, borderRadius:8, objectFit:'cover', flexShrink:0 }} />}
                 <div style={{ flex: 1 }}>
-                  <div className="pex-nm" style={{ textDecoration: ex.done ? 'line-through' : 'none', opacity: ex.done ? .5 : 1 }}>{ex.name}</div>
+                  <div className="pex-nm">{ex.name}</div>
                   <div style={{ fontSize: 11, color: 'var(--c-ink3)', fontFamily: 'var(--fm)', marginTop: 2 }}>
                     {ex.setsTotal || 3}×{ex.reps || 10}{ex.weight ? ` · ${ex.weight}kg` : ''} · pauză {ex.restSec || 90}s
                   </div>
@@ -217,9 +212,8 @@ export default function WorkoutEdit() {
                 <button type="button" className="pex-rm" onClick={(e) => { e.stopPropagation(); handleDelete(ex.id); }}>✕</button>
               </div>
             ))}
-            <div style={{ padding: '11px 16px', display: 'flex', gap: 7, background: 'var(--c-bg)', borderTop: '1px solid var(--c-border)' }}>
-              <button className="btn btn-black btn-sm" style={{ flex: 1 }} onClick={handleBulkDone} disabled={plan.length === 0 || done === plan.length}>✓ Toate done</button>
-              <button className="btn btn-outline btn-sm" onClick={handleClearAll} disabled={plan.length === 0}>🗑 Șterge tot</button>
+            <div style={{ padding: '11px 16px', background: 'var(--c-bg)', borderTop: '1px solid var(--c-border)' }}>
+              <button className="btn btn-outline btn-sm" style={{ width: '100%' }} onClick={handleClearAll} disabled={plan.length === 0}>🗑 Șterge tot</button>
             </div>
           </div>
 

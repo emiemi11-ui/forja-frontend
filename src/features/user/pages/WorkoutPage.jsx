@@ -35,6 +35,13 @@ export default function Workout() {
   const [restTimer, setRestTimer] = useState(0);
   const [resting, setResting] = useState(false);
   const [finishData, setFinishData] = useState(null);
+  const [lastWorkout, setLastWorkout] = useState(() => {
+    // Citesc ultimul antrenament finalizat din localStorage la mount
+    try {
+      const raw = localStorage.getItem('forja-last-workout');
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  });
   const restRef = useRef(null);
 
   const loadPlan = useCallback(async () => { const r = await getExercises(); setPlan(r.data); }, []);
@@ -216,8 +223,22 @@ export default function Workout() {
   const handleSkipRest = () => { setResting(false); setRestTimer(0); clearInterval(restRef.current); };
 
   const handleFinishWorkout = async () => {
-    try { const { data } = await finishWorkout(); setFinishData(data); setSessionMode('finished'); setRunning(false); showToast(`🏆 +${data.xpEarned} XP!`); loadPlan(); }
-    catch { showToast('❌ Eroare la finalizare', '❌'); }
+    try {
+      const { data } = await finishWorkout();
+      setFinishData(data);
+      setSessionMode('finished');
+      setRunning(false);
+      showToast(`🏆 +${data.xpEarned} XP!`);
+      // Salvez în localStorage pentru a afișa persistent pe pagina "Alege planul"
+      try {
+        localStorage.setItem('forja-last-workout', JSON.stringify({
+          ...data,
+          finishedAt: new Date().toISOString(),
+        }));
+        setLastWorkout({ ...data, finishedAt: new Date().toISOString() });
+      } catch {}
+      loadPlan();
+    } catch { showToast('❌ Eroare la finalizare', '❌'); }
   };
 
   const handleAbandonWorkout = () => {
@@ -398,6 +419,59 @@ export default function Workout() {
             ✏️ Editează planul meu
           </button>
         </div>
+
+        {/* === Card ULTIMUL ANTRENAMENT - progresul ultimei sesiuni finalizate === */}
+        {lastWorkout && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              marginBottom: 18,
+              padding: '16px 20px',
+              background: 'linear-gradient(135deg, rgba(184,237,0,0.10), rgba(26,82,255,0.06))',
+              border: '1.5px solid var(--c-lime)',
+              borderRadius: 14,
+              position: 'relative',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+              <div>
+                <div style={{ fontFamily: 'var(--fm)', fontSize: 9, letterSpacing: 1.5, color: 'var(--c-ink3)', textTransform: 'uppercase', fontWeight: 700 }}>
+                  🏆 Ultimul antrenament
+                </div>
+                <div style={{ fontFamily: 'var(--fd)', fontSize: 14, fontWeight: 800, color: 'var(--c-ink)', marginTop: 2 }}>
+                  {lastWorkout.allDone ? 'Toate exercițiile bifate' : `${lastWorkout.completedExercises}/${lastWorkout.totalExercises} exerciții completate`}
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  try { localStorage.removeItem('forja-last-workout'); } catch {}
+                  setLastWorkout(null);
+                }}
+                style={{
+                  background: 'transparent', border: 'none', cursor: 'pointer',
+                  color: 'var(--c-ink3)', fontSize: 18, padding: 4, lineHeight: 1,
+                }}
+                title="Închide"
+              >
+                ✕
+              </button>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+              {[
+                { val: lastWorkout.durationFormatted, lbl: 'Durată', color: 'var(--c-ink)' },
+                { val: `${lastWorkout.completedSets}/${lastWorkout.totalSets}`, lbl: 'Seturi', color: 'var(--c-blue)' },
+                { val: `${lastWorkout.completedExercises}/${lastWorkout.totalExercises}`, lbl: 'Exerciții', color: 'var(--c-lime-d)' },
+                { val: `+${lastWorkout.xpEarned}`, lbl: 'XP câștigat', color: 'var(--c-coral)' },
+              ].map((stat) => (
+                <div key={stat.lbl} style={{ background: 'var(--c-bg)', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
+                  <div style={{ fontFamily: 'var(--fd)', fontSize: 18, fontWeight: 900, color: stat.color, lineHeight: 1 }}>{stat.val}</div>
+                  <div style={{ fontFamily: 'var(--fm)', fontSize: 8, letterSpacing: 1, color: 'var(--c-ink3)', textTransform: 'uppercase', marginTop: 4 }}>{stat.lbl}</div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* === Planul meu (propriu) - afișat mereu, opacity scăzut dacă inactiv === */}
         {(selfPlanId || plan.length > 0) && (

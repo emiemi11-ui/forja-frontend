@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Dumbbell, Apple, CheckCircle, Clock, ChevronRight } from 'lucide-react';
 import { getDashboard, toggleExercise, togglePlanActive } from '../../../shared/api/index.js';
 import { AnimatedPage } from '../../../shared/ui/animations/index.jsx';
+import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
 
 export default function MyPlansPage() {
   const [tab, setTab] = useState('workout');
@@ -9,6 +10,7 @@ export default function MyPlansPage() {
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
+  const { toast, showToast } = useToast();
 
   useEffect(() => {
     getDashboard()
@@ -54,12 +56,12 @@ export default function MyPlansPage() {
       // Refetch dashboard pentru a obține starea actualizată
       const r = await getDashboard();
       setDashboard(r.data);
-      // Feedback vizual
+      // Feedback vizual non-intrusiv
       const newActive = res.data?.active;
-      alert(newActive ? '✅ Plan activat' : '⏸️ Plan dezactivat');
+      showToast(newActive ? '✅ Plan activat' : '⏸️ Plan dezactivat');
     } catch (err) {
       console.error('Toggle plan active failed', err);
-      alert('❌ Eroare la toggle: ' + (err.response?.data?.error || err.message || 'Verifică dacă backend-ul e deployed.'));
+      showToast('❌ ' + (err.response?.data?.error || err.message || 'Eroare la toggle'), '❌');
     } finally {
       setBusyId(null);
     }
@@ -104,6 +106,7 @@ export default function MyPlansPage() {
 
   return (
     <AnimatedPage>
+      <Toast toast={toast} />
       <div style={{ marginBottom: 20 }}>
         <div style={{ fontFamily: 'var(--fm)', fontSize: 10, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--c-lime-d)', fontWeight: 700 }}>planuri asignate</div>
         <h1 style={{ fontFamily: 'var(--fd)', fontSize: 'clamp(24px, 5vw, 32px)', fontWeight: 900, letterSpacing: .5, color: 'var(--c-ink)', lineHeight: 1, margin: '4px 0 0' }}>PLANURILE MELE</h1>
@@ -174,14 +177,6 @@ export default function MyPlansPage() {
                       <div style={{ fontWeight: 700, fontSize: 13, textDecoration: item.done ? 'line-through' : 'none', color: item.done ? 'var(--c-ink3)' : 'var(--c-ink)' }}>{item.name}</div>
                       <div style={{ fontFamily: 'var(--fm)', fontSize: 10, color: 'var(--c-ink3)' }}>{item.sets} · {item.detail}</div>
                     </div>
-                    {item.anim && <img src={item.anim} alt="" onError={(event) => { event.target.style.display = 'none'; }} style={{ width: 44, height: 33, borderRadius: 6, background: 'var(--c-ink)' }} />}
-                    <button onClick={() => toggleDone(item.id)} disabled={busyId === item.id} style={{
-                      width: 32, height: 32, borderRadius: 8, border: 'none', cursor: 'pointer',
-                      background: item.done ? 'var(--c-green)' : 'var(--c-border)', color: '#fff',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', opacity: busyId === item.id ? 0.6 : 1,
-                    }}>
-                      {item.done ? <CheckCircle size={16} /> : ''}
-                    </button>
                   </div>
                 ))}
                 <div style={{ padding: '12px 20px', background: 'var(--c-bg)', display: 'flex', alignItems: 'center', gap: 8 }}>
