@@ -22,6 +22,7 @@ const EMPTY_CUSTOM_FOOD = {
   p: '',
   c: '',
   f: '',
+  fib: '',
   recipe: '',
   img: '',
 };
@@ -121,6 +122,7 @@ export default function Nutrition() {
         p: numberValue(customFood.p),
         c: numberValue(customFood.c),
         f: numberValue(customFood.f),
+        fib: numberValue(customFood.fib),
         recipe: customFood.recipe.trim(),
         img: customFood.img || '',
       };
@@ -283,11 +285,27 @@ export default function Nutrition() {
                             <input className="inp" value={customFood.quantity} onChange={(event) => updateCustomFood('quantity', event.target.value)} onKeyDown={handleCustomKeyDown} placeholder="Cantitate (ex: 150g / 1 porție)" />
                           </div>
 
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))', gap: 10 }}>
-                            <input className="inp" type="number" min="0" value={customFood.kcal} onChange={(event) => updateCustomFood('kcal', event.target.value)} onKeyDown={handleCustomKeyDown} placeholder="kcal" />
-                            <input className="inp" type="number" min="0" value={customFood.p} onChange={(event) => updateCustomFood('p', event.target.value)} onKeyDown={handleCustomKeyDown} placeholder="P" />
-                            <input className="inp" type="number" min="0" value={customFood.c} onChange={(event) => updateCustomFood('c', event.target.value)} onKeyDown={handleCustomKeyDown} placeholder="C" />
-                            <input className="inp" type="number" min="0" value={customFood.f} onChange={(event) => updateCustomFood('f', event.target.value)} onKeyDown={handleCustomKeyDown} placeholder="F" />
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: 10 }}>
+                            <div>
+                              <label style={{ fontSize: 9, fontWeight: 700, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--fm)', marginBottom: 2, display: 'block' }}>kcal</label>
+                              <input className="inp" type="number" min="0" value={customFood.kcal} onChange={(event) => updateCustomFood('kcal', event.target.value)} onKeyDown={handleCustomKeyDown} placeholder="0" />
+                            </div>
+                            <div>
+                              <label style={{ fontSize: 9, fontWeight: 700, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--fm)', marginBottom: 2, display: 'block' }}>Proteine (g)</label>
+                              <input className="inp" type="number" min="0" value={customFood.p} onChange={(event) => updateCustomFood('p', event.target.value)} onKeyDown={handleCustomKeyDown} placeholder="0" />
+                            </div>
+                            <div>
+                              <label style={{ fontSize: 9, fontWeight: 700, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--fm)', marginBottom: 2, display: 'block' }}>Carbo (g)</label>
+                              <input className="inp" type="number" min="0" value={customFood.c} onChange={(event) => updateCustomFood('c', event.target.value)} onKeyDown={handleCustomKeyDown} placeholder="0" />
+                            </div>
+                            <div>
+                              <label style={{ fontSize: 9, fontWeight: 700, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--fm)', marginBottom: 2, display: 'block' }}>Grăsimi (g)</label>
+                              <input className="inp" type="number" min="0" value={customFood.f} onChange={(event) => updateCustomFood('f', event.target.value)} onKeyDown={handleCustomKeyDown} placeholder="0" />
+                            </div>
+                            <div>
+                              <label style={{ fontSize: 9, fontWeight: 700, color: 'var(--c-ink3)', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--fm)', marginBottom: 2, display: 'block' }}>Fibre (g)</label>
+                              <input className="inp" type="number" min="0" value={customFood.fib} onChange={(event) => updateCustomFood('fib', event.target.value)} onKeyDown={handleCustomKeyDown} placeholder="0" />
+                            </div>
                           </div>
 
                           <ImageUploadButton currentImage={customFood.img} onImageSelect={(value) => updateCustomFood('img', value || '')} onRemove={() => updateCustomFood('img', '')} label="Încarcă poza alimentului tău" />
@@ -322,7 +340,7 @@ export default function Nutrition() {
                     </span>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div className="food-nm" style={{ color: 'var(--c-ink)', fontWeight: 700 }}>{meal.name}</div>
-                      <div className="food-meta">P {meal.p || meal.protein}g / C {meal.c || meal.carbs}g / F {meal.f || meal.fat}g</div>
+                      <div className="food-meta">P {meal.p || meal.protein || 0}g · C {meal.c || meal.carbs || 0}g · G {meal.f || meal.fat || 0}g · Fib {meal.fib || meal.fiber || 0}g</div>
                     </div>
                     <span className="food-kcal">{meal.kcal}</span>
                     <motion.button className="food-rm" whileHover={{ scale: 1.2, color: 'var(--c-coral)' }} onClick={() => handleDelete(meal.id)}>✕</motion.button>

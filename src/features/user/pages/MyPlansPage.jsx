@@ -50,12 +50,16 @@ export default function MyPlansPage() {
     if (busyId === plan.id) return;
     setBusyId(plan.id);
     try {
-      await togglePlanActive(plan.id);
+      const res = await togglePlanActive(plan.id);
       // Refetch dashboard pentru a obține starea actualizată
       const r = await getDashboard();
       setDashboard(r.data);
+      // Feedback vizual
+      const newActive = res.data?.active;
+      alert(newActive ? '✅ Plan activat' : '⏸️ Plan dezactivat');
     } catch (err) {
       console.error('Toggle plan active failed', err);
+      alert('❌ Eroare la toggle: ' + (err.response?.data?.error || err.message || 'Verifică dacă backend-ul e deployed.'));
     } finally {
       setBusyId(null);
     }
