@@ -176,9 +176,13 @@ export default function NutClientsPage() {
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
 
-              <button className="btn btn-lime btn-sm" style={{ flex: 1 }}
+              <button className="btn btn-lime btn-sm" style={{ flex: 1, minWidth: 140 }}
+                onClick={() => navigate(`/nutritionist/clients/${selected.id}/nutrition-history`)}>
+                📊 Vezi istoric nutriție
+              </button>
+              <button className="btn btn-black btn-sm" style={{ flex: 1, minWidth: 140 }}
                 onClick={async () => {
                   try { await startConversation(selected.id); navigate('/nutritionist/dm'); } catch { showToast('💬 Conversație deschisă'); navigate('/nutritionist/dm'); }
                 }}>

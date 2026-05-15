@@ -17,6 +17,7 @@ import WorkoutPage from '../features/user/pages/WorkoutPage.jsx';
 import WorkoutEditPage from '../features/user/pages/WorkoutEditPage.jsx';
 import WorkoutHistoryPage from '../features/user/pages/WorkoutHistoryPage.jsx';
 import NutritionPage from '../features/user/pages/NutritionPage.jsx';
+import NutritionHistoryPage from '../features/user/pages/NutritionHistoryPage.jsx';
 import SleepPage from '../features/user/pages/SleepPage.jsx';
 import TeamsPage from '../features/user/pages/TeamsPage.jsx';
 import FeedPage from '../features/user/pages/FeedPage.jsx';
@@ -34,6 +35,7 @@ import CoachMessagesPage from '../features/coach/pages/CoachMessagesPage.jsx';
 import NutLayout from '../features/nutritionist/layout/NutLayout.jsx';
 import NutOverviewPage from '../features/nutritionist/pages/NutOverviewPage.jsx';
 import NutClientsPage from '../features/nutritionist/pages/NutClientsPage.jsx';
+import NutClientHistoryPage from '../features/nutritionist/pages/NutClientHistoryPage.jsx';
 import NutTemplatesPage from '../features/nutritionist/pages/NutTemplatesPage.jsx';
 import AdminLayout from '../features/admin/layout/AdminLayout.jsx';
 import AdminOverviewPage from '../features/admin/pages/AdminOverviewPage.jsx';
@@ -88,6 +90,7 @@ export default function AppRouter() {
               <Route path="workout/edit" element={<WorkoutEditPage />} />
               <Route path="workout/history" element={<WorkoutHistoryPage />} />
               <Route path="nutrition" element={<NutritionPage />} />
+              <Route path="nutrition/history" element={<NutritionHistoryPage />} />
               <Route path="sleep" element={<SleepPage />} />
               <Route path="feed" element={<FeedPage />} />
               <Route path="teams" element={<PlanLock requiredPlan="TEAM"><TeamsPage /></PlanLock>} />
@@ -131,6 +134,7 @@ export default function AppRouter() {
             >
               <Route index element={<NutOverviewPage />} />
               <Route path="clients" element={<NutClientsPage />} />
+              <Route path="clients/:id/nutrition-history" element={<NutClientHistoryPage />} />
               <Route path="templates" element={<NutTemplatesPage />} />
               <Route path="chat" element={<ChatPage />} />
               <Route path="dm" element={<DirectMessagesPage />} />

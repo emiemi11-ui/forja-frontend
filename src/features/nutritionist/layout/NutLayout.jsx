@@ -37,7 +37,8 @@ export default function NutLayout() {
   const navigate = useNavigate();
   const [clock, setClock] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const title = PAGE_TITLES[location.pathname] || 'Nutritionist';
+  const title = PAGE_TITLES[location.pathname]
+    || (/^\/nutritionist\/clients\/[^/]+\/nutrition-history$/.test(location.pathname) ? 'Istoric Client' : 'Nutritionist');
 
   useEffect(() => {
     const tick = () => {

@@ -10,6 +10,7 @@ const PAGE_TITLES = {
   '/app/workout': 'Antrenament',
   '/app/workout/history': 'Istoric Antrenamente',
   '/app/nutrition': 'Nutriție',
+  '/app/nutrition/history': 'Istoric Nutriție',
   '/app/sleep': 'Somn',
   '/app/chat': 'Chat',
   '/app/teams': 'Echipe',
