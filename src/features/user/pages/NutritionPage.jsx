@@ -248,7 +248,7 @@ export default function Nutrition() {
                           </span>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div className="fr-nm" style={{ color: 'var(--c-ink)', fontWeight: 700 }}>{food.name}</div>
-                            <div className="fr-macros">P {food.p}g / C {food.c}g / F {food.f}g</div>
+                            <div className="fr-macros">P {food.p}g · C {food.c}g · G {food.f}g · Fib {food.fib || 0}g</div>
                           </div>
                           <span className="fr-kcal">{food.kcal} kcal</span>
                         </motion.div>

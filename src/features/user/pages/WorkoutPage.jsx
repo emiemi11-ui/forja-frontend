@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getExercises, getExLib, addExercise, toggleExercise, updateExercise, deleteExercise, bulkDoneExercises, clearExercises, getWorkoutCurrent, startWorkout, completeSet, finishWorkout, abandonWorkout, getCoachPlan, getSelfPlanStatus } from '../../../shared/api/index.js';
+import { getExercises, getExLib, addExercise, toggleExercise, updateExercise, deleteExercise, bulkDoneExercises, clearExercises, getWorkoutCurrent, startWorkout, completeSet, finishWorkout, abandonWorkout, getCoachPlan, getSelfPlanStatus, togglePlanActive } from '../../../shared/api/index.js';
 import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
 import { useConfirm } from '../../../shared/ui/ConfirmModal.jsx';
 import BodyMap from '../../../shared/ui/BodyMap.jsx';
@@ -43,6 +43,8 @@ export default function Workout() {
   // Plan atribuit de coach (separat de planul propriu)
   const [coachPlan, setCoachPlan] = useState(null);
   const [selfPlanActive, setSelfPlanActive] = useState(true);  // implicit activ
+  const [selfPlanId, setSelfPlanId] = useState(null);          // pentru toggle
+  const [planBusyId, setPlanBusyId] = useState(null);          // pentru loading state pe butoane
   const loadCoachPlan = useCallback(async () => {
     try {
       const r = await getCoachPlan();
@@ -55,10 +57,28 @@ export default function Workout() {
     try {
       const r = await getSelfPlanStatus();
       setSelfPlanActive(r.data?.active !== false);
+      setSelfPlanId(r.data?.id || null);
     } catch {
       setSelfPlanActive(true);
+      setSelfPlanId(null);
     }
   }, []);
+
+  const handleTogglePlan = async (planId, planLabel) => {
+    if (!planId || planBusyId === planId) return;
+    setPlanBusyId(planId);
+    try {
+      const r = await togglePlanActive(planId);
+      const newActive = r.data?.active;
+      showToast(newActive ? `✅ ${planLabel} activat` : `⏸️ ${planLabel} dezactivat`);
+      // Reincarcă starea ambelor planuri
+      await Promise.all([loadCoachPlan(), loadSelfStatus()]);
+    } catch (err) {
+      showToast(`❌ Eroare: ${err.response?.data?.error || err.message}`, '❌');
+    } finally {
+      setPlanBusyId(null);
+    }
+  };
 
   useEffect(() => { loadPlan(); loadCoachPlan(); loadSelfStatus(); }, []);
   useEffect(() => { loadLib(); }, [query, muscle]);
@@ -379,12 +399,31 @@ export default function Workout() {
           </button>
         </div>
 
-        {/* === Planul meu (propriu) - doar dacă activ === */}
-        {selfPlanActive && (
-        <div className="plan-panel" style={{ marginBottom: 18 }}>
-          <div className="plan-banner">
+        {/* === Planul meu (propriu) - afișat mereu, opacity scăzut dacă inactiv === */}
+        {(selfPlanId || plan.length > 0) && (
+        <div className="plan-panel" style={{ marginBottom: 18, opacity: selfPlanActive ? 1 : 0.55, transition: 'opacity 0.3s' }}>
+          <div className="plan-banner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
             <span className="plan-title">📓 Planul meu</span>
-            <span className="plan-prog">{plan.length} ex. · {done}/{plan.length} done</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span className="plan-prog">{plan.length} ex. · {done}/{plan.length} done</span>
+              {selfPlanId && (
+                <button
+                  onClick={() => handleTogglePlan(selfPlanId, 'Planul meu')}
+                  disabled={planBusyId === selfPlanId}
+                  style={{
+                    padding: '4px 10px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                    fontFamily: 'var(--fm)', fontSize: 9, fontWeight: 800, letterSpacing: 1,
+                    background: selfPlanActive ? 'var(--c-lime)' : 'var(--c-border)',
+                    color: selfPlanActive ? '#000' : 'var(--c-ink2)',
+                    opacity: planBusyId === selfPlanId ? 0.5 : 1,
+                    transition: 'all 0.2s',
+                  }}
+                  title={selfPlanActive ? 'Click pentru a dezactiva' : 'Click pentru a activa'}
+                >
+                  {selfPlanActive ? 'ACTIV' : 'INACTIV'}
+                </button>
+              )}
+            </div>
           </div>
           {plan.length === 0 ? (
             <div style={{ padding: 24, textAlign: 'center', color: 'var(--c-ink3)', fontSize: 13 }}>
@@ -406,6 +445,7 @@ export default function Workout() {
                   </div>
                 </div>
               ))}
+              {selfPlanActive && (
               <div style={{ padding: '11px 16px', background: 'var(--c-bg)', borderTop: '1px solid var(--c-border)' }}>
                 <motion.button
                   className="btn btn-lime"
@@ -417,17 +457,46 @@ export default function Workout() {
                   {done === plan.length ? '✓ Plan complet' : '🏋️ START ANTRENAMENT'}
                 </motion.button>
               </div>
+              )}
+              {!selfPlanActive && (
+                <div style={{ padding: '11px 16px', background: 'var(--c-bg)', borderTop: '1px solid var(--c-border)', textAlign: 'center', fontSize: 12, color: 'var(--c-ink3)', fontFamily: 'var(--fm)' }}>
+                  Plan inactiv — activează-l pentru a porni antrenamentul
+                </div>
+              )}
             </>
           )}
         </div>
         )}
 
-        {/* === Planul de la coach (separat) — doar dacă activ === */}
-        {coachPlan && coachPlan.exercises?.length > 0 && coachPlan.active !== false && (
-          <div className="plan-panel" style={{ marginBottom: 18, border: '2px solid var(--c-lime)', background: 'linear-gradient(135deg, rgba(184,237,0,0.04), rgba(26,82,255,0.04))' }}>
-            <div className="plan-banner">
+        {/* === Planul de la coach (separat) — afișat mereu dacă există, opacity scăzut dacă inactiv === */}
+        {coachPlan && coachPlan.exercises?.length > 0 && (
+          <div className="plan-panel" style={{
+            marginBottom: 18,
+            border: coachPlan.active !== false ? '2px solid var(--c-lime)' : '1px solid var(--c-border)',
+            background: coachPlan.active !== false ? 'linear-gradient(135deg, rgba(184,237,0,0.04), rgba(26,82,255,0.04))' : 'transparent',
+            opacity: coachPlan.active !== false ? 1 : 0.55,
+            transition: 'opacity 0.3s',
+          }}>
+            <div className="plan-banner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
               <span className="plan-title">📋 Plan de la coach — {coachPlan.coachName}</span>
-              <span className="plan-prog">{coachPlan.exercises.length} ex.</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span className="plan-prog">{coachPlan.exercises.length} ex.</span>
+                <button
+                  onClick={() => handleTogglePlan(coachPlan.id, `Plan ${coachPlan.coachName}`)}
+                  disabled={planBusyId === coachPlan.id}
+                  style={{
+                    padding: '4px 10px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                    fontFamily: 'var(--fm)', fontSize: 9, fontWeight: 800, letterSpacing: 1,
+                    background: coachPlan.active !== false ? 'var(--c-lime)' : 'var(--c-border)',
+                    color: coachPlan.active !== false ? '#000' : 'var(--c-ink2)',
+                    opacity: planBusyId === coachPlan.id ? 0.5 : 1,
+                    transition: 'all 0.2s',
+                  }}
+                  title={coachPlan.active !== false ? 'Click pentru a dezactiva' : 'Click pentru a activa'}
+                >
+                  {coachPlan.active !== false ? 'ACTIV' : 'INACTIV'}
+                </button>
+              </div>
             </div>
             {coachPlan.exercises.map((ex) => (
               <div key={ex.id} className="pex-row" style={{ position: 'relative' }}>
@@ -440,21 +509,27 @@ export default function Workout() {
                 </div>
               </div>
             ))}
-            <div style={{ padding: '11px 16px', background: 'var(--c-bg)', borderTop: '1px solid var(--c-border)' }}>
-              <motion.button
-                className="btn btn-lime"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                style={{ width: '100%', justifyContent: 'center', padding: '14px 20px', fontSize: 16, fontWeight: 900 }}
-                onClick={() => handleStartWorkout('coach')}>
-                🏋️ START ANTRENAMENT COACH
-              </motion.button>
-            </div>
+            {coachPlan.active !== false ? (
+              <div style={{ padding: '11px 16px', background: 'var(--c-bg)', borderTop: '1px solid var(--c-border)' }}>
+                <motion.button
+                  className="btn btn-lime"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  style={{ width: '100%', justifyContent: 'center', padding: '14px 20px', fontSize: 16, fontWeight: 900 }}
+                  onClick={() => handleStartWorkout('coach')}>
+                  🏋️ START ANTRENAMENT COACH
+                </motion.button>
+              </div>
+            ) : (
+              <div style={{ padding: '11px 16px', background: 'var(--c-bg)', borderTop: '1px solid var(--c-border)', textAlign: 'center', fontSize: 12, color: 'var(--c-ink3)', fontFamily: 'var(--fm)' }}>
+                Plan inactiv — activează-l pentru a porni antrenamentul
+              </div>
+            )}
           </div>
         )}
 
-        {/* Empty state: niciun plan activ */}
-        {!selfPlanActive && (!coachPlan || coachPlan.active === false || !coachPlan.exercises?.length) && (
+        {/* Empty state: niciun plan deloc */}
+        {!selfPlanId && plan.length === 0 && (!coachPlan || !coachPlan.exercises?.length) && (
           <div className="card" style={{ padding: 30, textAlign: 'center', marginTop: 16 }}>
             <div style={{ fontSize: 36, marginBottom: 10 }}>😴</div>
             <div style={{ fontFamily: 'var(--fd)', fontSize: 18, fontWeight: 900, marginBottom: 6 }}>Niciun plan activ</div>
