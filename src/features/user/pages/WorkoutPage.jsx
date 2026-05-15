@@ -242,7 +242,6 @@ export default function Workout() {
                 ) : <div style={{ fontSize: 36 }}>{currentEx.icon}</div>}
                 <div>
                   <div style={{ fontFamily: 'var(--fd)', fontSize: 24, fontWeight: 900 }}>{currentEx.name}</div>
-                  <div style={{ fontFamily: 'var(--fm)', fontSize: 11, color: 'var(--c-ink3)', marginTop: 2 }}>{currentEx.muscle} · {currentEx.equip} · {currentEx.detail}</div>
                 </div>
               </div>
             </div>
