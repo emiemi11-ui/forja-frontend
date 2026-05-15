@@ -26,6 +26,8 @@ export const deleteExercise = (id) =>
 
 // Returns plan assigned by coach (separate from user's own plan)
 export const getCoachPlan = () => api.get('/athlete/coach-plan');
+export const togglePlanActive = (planId) => api.patch(`/athlete/workouts/${planId}/toggle-active`);
+export const getSelfPlanStatus = () => api.get('/athlete/self-plan-status');
 
 // === UPGRADE PLAN ===
 export const requestUpgrade = (plan, email) => api.post('/upgrade/request', { plan, email });

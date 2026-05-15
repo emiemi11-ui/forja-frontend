@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Dumbbell, Apple, CheckCircle, Clock, ChevronRight } from 'lucide-react';
-import { getDashboard, toggleExercise } from '../../../shared/api/index.js';
+import { getDashboard, toggleExercise, togglePlanActive } from '../../../shared/api/index.js';
 import { AnimatedPage } from '../../../shared/ui/animations/index.jsx';
 
 export default function MyPlansPage() {
@@ -45,6 +45,21 @@ export default function MyPlansPage() {
   }, [workoutPlans, nutritionPlans]);
 
   const plans = tab === 'workout' ? workoutPlans : nutritionPlans;
+
+  const handleToggleActive = async (plan) => {
+    if (busyId === plan.id) return;
+    setBusyId(plan.id);
+    try {
+      await togglePlanActive(plan.id);
+      // Refetch dashboard pentru a obține starea actualizată
+      const r = await getDashboard();
+      setDashboard(r.data);
+    } catch (err) {
+      console.error('Toggle plan active failed', err);
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   const toggleDone = async (exerciseId) => {
     if (!exerciseId || busyId === exerciseId) return;
@@ -128,7 +143,21 @@ export default function MyPlansPage() {
                     : `Nutriționist: ${plan.nutritionist || '—'} · ${plan.kcal || 0} kcal/zi`}
                 </div>
               </div>
-              <div className="tag tag-lime" style={{ fontSize: 9 }}>{plan.status === 'pending' ? 'PENDING' : 'ACTIV'}</div>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleToggleActive(plan); }}
+                disabled={busyId === plan.id}
+                style={{
+                  padding: '6px 12px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                  fontFamily: 'var(--fm)', fontSize: 10, fontWeight: 800, letterSpacing: 1,
+                  background: plan.active === false ? 'var(--c-border)' : 'var(--c-lime)',
+                  color: plan.active === false ? 'var(--c-ink2)' : '#000',
+                  opacity: busyId === plan.id ? 0.5 : 1,
+                  transition: 'all 0.2s',
+                }}
+                title={plan.active === false ? 'Click pentru a activa' : 'Click pentru a dezactiva'}
+              >
+                {plan.active === false ? 'INACTIV' : 'ACTIV'}
+              </button>
               <ChevronRight size={18} color="var(--c-ink3)" style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
             </div>
 

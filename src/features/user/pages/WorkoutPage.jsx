@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getExercises, getExLib, addExercise, toggleExercise, updateExercise, deleteExercise, bulkDoneExercises, clearExercises, getWorkoutCurrent, startWorkout, completeSet, finishWorkout, abandonWorkout, getCoachPlan } from '../../../shared/api/index.js';
+import { getExercises, getExLib, addExercise, toggleExercise, updateExercise, deleteExercise, bulkDoneExercises, clearExercises, getWorkoutCurrent, startWorkout, completeSet, finishWorkout, abandonWorkout, getCoachPlan, getSelfPlanStatus } from '../../../shared/api/index.js';
 import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
 import { useConfirm } from '../../../shared/ui/ConfirmModal.jsx';
 import BodyMap from '../../../shared/ui/BodyMap.jsx';
@@ -42,6 +42,7 @@ export default function Workout() {
 
   // Plan atribuit de coach (separat de planul propriu)
   const [coachPlan, setCoachPlan] = useState(null);
+  const [selfPlanActive, setSelfPlanActive] = useState(true);  // implicit activ
   const loadCoachPlan = useCallback(async () => {
     try {
       const r = await getCoachPlan();
@@ -50,8 +51,16 @@ export default function Workout() {
       setCoachPlan(null);
     }
   }, []);
+  const loadSelfStatus = useCallback(async () => {
+    try {
+      const r = await getSelfPlanStatus();
+      setSelfPlanActive(r.data?.active !== false);
+    } catch {
+      setSelfPlanActive(true);
+    }
+  }, []);
 
-  useEffect(() => { loadPlan(); loadCoachPlan(); }, []);
+  useEffect(() => { loadPlan(); loadCoachPlan(); loadSelfStatus(); }, []);
   useEffect(() => { loadLib(); }, [query, muscle]);
 
   useEffect(() => {
@@ -370,7 +379,8 @@ export default function Workout() {
           </button>
         </div>
 
-        {/* === Planul meu (propriu) === */}
+        {/* === Planul meu (propriu) - doar dacă activ === */}
+        {selfPlanActive && (
         <div className="plan-panel" style={{ marginBottom: 18 }}>
           <div className="plan-banner">
             <span className="plan-title">📓 Planul meu</span>
@@ -410,9 +420,10 @@ export default function Workout() {
             </>
           )}
         </div>
+        )}
 
-        {/* === Planul de la coach (separat) === */}
-        {coachPlan && coachPlan.exercises?.length > 0 && (
+        {/* === Planul de la coach (separat) — doar dacă activ === */}
+        {coachPlan && coachPlan.exercises?.length > 0 && coachPlan.active !== false && (
           <div className="plan-panel" style={{ marginBottom: 18, border: '2px solid var(--c-lime)', background: 'linear-gradient(135deg, rgba(184,237,0,0.04), rgba(26,82,255,0.04))' }}>
             <div className="plan-banner">
               <span className="plan-title">📋 Plan de la coach — {coachPlan.coachName}</span>
@@ -438,6 +449,21 @@ export default function Workout() {
                 onClick={() => handleStartWorkout('coach')}>
                 🏋️ START ANTRENAMENT COACH
               </motion.button>
+            </div>
+          </div>
+        )}
+
+        {/* Empty state: niciun plan activ */}
+        {!selfPlanActive && (!coachPlan || coachPlan.active === false || !coachPlan.exercises?.length) && (
+          <div className="card" style={{ padding: 30, textAlign: 'center', marginTop: 16 }}>
+            <div style={{ fontSize: 36, marginBottom: 10 }}>😴</div>
+            <div style={{ fontFamily: 'var(--fd)', fontSize: 18, fontWeight: 900, marginBottom: 6 }}>Niciun plan activ</div>
+            <div style={{ fontSize: 13, color: 'var(--c-ink3)', marginBottom: 16 }}>
+              Activează un plan din <strong>Planurile mele</strong> sau editează planul propriu.
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button className="btn btn-lime btn-sm" onClick={() => navigate('/app/my-plans')}>📋 Planurile mele</button>
+              <button className="btn btn-outline btn-sm" onClick={() => navigate('/app/workout/edit')}>✏️ Editor</button>
             </div>
           </div>
         )}
