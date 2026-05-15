@@ -482,24 +482,28 @@ export default function Workout() {
         </div>
       </div>
 
-      {/* === EDIT EXERCITIU MODAL — Portal in document.body, popover langa exercitiu daca avem anchor === */}
+      {/* === EDIT EXERCITIU MODAL — pe desktop wide popover langa exercitiu, pe mobile/tablet centrat === */}
       {editingEx && createPortal(
+        (() => {
+          // Pe ecrane mici (< 1024px) ignoram anchor-ul si centram modal-ul
+          const useAnchor = editingEx.anchor && window.innerWidth >= 1024;
+          return (
         <div
           onClick={() => setEditingEx(null)}
           style={{
             position: 'fixed', inset: 0, zIndex: 99999,
-            background: editingEx.anchor ? 'transparent' : 'rgba(0,0,0,0.7)',
-            display: editingEx.anchor ? 'block' : 'flex',
-            alignItems: 'center', justifyContent: 'center', padding: editingEx.anchor ? 0 : 20,
+            background: useAnchor ? 'transparent' : 'rgba(0,0,0,0.7)',
+            display: useAnchor ? 'block' : 'flex',
+            alignItems: 'center', justifyContent: 'center', padding: useAnchor ? 0 : 20,
           }}>
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
               background: 'var(--c-surface, #fff)', borderRadius: 18, padding: 22,
-              maxWidth: 380, width: editingEx.anchor ? 380 : 'min(95vw, 380px)',
+              maxWidth: 380, width: useAnchor ? 380 : 'min(95vw, 380px)',
               maxHeight: '90vh', overflow: 'auto',
               boxShadow: '0 20px 60px rgba(0,0,0,0.4)', border: '2px solid var(--c-lime)',
-              ...(editingEx.anchor ? {
+              ...(useAnchor ? {
                 position: 'absolute',
                 top: Math.min(window.innerHeight - 380, editingEx.anchor.top) + 'px',
                 left: Math.max(10, Math.min(window.innerWidth - 390, editingEx.anchor.left)) + 'px',
@@ -553,7 +557,9 @@ export default function Workout() {
               </button>
             </div>
           </div>
-        </div>,
+        </div>
+          );
+        })(),
         document.body
       )}
     </AnimatedPage>

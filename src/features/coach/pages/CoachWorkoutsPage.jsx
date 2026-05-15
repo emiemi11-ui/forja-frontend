@@ -61,7 +61,7 @@ export default function CoachWorkoutsPage() {
     setEditExercises(prev => [...prev, {
       id: 'edit-' + Date.now() + '-' + ex.id,
       libId: ex.id, name: ex.name, muscle: ex.muscle, equip: ex.equip,
-      sets: 4, reps: 8, rest: 90,
+      sets: 4, reps: 8, rest: 90, weight: 0,
       img: ex.img, anim: ex.anim, icon: ex.icon,
     }]);
     setExSearch(''); setExResults([]);
@@ -72,7 +72,7 @@ export default function CoachWorkoutsPage() {
   };
 
   const updateEx = (id, field, value) => {
-    setEditExercises(prev => prev.map(e => e.id === id ? { ...e, [field]: parseInt(value) || 0 } : e));
+    setEditExercises(prev => prev.map(e => e.id === id ? { ...e, [field]: field === 'weight' ? (parseFloat(value) || 0) : (parseInt(value) || 0) } : e));
   };
 
   const openEditor = (plan) => {
@@ -85,7 +85,7 @@ export default function CoachWorkoutsPage() {
       getCoachWorkout(plan.id).then(({ data }) => {
         setEditExercises((data.exercises || []).map((ex, i) => ({
           id: 'ed-' + i, libId: ex.libId || i, name: ex.name, muscle: ex.muscle || '', equip: ex.equip || '',
-          sets: ex.sets || 4, reps: ex.reps || 8, rest: ex.rest || 90,
+          sets: ex.sets || 4, reps: ex.reps || 8, rest: ex.rest || 90, weight: ex.weight || 0,
           img: ex.img, anim: ex.anim, icon: ex.icon,
         })));
       }).catch(() => setEditExercises([]));
@@ -225,22 +225,26 @@ export default function CoachWorkoutsPage() {
                         <div style={{ fontWeight: 700, fontSize: 13 }}>{ex.name}</div>
                         <div style={{ fontSize: 10, color: 'var(--c-ink3)' }}>{ex.muscle}</div>
                       </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: compact ? 'repeat(3, minmax(0, 1fr))' : 'repeat(3, auto)', gap: 6, alignItems: 'center', width: compact ? '100%' : 'auto' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: compact ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, auto)', gap: 6, alignItems: 'center', width: compact ? '100%' : 'auto' }}>
                         <div style={{ textAlign: 'center' }}>
                           <div style={{ fontSize: 8, color: 'var(--c-ink3)', fontFamily: 'var(--fm)' }}>{ex.muscle === 'Cardio' ? 'SESIUNI' : 'SETURI'}</div>
                           <input type="number" value={ex.sets} onChange={e => updateEx(ex.id, 'sets', e.target.value)} min={1} max={10}
-                            style={{ width: compact ? '100%' : 44, padding: '4px 6px', borderRadius: 6, border: '1px solid var(--c-border)', textAlign: 'center', fontSize: 14, fontWeight: 800, fontFamily: 'var(--fd)', background: 'var(--c-bg)', boxSizing: 'border-box' }} />
+                            style={{ width: compact ? '100%' : 50, padding: '4px 6px', borderRadius: 6, border: '1px solid var(--c-border)', textAlign: 'center', fontSize: 14, fontWeight: 800, fontFamily: 'var(--fd)', background: 'var(--c-bg)', boxSizing: 'border-box' }} />
                         </div>
-                        <span style={{ color: 'var(--c-ink3)' }}>×</span>
                         <div style={{ textAlign: 'center' }}>
                           <div style={{ fontSize: 8, color: 'var(--c-ink3)', fontFamily: 'var(--fm)' }}>{ex.muscle === 'Cardio' ? 'MIN' : 'REPS'}</div>
                           <input type="number" value={ex.reps} onChange={e => updateEx(ex.id, 'reps', e.target.value)} min={1} max={100}
-                            style={{ width: compact ? '100%' : 44, padding: '4px 6px', borderRadius: 6, border: '1px solid var(--c-border)', textAlign: 'center', fontSize: 14, fontWeight: 800, fontFamily: 'var(--fd)', background: 'var(--c-bg)', boxSizing: 'border-box' }} />
+                            style={{ width: compact ? '100%' : 50, padding: '4px 6px', borderRadius: 6, border: '1px solid var(--c-border)', textAlign: 'center', fontSize: 14, fontWeight: 800, fontFamily: 'var(--fd)', background: 'var(--c-bg)', boxSizing: 'border-box' }} />
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ fontSize: 8, color: 'var(--c-ink3)', fontFamily: 'var(--fm)' }}>{ex.muscle === 'Cardio' ? 'KM' : 'KG'}</div>
+                          <input type="number" value={ex.weight || 0} onChange={e => updateEx(ex.id, 'weight', e.target.value)} min={0} step={0.5}
+                            style={{ width: compact ? '100%' : 55, padding: '4px 6px', borderRadius: 6, border: '1px solid var(--c-border)', textAlign: 'center', fontSize: 14, fontWeight: 800, fontFamily: 'var(--fd)', background: 'var(--c-bg)', boxSizing: 'border-box' }} />
                         </div>
                         <div style={{ textAlign: 'center' }}>
                           <div style={{ fontSize: 8, color: 'var(--c-ink3)', fontFamily: 'var(--fm)' }}>REST</div>
                           <input type="number" value={ex.rest} onChange={e => updateEx(ex.id, 'rest', e.target.value)} min={0} step={15}
-                            style={{ width: compact ? '100%' : 50, padding: '4px 6px', borderRadius: 6, border: '1px solid var(--c-border)', textAlign: 'center', fontSize: 12, fontFamily: 'var(--fm)', background: 'var(--c-bg)', boxSizing: 'border-box' }} />
+                            style={{ width: compact ? '100%' : 55, padding: '4px 6px', borderRadius: 6, border: '1px solid var(--c-border)', textAlign: 'center', fontSize: 12, fontFamily: 'var(--fm)', background: 'var(--c-bg)', boxSizing: 'border-box' }} />
                         </div>
                       </div>
                       {ex.anim && <img src={ex.anim} alt="" onError={e => { e.target.style.display = "none"; }} style={{ width: 44, height: 33, borderRadius: 6, background: 'var(--c-ink)', flexShrink: 0 }} />}

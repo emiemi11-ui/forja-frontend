@@ -292,15 +292,6 @@ export default function Nutrition() {
 
                           <ImageUploadButton currentImage={customFood.img} onImageSelect={(value) => updateCustomFood('img', value || '')} onRemove={() => updateCustomFood('img', '')} label="Încarcă poza alimentului tău" />
 
-                          <textarea
-                            className="inp"
-                            rows={3}
-                            value={customFood.recipe}
-                            onChange={(event) => updateCustomFood('recipe', event.target.value)}
-                            placeholder="Ingrediente / rețetă / notițe personale"
-                            style={{ resize: 'vertical', paddingTop: 12 }}
-                          />
-
                           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                             <button className="btn btn-outline btn-sm" onClick={resetCustomFood}>Resetează</button>
                             <button className="btn btn-lime btn-sm" onClick={handleCustomSubmit} disabled={savingCustom}>
