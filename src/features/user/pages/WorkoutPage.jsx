@@ -416,44 +416,10 @@ export default function Workout() {
             )}
           </div>
 
-          {/* === Planul de la coach (separate de planul propriu) === */}
-          {coachPlan && coachPlan.exercises?.length > 0 && (
-            <div style={{ background: 'linear-gradient(135deg, rgba(184,237,0,0.06), rgba(26,82,255,0.06))', border: '2px solid var(--c-lime)', borderRadius: 14, padding: 14, marginBottom: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                <div>
-                  <div style={{ fontFamily: 'var(--fm)', fontSize: 9, fontWeight: 800, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--c-lime-d, #4d7a00)' }}>📋 De la coach: {coachPlan.coachName}</div>
-                  <div style={{ fontFamily: 'var(--fd)', fontSize: 18, fontWeight: 900, marginTop: 2 }}>{coachPlan.name}</div>
-                </div>
-                <span style={{ padding: '4px 10px', borderRadius: 6, fontSize: 10, fontWeight: 800, background: 'var(--c-lime)', color: '#000', fontFamily: 'var(--fm)' }}>
-                  {coachPlan.exercises.length} EX.
-                </span>
-              </div>
-              {coachPlan.exercises.map((ex) => (
-                <div key={ex.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderTop: '1px solid rgba(184,237,0,0.15)' }}>
-                  {ex.img && <img src={ex.img} alt="" style={{ width: 28, height: 28, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} />}
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: 13 }}>{ex.name}</div>
-                    <div style={{ fontSize: 11, color: 'var(--c-ink3)', fontFamily: 'var(--fm)', marginTop: 2 }}>
-                      {ex.setsTotal || 3}×{ex.reps || 10}{ex.weight ? ` · ${ex.weight}kg` : ''} · pauză {ex.restSec || 90}s
-                    </div>
-                  </div>
-                </div>
-              ))}
-              <button
-                className="btn btn-lime"
-                style={{ width: '100%', justifyContent: 'center', padding: '14px 20px', fontSize: 15, fontWeight: 900, marginTop: 12 }}
-                onClick={() => handleStartWorkout('coach')}>
-                🏋️ START ANTRENAMENT COACH
-              </button>
-              <div style={{ marginTop: 10, fontSize: 11, color: 'var(--c-ink3)', fontStyle: 'italic', textAlign: 'center' }}>
-                Plan stabilit de coach. Apare separat de planul tău personal.
-              </div>
-            </div>
-          )}
-
+          {/* PLANUL DE AZI (al atletului) */}
           <div className="plan-panel">
             <div className="plan-banner">
-              <span className="plan-title">Planul de azi</span>
+              <span className="plan-title">📓 Planul de azi</span>
               <span className="plan-prog">{done}/{plan.length} completate</span>
             </div>
             {plan.length === 0 ? (
@@ -484,10 +450,39 @@ export default function Workout() {
               </div>
             ))}
             <div style={{ padding: '11px 16px', display: 'flex', gap: 7, background: 'var(--c-bg)', borderTop: '1px solid var(--c-border)' }}>
-              <button className="btn btn-black btn-sm" style={{ flex: 1 }} onClick={handleBulkDone} disabled={plan.length === 0 || done === plan.length}>✓ Toate done</button>
-              <button className="btn btn-outline btn-sm" onClick={handleClearAll} disabled={plan.length === 0}>🗑 Șterge</button>
+              <button className="btn btn-lime btn-sm" style={{ flex: 1, fontWeight: 800 }} onClick={() => handleStartWorkout('self')} disabled={plan.length === 0 || done === plan.length}>
+                🏋️ START
+              </button>
+              <button className="btn btn-black btn-sm" onClick={handleBulkDone} disabled={plan.length === 0 || done === plan.length}>✓ Toate</button>
+              <button className="btn btn-outline btn-sm" onClick={handleClearAll} disabled={plan.length === 0}>🗑</button>
             </div>
           </div>
+
+          {/* PLANUL DE LA COACH (separat dar acelasi stil) */}
+          {coachPlan && coachPlan.exercises?.length > 0 && (
+            <div className="plan-panel" style={{ marginTop: 16, border: '2px solid var(--c-lime)', background: 'linear-gradient(135deg, rgba(184,237,0,0.04), rgba(26,82,255,0.04))' }}>
+              <div className="plan-banner">
+                <span className="plan-title">📋 Plan de la coach — {coachPlan.coachName}</span>
+                <span className="plan-prog">{coachPlan.exercises.length} ex.</span>
+              </div>
+              {coachPlan.exercises.map((ex) => (
+                <div key={ex.id} className="pex-row" style={{ position: 'relative' }}>
+                  {ex.img && <img src={ex.img} alt="" style={{ width:32, height:32, borderRadius:8, objectFit:'cover', flexShrink:0 }} />}
+                  <div style={{ flex: 1 }}>
+                    <div className="pex-nm">{ex.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--c-ink3)', fontFamily: 'var(--fm)', marginTop: 2 }}>
+                      {ex.setsTotal || 3}×{ex.reps || 10}{ex.weight ? ` · ${ex.weight}kg` : ''} · pauză {ex.restSec || 90}s
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <div style={{ padding: '11px 16px', background: 'var(--c-bg)', borderTop: '1px solid var(--c-border)' }}>
+                <button className="btn btn-lime btn-sm" style={{ width: '100%', justifyContent: 'center', fontWeight: 800 }} onClick={() => handleStartWorkout('coach')}>
+                  🏋️ START ANTRENAMENT COACH
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
