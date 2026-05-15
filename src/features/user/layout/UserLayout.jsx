@@ -7,6 +7,7 @@ import { LogOut } from 'lucide-react';
 const PAGE_TITLES = {
   '/app': 'Overview',
   '/app/workout': 'Antrenament',
+  '/app/workout/history': 'Istoric Antrenamente',
   '/app/nutrition': 'Nutriție',
   '/app/sleep': 'Somn',
   '/app/chat': 'Chat',

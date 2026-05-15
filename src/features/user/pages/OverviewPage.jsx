@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getDashboard, setWater, toggleExercise } from '../../../shared/api/index.js';
+import { getDashboard, setWater, toggleExercise, getTodayWorkoutProgress } from '../../../shared/api/index.js';
 import { Avatar, pct, Toast, useToast } from '../../../shared/ui/helpers.jsx';
 import {
   AnimatedPage, HeroSection, StaggerGrid, ScrollReveal, CountUp,
@@ -167,14 +167,19 @@ export default function Overview() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [confetti, setConfetti] = useState(false);
+  const [todayProgress, setTodayProgress] = useState({ count: 0, exercises: [] });
   const { toast, showToast } = useToast();
   const navigate = useNavigate();
 
   const load = useCallback(async () => {
     try {
-      const r = await getDashboard();
-      setData(r.data);
-      if (r.data?.workout?.progress_pct >= 100) {
+      const [dashRes, todayRes] = await Promise.all([
+        getDashboard(),
+        getTodayWorkoutProgress().catch(() => ({ data: { count: 0, exercises: [] } })),
+      ]);
+      setData(dashRes.data);
+      setTodayProgress(todayRes.data || { count: 0, exercises: [] });
+      if (dashRes.data?.workout?.progress_pct >= 100) {
         setConfetti(true);
         setTimeout(() => setConfetti(false), 2500);
       }
@@ -216,53 +221,84 @@ export default function Overview() {
         <ScrollReveal direction="left">
           <div className="card card-glow card-inner-glow">
             <div className="card-hd">
-              <span className="card-hd-title">Antrenament</span>
+              <span className="card-hd-title">Antrenament — Astăzi</span>
               <div className="card-hd-right">
-                <span style={{ background: (workout?.progressPct||0) >= 100 ? 'var(--c-lime-bg)' : (workout?.progressPct||0) >= 60 ? 'rgba(26,82,255,0.1)' : 'var(--c-coral-bg)', color: (workout?.progressPct||0) >= 100 ? 'var(--c-lime-d)' : (workout?.progressPct||0) >= 60 ? 'var(--c-blue)' : 'var(--c-coral)', border: '1px solid currentColor', borderRadius: 100, padding: '2px 10px', fontFamily: 'var(--fm)', fontSize: 9, fontWeight: 700, letterSpacing: 1 }}>
-                  {(workout?.progressPct||0) >= 100 ? 'A+' : (workout?.progressPct||0) >= 75 ? 'A' : (workout?.progressPct||0) >= 50 ? 'B' : 'C'}
+                <span style={{ background: todayProgress.count > 0 ? 'var(--c-lime-bg)' : 'var(--c-bg)', color: todayProgress.count > 0 ? 'var(--c-lime-d)' : 'var(--c-ink3)', border: '1px solid currentColor', borderRadius: 100, padding: '2px 10px', fontFamily: 'var(--fm)', fontSize: 9, fontWeight: 700, letterSpacing: 1 }}>
+                  {todayProgress.count} done
                 </span>
                 <button className="btn btn-sm btn-ripple" onClick={() => navigate('/app/workout')}>Ver tot</button>
               </div>
             </div>
             <div className="card-body">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <div>
-                  <div style={{ fontFamily: 'var(--fd)', fontSize: 17, fontWeight: 800 }}>{workout?.name || 'Push Day'}</div>
-                  <div style={{ fontSize: 11, color: 'var(--c-ink3)', fontFamily: 'var(--fm)' }}>Ziua {workout?.day||1} / Sapt. {workout?.week||1}</div>
+              {todayProgress.count === 0 ? (
+                <div style={{ padding: '30px 12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 36, marginBottom: 8 }}>💪</div>
+                  <div style={{ fontFamily: 'var(--fd)', fontSize: 14, fontWeight: 800, color: 'var(--c-ink)', marginBottom: 4 }}>
+                    Niciun exercițiu astăzi încă
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--c-ink3)', fontFamily: 'var(--fm)', marginBottom: 14 }}>
+                    Pornește un antrenament pentru a vedea progresul aici
+                  </div>
+                  <button className="btn btn-lime btn-sm" onClick={() => navigate('/app/workout')}>
+                    🏋️ Începe antrenamentul
+                  </button>
                 </div>
-                <CountUp to={workout?.progressPct || 0} suffix="%" style={{ fontFamily: 'var(--fd)', fontSize: 32, fontWeight: 900, color: 'var(--c-lime-d)' }} />
-              </div>
-              <AnimatedBar value={workout?.progressPct || 0} color="var(--c-lime)" glow />
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 14 }}>
-                {(exercises || []).slice(0, 4).map((ex, idx) => {
-                  const mc = { 'Piept': 'var(--c-coral)', 'Spate': 'var(--c-blue)', 'Umeri': 'var(--c-purple)', 'Brate': 'var(--c-lime-d)', 'Picioare': 'var(--c-amber)' }[ex.muscle] || 'var(--c-ink3)';
-                  return (
-                    <motion.div key={ex.id}
-                      initial={{ opacity: 0, x: -15 }} animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 + idx * 0.08, duration: 0.4 }}
-                      whileHover={{ scale: 1.01, x: 4 }} whileTap={{ scale: 0.98 }}
-                      onClick={() => handleToggle(ex.id)}
-                      style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, background: ex.done ? 'var(--c-lime-bg)' : 'var(--c-bg)', border: `1px solid ${ex.done ? 'rgba(184,237,0,0.2)' : 'var(--c-border)'}`, cursor: 'pointer', borderLeft: `3px solid ${mc}` }}>
-                      <span style={{ width: 40, height: 40, borderRadius: 10, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'var(--c-border)' }}>
-                        {ex.img
-                          ? <img src={ex.img} alt="" onError={e => { e.target.style.display = 'none'; }} style={{ width: '100%', height: '100%', objectFit: ex.img?.endsWith('.svg') ? 'contain' : 'cover', padding: ex.img?.endsWith('.svg') ? '4px' : '0' }} />
-                          : <span style={{ fontSize: 18 }}>{ex.icon}</span>
-                        }
-                      </span>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 12, fontWeight: 700, textDecoration: ex.done ? 'line-through' : 'none', color: ex.done ? 'var(--c-ink3)' : 'var(--c-ink)' }}>{ex.name}</div>
-                        <div style={{ fontSize: 10, color: 'var(--c-ink3)', fontFamily: 'var(--fm)' }}>{ex.sets} / {ex.detail}</div>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <div>
+                      <div style={{ fontFamily: 'var(--fd)', fontSize: 17, fontWeight: 800 }}>
+                        {todayProgress.count} exerciții bifate
                       </div>
-                      <motion.div
-                        animate={{ scale: ex.done ? 1 : 0.85, background: ex.done ? 'var(--c-green)' : 'transparent', borderColor: ex.done ? 'var(--c-green)' : 'var(--c-border2)' }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                        style={{ width: 22, height: 22, borderRadius: '50%', border: '2px solid', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#fff', flexShrink: 0 }}>
-                        {ex.done && <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 12 }}>✓</motion.span>}
-                      </motion.div>
-                    </motion.div>
-                  );
-                })}
-              </div>
+                      <div style={{ fontSize: 11, color: 'var(--c-ink3)', fontFamily: 'var(--fm)' }}>
+                        Sesiune de astăzi · {new Date().toLocaleDateString('ro-RO', { weekday: 'long' })}
+                      </div>
+                    </div>
+                    <div style={{ fontFamily: 'var(--fd)', fontSize: 32, fontWeight: 900, color: 'var(--c-lime-d)' }}>
+                      {todayProgress.count}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 14 }}>
+                    {todayProgress.exercises.slice(0, 5).map((ex, idx) => {
+                      const setsCompleted = ex.setsCompleted || 0;
+                      const setsTotal = ex.setsTotal || 0;
+                      const progressPct = setsTotal > 0 ? (setsCompleted / setsTotal) * 100 : 0;
+                      const isComplete = ex.done || (setsTotal > 0 && setsCompleted >= setsTotal);
+                      return (
+                        <motion.div key={`${ex.name}-${idx}`}
+                          initial={{ opacity: 0, x: -15 }} animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.2 + idx * 0.06, duration: 0.4 }}
+                          style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, background: isComplete ? 'var(--c-lime-bg)' : 'var(--c-bg)', border: `1px solid ${isComplete ? 'rgba(184,237,0,0.25)' : 'var(--c-border)'}`, borderLeft: `3px solid ${isComplete ? 'var(--c-green)' : 'var(--c-lime)'}` }}>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--c-ink)' }}>{ex.name}</div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                              <div style={{ flex: 1, height: 3, background: 'var(--c-border)', borderRadius: 2, overflow: 'hidden' }}>
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${progressPct}%` }}
+                                  transition={{ duration: 0.6, delay: 0.3 + idx * 0.06 }}
+                                  style={{ height: '100%', background: isComplete ? 'var(--c-green)' : 'var(--c-lime)' }}
+                                />
+                              </div>
+                              <span style={{ fontSize: 9, fontFamily: 'var(--fm)', fontWeight: 800, color: isComplete ? 'var(--c-green)' : 'var(--c-ink2)', minWidth: 26, textAlign: 'right' }}>
+                                {setsCompleted}/{setsTotal}
+                              </span>
+                            </div>
+                          </div>
+                          {isComplete && (
+                            <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--c-green)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, flexShrink: 0 }}>✓</div>
+                          )}
+                        </motion.div>
+                      );
+                    })}
+                    {todayProgress.exercises.length > 5 && (
+                      <div style={{ textAlign: 'center', fontSize: 10, color: 'var(--c-ink3)', fontFamily: 'var(--fm)', marginTop: 4 }}>
+                        + încă {todayProgress.exercises.length - 5} exerciții
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </ScrollReveal>

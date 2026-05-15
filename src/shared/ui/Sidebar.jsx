@@ -2,19 +2,20 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../features/auth/context/AuthContext.jsx';
 import { PEOPLE_PHOTOS } from './helpers.jsx';
 import { ThemeToggle } from './ThemeToggle.jsx';
-import { Zap, Dumbbell, Apple, Moon, MessageCircle, Mail, Users, Search, User, LayoutDashboard, ClipboardList, FileText, Trophy, BookOpen, UserCircle } from 'lucide-react';
+import { Zap, Dumbbell, Apple, Moon, MessageCircle, Mail, Users, Search, User, LayoutDashboard, ClipboardList, FileText, Trophy, BookOpen, UserCircle, History } from 'lucide-react';
 import '../styles/sidebar.css';
 
 const I = (Icon) => <Icon size={18} strokeWidth={2} />;
 
 const USER_NAV = [
   { section: 'Principal' },
-  { to: '/app',              icon: I(Zap),            label: 'Overview'    },
-  { to: '/app/workout',      icon: I(Dumbbell),       label: 'Antrenament' },
-  { to: '/app/nutrition',    icon: I(Apple),           label: 'Nutriție'    },
-  { to: '/app/sleep',        icon: I(Moon),            label: 'Somn'        },
-  { to: '/app/achievements', icon: I(Trophy),          label: 'Realizări'   },
-  { to: '/app/my-plans',     icon: I(BookOpen),        label: 'Planurile mele', planOnly: true },
+  { to: '/app',                 icon: I(Zap),            label: 'Overview'    },
+  { to: '/app/workout',         icon: I(Dumbbell),       label: 'Antrenament' },
+  { to: '/app/workout/history', icon: I(History),        label: 'Istoric'     },
+  { to: '/app/nutrition',       icon: I(Apple),           label: 'Nutriție'    },
+  { to: '/app/sleep',           icon: I(Moon),            label: 'Somn'        },
+  { to: '/app/achievements',    icon: I(Trophy),          label: 'Realizări'   },
+  { to: '/app/my-plans',        icon: I(BookOpen),        label: 'Planurile mele', planOnly: true },
   { section: 'Comunitate' },
   { to: '/app/chat',      icon: I(MessageCircle),   label: 'Chat',        badge: true },
   { to: '/app/dm',        icon: I(Mail),            label: 'Mesaje'      },

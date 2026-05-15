@@ -473,9 +473,9 @@ export default function Workout() {
           </motion.div>
         )}
 
-        {/* === Planul meu (propriu) - afișat mereu, opacity scăzut dacă inactiv === */}
-        {(selfPlanId || plan.length > 0) && (
-        <div className="plan-panel" style={{ marginBottom: 18, opacity: selfPlanActive ? 1 : 0.55, transition: 'opacity 0.3s' }}>
+        {/* === Planul meu (propriu) - afișat doar dacă activ === */}
+        {selfPlanActive && (selfPlanId || plan.length > 0) && (
+        <div className="plan-panel" style={{ marginBottom: 18 }}>
           <div className="plan-banner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
             <span className="plan-title">📓 Planul meu</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -487,14 +487,14 @@ export default function Workout() {
                   style={{
                     padding: '4px 10px', borderRadius: 6, border: 'none', cursor: 'pointer',
                     fontFamily: 'var(--fm)', fontSize: 9, fontWeight: 800, letterSpacing: 1,
-                    background: selfPlanActive ? 'var(--c-lime)' : 'var(--c-border)',
-                    color: selfPlanActive ? '#000' : 'var(--c-ink2)',
+                    background: 'var(--c-lime)',
+                    color: '#000',
                     opacity: planBusyId === selfPlanId ? 0.5 : 1,
                     transition: 'all 0.2s',
                   }}
-                  title={selfPlanActive ? 'Click pentru a dezactiva' : 'Click pentru a activa'}
+                  title="Click pentru a dezactiva"
                 >
-                  {selfPlanActive ? 'ACTIV' : 'INACTIV'}
+                  ACTIV
                 </button>
               )}
             </div>
@@ -508,18 +508,37 @@ export default function Workout() {
             </div>
           ) : (
             <>
-              {plan.map((ex) => (
+              {plan.map((ex) => {
+                const setsTotal = ex.setsTotal || 3;
+                const setsCompleted = Math.max(0, Math.min(setsTotal, Number(ex.setsCompleted || 0)));
+                const progressPct = setsTotal > 0 ? (setsCompleted / setsTotal) * 100 : 0;
+                const isComplete = ex.done || (setsTotal > 0 && setsCompleted >= setsTotal);
+                return (
                 <div key={ex.id} className="pex-row" style={{ position: 'relative' }}>
                   {ex.img && <img src={ex.img} alt="" style={{ width:32, height:32, borderRadius:8, objectFit:'cover', flexShrink:0 }} />}
                   <div style={{ flex: 1 }}>
-                    <div className="pex-nm" style={{ textDecoration: ex.done ? 'line-through' : 'none', opacity: ex.done ? .5 : 1 }}>{ex.name}</div>
+                    <div className="pex-nm" style={{ textDecoration: isComplete ? 'line-through' : 'none', opacity: isComplete ? .55 : 1 }}>{ex.name}</div>
                     <div style={{ fontSize: 11, color: 'var(--c-ink3)', fontFamily: 'var(--fm)', marginTop: 2 }}>
-                      {ex.setsTotal || 3}×{ex.reps || 10}{ex.weight ? ` · ${ex.weight}kg` : ''} · pauză {ex.restSec || 90}s
+                      {setsTotal}×{ex.reps || 10}{ex.weight ? ` · ${ex.weight}kg` : ''} · pauză {ex.restSec || 90}s
+                    </div>
+                    {/* Bara de progres + text X/Y seturi */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                      <div style={{ flex: 1, height: 4, background: 'var(--c-border)', borderRadius: 2, overflow: 'hidden' }}>
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${progressPct}%` }}
+                          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                          style={{ height: '100%', background: isComplete ? 'var(--c-green)' : 'var(--c-lime)', borderRadius: 2 }}
+                        />
+                      </div>
+                      <span style={{ fontSize: 10, fontFamily: 'var(--fm)', fontWeight: 700, color: isComplete ? 'var(--c-green)' : 'var(--c-ink2)', minWidth: 30, textAlign: 'right' }}>
+                        {setsCompleted}/{setsTotal}
+                      </span>
                     </div>
                   </div>
                 </div>
-              ))}
-              {selfPlanActive && (
+                );
+              })}
               <div style={{ padding: '11px 16px', background: 'var(--c-bg)', borderTop: '1px solid var(--c-border)' }}>
                 <motion.button
                   className="btn btn-lime"
@@ -531,25 +550,17 @@ export default function Workout() {
                   {done === plan.length ? '✓ Plan complet' : '🏋️ START ANTRENAMENT'}
                 </motion.button>
               </div>
-              )}
-              {!selfPlanActive && (
-                <div style={{ padding: '11px 16px', background: 'var(--c-bg)', borderTop: '1px solid var(--c-border)', textAlign: 'center', fontSize: 12, color: 'var(--c-ink3)', fontFamily: 'var(--fm)' }}>
-                  Plan inactiv — activează-l pentru a porni antrenamentul
-                </div>
-              )}
             </>
           )}
         </div>
         )}
 
-        {/* === Planul de la coach (separat) — afișat mereu dacă există, opacity scăzut dacă inactiv === */}
-        {coachPlan && coachPlan.exercises?.length > 0 && (
+        {/* === Planul de la coach (separat) — afișat doar dacă activ === */}
+        {coachPlan && coachPlan.exercises?.length > 0 && coachPlan.active !== false && (
           <div className="plan-panel" style={{
             marginBottom: 18,
-            border: coachPlan.active !== false ? '2px solid var(--c-lime)' : '1px solid var(--c-border)',
-            background: coachPlan.active !== false ? 'linear-gradient(135deg, rgba(184,237,0,0.04), rgba(26,82,255,0.04))' : 'transparent',
-            opacity: coachPlan.active !== false ? 1 : 0.55,
-            transition: 'opacity 0.3s',
+            border: '2px solid var(--c-lime)',
+            background: 'linear-gradient(135deg, rgba(184,237,0,0.04), rgba(26,82,255,0.04))',
           }}>
             <div className="plan-banner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
               <span className="plan-title">📋 Plan de la coach — {coachPlan.coachName}</span>
@@ -561,49 +572,62 @@ export default function Workout() {
                   style={{
                     padding: '4px 10px', borderRadius: 6, border: 'none', cursor: 'pointer',
                     fontFamily: 'var(--fm)', fontSize: 9, fontWeight: 800, letterSpacing: 1,
-                    background: coachPlan.active !== false ? 'var(--c-lime)' : 'var(--c-border)',
-                    color: coachPlan.active !== false ? '#000' : 'var(--c-ink2)',
+                    background: 'var(--c-lime)',
+                    color: '#000',
                     opacity: planBusyId === coachPlan.id ? 0.5 : 1,
                     transition: 'all 0.2s',
                   }}
-                  title={coachPlan.active !== false ? 'Click pentru a dezactiva' : 'Click pentru a activa'}
+                  title="Click pentru a dezactiva"
                 >
-                  {coachPlan.active !== false ? 'ACTIV' : 'INACTIV'}
+                  ACTIV
                 </button>
               </div>
             </div>
-            {coachPlan.exercises.map((ex) => (
+            {coachPlan.exercises.map((ex) => {
+              const setsTotal = ex.setsTotal || 3;
+              const setsCompleted = Math.max(0, Math.min(setsTotal, Number(ex.setsCompleted || 0)));
+              const progressPct = setsTotal > 0 ? (setsCompleted / setsTotal) * 100 : 0;
+              const isComplete = ex.done || (setsTotal > 0 && setsCompleted >= setsTotal);
+              return (
               <div key={ex.id} className="pex-row" style={{ position: 'relative' }}>
                 {ex.img && <img src={ex.img} alt="" style={{ width:32, height:32, borderRadius:8, objectFit:'cover', flexShrink:0 }} />}
                 <div style={{ flex: 1 }}>
-                  <div className="pex-nm">{ex.name}</div>
+                  <div className="pex-nm" style={{ textDecoration: isComplete ? 'line-through' : 'none', opacity: isComplete ? .55 : 1 }}>{ex.name}</div>
                   <div style={{ fontSize: 11, color: 'var(--c-ink3)', fontFamily: 'var(--fm)', marginTop: 2 }}>
-                    {ex.setsTotal || 3}×{ex.reps || 10}{ex.weight ? ` · ${ex.weight}kg` : ''} · pauză {ex.restSec || 90}s
+                    {setsTotal}×{ex.reps || 10}{ex.weight ? ` · ${ex.weight}kg` : ''} · pauză {ex.restSec || 90}s
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                    <div style={{ flex: 1, height: 4, background: 'var(--c-border)', borderRadius: 2, overflow: 'hidden' }}>
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progressPct}%` }}
+                        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                        style={{ height: '100%', background: isComplete ? 'var(--c-green)' : 'var(--c-lime)', borderRadius: 2 }}
+                      />
+                    </div>
+                    <span style={{ fontSize: 10, fontFamily: 'var(--fm)', fontWeight: 700, color: isComplete ? 'var(--c-green)' : 'var(--c-ink2)', minWidth: 30, textAlign: 'right' }}>
+                      {setsCompleted}/{setsTotal}
+                    </span>
                   </div>
                 </div>
               </div>
-            ))}
-            {coachPlan.active !== false ? (
-              <div style={{ padding: '11px 16px', background: 'var(--c-bg)', borderTop: '1px solid var(--c-border)' }}>
-                <motion.button
-                  className="btn btn-lime"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  style={{ width: '100%', justifyContent: 'center', padding: '14px 20px', fontSize: 16, fontWeight: 900 }}
-                  onClick={() => handleStartWorkout('coach')}>
-                  🏋️ START ANTRENAMENT COACH
-                </motion.button>
-              </div>
-            ) : (
-              <div style={{ padding: '11px 16px', background: 'var(--c-bg)', borderTop: '1px solid var(--c-border)', textAlign: 'center', fontSize: 12, color: 'var(--c-ink3)', fontFamily: 'var(--fm)' }}>
-                Plan inactiv — activează-l pentru a porni antrenamentul
-              </div>
-            )}
+              );
+            })}
+            <div style={{ padding: '11px 16px', background: 'var(--c-bg)', borderTop: '1px solid var(--c-border)' }}>
+              <motion.button
+                className="btn btn-lime"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                style={{ width: '100%', justifyContent: 'center', padding: '14px 20px', fontSize: 16, fontWeight: 900 }}
+                onClick={() => handleStartWorkout('coach')}>
+                🏋️ START ANTRENAMENT COACH
+              </motion.button>
+            </div>
           </div>
         )}
 
-        {/* Empty state: niciun plan deloc */}
-        {!selfPlanId && plan.length === 0 && (!coachPlan || !coachPlan.exercises?.length) && (
+        {/* Empty state: niciun plan activ */}
+        {!selfPlanActive && (!coachPlan || coachPlan.active === false || !coachPlan.exercises?.length) && (
           <div className="card" style={{ padding: 30, textAlign: 'center', marginTop: 16 }}>
             <div style={{ fontSize: 36, marginBottom: 10 }}>😴</div>
             <div style={{ fontFamily: 'var(--fd)', fontSize: 18, fontWeight: 900, marginBottom: 6 }}>Niciun plan activ</div>

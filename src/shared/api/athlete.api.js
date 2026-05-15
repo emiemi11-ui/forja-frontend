@@ -80,6 +80,8 @@ export const completeSet = (exerciseId) =>
 export const finishWorkout = () => api.post(ENDPOINTS.athlete.workoutFinish);
 export const abandonWorkout = () => api.post(ENDPOINTS.athlete.workoutAbandon);
 export const getWorkoutHistory = () => api.get(ENDPOINTS.athlete.workoutHistory);
+export const getWorkoutHistory7Days = () => api.get('/workout/history-7days');
+export const getTodayWorkoutProgress = () => api.get('/workout/today-progress');
 
 // === BATCH 1: Profesioniștii mei (coach + nutritionist relationships) ===
 export const getMyProfessionals = () =>
