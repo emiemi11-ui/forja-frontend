@@ -72,7 +72,7 @@ export const getAchievements = () => api.get('/achievements');
 export const addDiscoverReview = (professionalId, payload) => api.post(`${ENDPOINTS.athlete.discover}/${professionalId}/reviews`, payload);
 
 export const getWorkoutCurrent = () => api.get(ENDPOINTS.athlete.workoutCurrent);
-export const startWorkout = () => api.post(ENDPOINTS.athlete.workoutStart);
+export const startWorkout = (source = 'self') => api.post(ENDPOINTS.athlete.workoutStart, { source });
 export const completeSet = (exerciseId) =>
   api.patch(ENDPOINTS.athlete.workoutSet, { exerciseId });
 export const finishWorkout = () => api.post(ENDPOINTS.athlete.workoutFinish);

@@ -158,8 +158,8 @@ export default function Workout() {
   };
 
 
-  const handleStartWorkout = async () => {
-    try { const { data } = await startWorkout(); setSession(data.session); setSessionMode('active'); setActiveExIdx(0); setTimerSec(0); setRunning(true); }
+  const handleStartWorkout = async (source = 'self') => {
+    try { const { data } = await startWorkout(source); setSession(data.session); setSessionMode('active'); setActiveExIdx(0); setTimerSec(0); setRunning(true); }
     catch (e) { showToast(e.response?.data?.error || '❌ Eroare la pornire', '❌'); }
   };
 
@@ -439,6 +439,12 @@ export default function Workout() {
                   </div>
                 </div>
               ))}
+              <button
+                className="btn btn-lime"
+                style={{ width: '100%', justifyContent: 'center', padding: '14px 20px', fontSize: 15, fontWeight: 900, marginTop: 12 }}
+                onClick={() => handleStartWorkout('coach')}>
+                🏋️ START ANTRENAMENT COACH
+              </button>
               <div style={{ marginTop: 10, fontSize: 11, color: 'var(--c-ink3)', fontStyle: 'italic', textAlign: 'center' }}>
                 Plan stabilit de coach. Apare separat de planul tău personal.
               </div>
