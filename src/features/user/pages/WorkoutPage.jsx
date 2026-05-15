@@ -174,7 +174,11 @@ export default function Workout() {
       setSession(s => ({ ...s, progress: newProgress, completedSets: data.totalCompletedSets, completedExercises: data.totalCompletedExercises }));
       if (data.allDone) { handleFinishWorkout(); return; }
       if (data.exerciseDone) { setActiveExIdx(i => i + 1); showToast(`✅ ${exercise.name} complet!`); }
-      else { setResting(true); setRestTimer(REST_DURATION); }
+      else {
+        setResting(true);
+        // FIX: foloseste pauza setata in exercitiu, nu valoarea hardcoded de 90s
+        setRestTimer(Number(exercise.restSec) || 90);
+      }
     } catch (e) { showToast(e.response?.data?.error || '❌ Eroare', '❌'); }
   };
 
@@ -244,7 +248,7 @@ export default function Workout() {
             </div>
             <div style={{ padding: '20px 24px' }}>
               <div style={{ fontFamily: 'var(--fm)', fontSize: 10, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--c-ink3)', marginBottom: 12 }}>
-                SET {currentProgress.setsCompleted + 1} / {currentEx.setsTotal} — {currentEx.reps} {String(currentEx.reps).includes('s') ? '' : 'reps'}
+                SET {currentProgress.setsCompleted + 1} / {currentEx.setsTotal} — {currentEx.reps} {String(currentEx.reps).includes('s') ? '' : 'reps'}{currentEx.weight ? ` · ${currentEx.weight} kg` : ''} · pauză {currentEx.restSec}s
               </div>
               <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
                 {Array.from({ length: currentEx.setsTotal }, (_, i) => (
