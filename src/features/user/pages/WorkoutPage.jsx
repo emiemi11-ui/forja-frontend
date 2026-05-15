@@ -202,9 +202,15 @@ export default function Workout() {
   };
 
   const handleCompleteSet = async () => {
-    if (!session) return;
+    if (!session) {
+      showToast('❌ Nicio sesiune activă în browser', '❌');
+      return;
+    }
     const exercise = session.exercises[activeExIdx];
-    if (!exercise) return;
+    if (!exercise || !exercise.id) {
+      showToast('❌ Exercițiul activ nu există în sesiune', '❌');
+      return;
+    }
     try {
       const { data } = await completeSet(exercise.id);
       const newProgress = { ...session.progress };
@@ -217,7 +223,16 @@ export default function Workout() {
         // FIX: foloseste pauza setata in exercitiu, nu valoarea hardcoded de 90s
         setRestTimer(Number(exercise.restSec) || 90);
       }
-    } catch (e) { showToast(e.response?.data?.error || '❌ Eroare', '❌'); }
+    } catch (e) {
+      // Diagnoza completă: status HTTP + mesaj specific din backend sau axios
+      const status = e.response?.status;
+      const apiMsg = e.response?.data?.error || e.response?.data?.message;
+      const networkMsg = e.code === 'ECONNABORTED' ? 'Timeout' : e.message;
+      const detail = apiMsg || networkMsg || 'Eroare necunoscută';
+      const prefix = status ? `[${status}] ` : '';
+      console.error('[completeSet] failed', { status, apiMsg, networkMsg, exerciseId: exercise.id, sessionId: session.id });
+      showToast(`❌ ${prefix}${detail}`, '❌');
+    }
   };
 
   const handleSkipRest = () => { setResting(false); setRestTimer(0); clearInterval(restRef.current); };

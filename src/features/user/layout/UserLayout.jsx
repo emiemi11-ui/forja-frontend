@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from '../../../shared/ui/Sidebar.jsx';
 import { useAuth } from '../../../features/auth/context/AuthContext.jsx';
+import { getUser } from '../../../shared/api/index.js';
 import { LogOut } from 'lucide-react';
 
 const PAGE_TITLES = {
@@ -16,7 +17,7 @@ const PAGE_TITLES = {
 };
 
 export default function UserLayout() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const title = PAGE_TITLES[location.pathname] || 'FORJA';
@@ -24,6 +25,23 @@ export default function UserLayout() {
   const [clock, setClock] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Sincronizez streak/XP/level din DB la mount și la fiecare schimbare de rută.
+  // Fără asta, topbar afișează valoarea veche din localStorage (de la login),
+  // chiar dacă DB-ul are streak-ul actual (ex: 4 zile vs 1 zi afișat).
+  useEffect(() => {
+    let cancelled = false;
+    getUser()
+      .then(({ data }) => {
+        if (cancelled || !data) return;
+        const patch = {};
+        if (typeof data.streak === 'number' && data.streak !== user?.streak) patch.streak = data.streak;
+        if (typeof data.xp === 'number' && data.xp !== user?.xp) patch.xp = data.xp;
+        if (typeof data.level === 'number' && data.level !== user?.level) patch.level = data.level;
+        if (Object.keys(patch).length > 0) updateUser(patch);
+      })
+      .catch(() => { /* silent — păstrăm valoarea curentă din context */ });
+    return () => { cancelled = true; };
+  }, [location.pathname]);
 
   useEffect(() => {
     const tick = () => {
