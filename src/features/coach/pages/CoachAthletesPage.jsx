@@ -276,8 +276,14 @@ export default function CoachAthletesPage() {
                 ))}
               </div>
             )}
-            <div style={{ marginTop: 24, display: 'flex', gap: 8 }}>
-              <button className="btn btn-black btn-sm" style={{ flex: 1 }}
+            <div style={{ marginTop: 24, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button className="btn btn-lime btn-sm" style={{ flex: 1, minWidth: 140 }}
+                onClick={() => {
+                  navigate(`/coach/athletes/${selected.id}/history`);
+                }}>
+                📊 Vezi istoric antrenamente
+              </button>
+              <button className="btn btn-black btn-sm" style={{ flex: 1, minWidth: 140 }}
                 onClick={async () => {
                   if (!drawerData?.linked) { showToast('Atletul nu e încă conectat (invite pending)', '⚠️'); return; }
                   try {

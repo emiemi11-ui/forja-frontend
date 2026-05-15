@@ -37,7 +37,8 @@ export default function CoachLayout() {
   const navigate = useNavigate();
   const [clock, setClock] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const title = PAGE_TITLES[location.pathname] || 'Coach';
+  const title = PAGE_TITLES[location.pathname]
+    || (/^\/coach\/athletes\/[^/]+\/history$/.test(location.pathname) ? 'Istoric Atlet' : 'Coach');
 
   useEffect(() => {
     const tick = () => {

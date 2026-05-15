@@ -4,6 +4,8 @@ import { ENDPOINTS } from './endpoints.js';
 export const getCoachTeam = () => api.get(ENDPOINTS.coach.team);
 export const getCoachAthletes = () => api.get(ENDPOINTS.coach.athletes);
 export const getCoachAthlete = (id) => api.get(`${ENDPOINTS.coach.athletes}/${id}`);
+export const getCoachAthleteHistory7Days = (athleteId) =>
+  api.get(`${ENDPOINTS.coach.athletes}/${athleteId}/workout-history-7days`);
 export const getCoachWorkouts = () => api.get(ENDPOINTS.coach.workouts);
 export const getCoachWorkout = (id) => api.get(`${ENDPOINTS.coach.workouts}/${id}`);
 export const getCoachMessages = () => api.get(ENDPOINTS.coach.messages);

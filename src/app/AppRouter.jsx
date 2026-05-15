@@ -28,6 +28,7 @@ import MyPlansPage from '../features/user/pages/MyPlansPage.jsx';
 import CoachLayout from '../features/coach/layout/CoachLayout.jsx';
 import CoachOverviewPage from '../features/coach/pages/CoachOverviewPage.jsx';
 import CoachAthletesPage from '../features/coach/pages/CoachAthletesPage.jsx';
+import CoachAthleteHistoryPage from '../features/coach/pages/CoachAthleteHistoryPage.jsx';
 import CoachWorkoutsPage from '../features/coach/pages/CoachWorkoutsPage.jsx';
 import CoachMessagesPage from '../features/coach/pages/CoachMessagesPage.jsx';
 import NutLayout from '../features/nutritionist/layout/NutLayout.jsx';
@@ -110,6 +111,7 @@ export default function AppRouter() {
             >
               <Route index element={<CoachOverviewPage />} />
               <Route path="athletes" element={<CoachAthletesPage />} />
+              <Route path="athletes/:id/history" element={<CoachAthleteHistoryPage />} />
               <Route path="workouts" element={<CoachWorkoutsPage />} />
               <Route path="messages" element={<CoachMessagesPage />} />
               <Route path="chat" element={<ChatPage />} />
