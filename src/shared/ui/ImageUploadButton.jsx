@@ -1,8 +1,17 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 export default function ImageUploadButton({ onImageSelect, currentImage, onRemove, label = 'Adaugă imagine', compact = false }) {
   const [preview, setPreview] = useState(currentImage || null);
   const inputRef = useRef(null);
+
+  // Sync preview cu prop-ul currentImage — cand parent-ul reseteaza imaginea
+  // (ex: dupa publish), preview-ul intern trebuie sa dispara odata cu prop-ul.
+  useEffect(() => {
+    setPreview(currentImage || null);
+    if (!currentImage && inputRef.current) {
+      inputRef.current.value = '';
+    }
+  }, [currentImage]);
 
   const handleFile = (file) => {
     if (!file) return;
