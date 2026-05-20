@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { startConversation, getDiscover, addDiscoverReview, requestProfessional } from '../../../shared/api/index.js';
+import { startConversation, getDiscover, addDiscoverReview, requestProfessional, likePost } from '../../../shared/api/index.js';
 import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
 import { useAuth } from '../../../features/auth/context/AuthContext.jsx';
 import { Star, MessageCircle, Users, Award, ChevronDown, Heart, UserPlus } from 'lucide-react';
@@ -69,6 +69,56 @@ export default function DiscoverPage() {
       }
     } catch (e) {
       showToast(e.response?.data?.error || '❌ Eroare', '❌');
+    }
+  };
+
+  const [likeBusy, setLikeBusy] = useState({}); // per-post anti double-submit
+
+  const handleLikePost = async (professionalId, postId) => {
+    if (likeBusy[postId]) return;
+    setLikeBusy((prev) => ({ ...prev, [postId]: true }));
+
+    // Optimistic update — flip liked + likes count instant in UI
+    setProfessionals((prev) => prev.map((p) => {
+      if (p.id !== professionalId) return p;
+      return {
+        ...p,
+        posts: (p.posts || []).map((post) => {
+          if (post.id !== postId) return post;
+          const wasLiked = !!post.liked;
+          return { ...post, liked: !wasLiked, likes: Math.max(0, (post.likes || 0) + (wasLiked ? -1 : 1)) };
+        }),
+      };
+    }));
+
+    try {
+      const { data } = await likePost(postId);
+      // Sync cu valoarea reala de la server (in caz de mismatch)
+      setProfessionals((prev) => prev.map((p) => {
+        if (p.id !== professionalId) return p;
+        return {
+          ...p,
+          posts: (p.posts || []).map((post) =>
+            post.id === postId ? { ...post, liked: data.liked, likes: data.likes } : post
+          ),
+        };
+      }));
+    } catch (e) {
+      // Rollback la optimistic update
+      setProfessionals((prev) => prev.map((p) => {
+        if (p.id !== professionalId) return p;
+        return {
+          ...p,
+          posts: (p.posts || []).map((post) => {
+            if (post.id !== postId) return post;
+            const wasLiked = !!post.liked;
+            return { ...post, liked: !wasLiked, likes: Math.max(0, (post.likes || 0) + (wasLiked ? -1 : 1)) };
+          }),
+        };
+      }));
+      showToast(e.response?.data?.error || '❌ Eroare la like', '❌');
+    } finally {
+      setLikeBusy((prev) => ({ ...prev, [postId]: false }));
     }
   };
 
@@ -170,11 +220,26 @@ export default function DiscoverPage() {
                 {isExpanded && p.posts && (
                   <div style={{ borderTop: '1px solid var(--c-border)', padding: '0' }}>
                     {p.posts.map((post, i) => (
-                      <div key={i} style={{ padding: '14px 20px', borderBottom: '1px solid var(--c-border)' }}>
+                      <div key={post.id || i} style={{ padding: '14px 20px', borderBottom: '1px solid var(--c-border)' }}>
                         <p style={{ fontSize: 13, lineHeight: 1.5, color: 'var(--c-ink2)', margin: 0 }}>{post.content}</p>
                         {post.img && <img src={post.img} alt="" onError={e => { e.target.style.display = "none"; }} style={{ width: '100%', height: 140, objectFit: 'cover', borderRadius: 10, marginTop: 8 }} />}
-                        <div style={{ marginTop: 8, fontSize: 12, color: 'var(--c-ink3)' }}>
-                          <Heart size={12} style={{ display: 'inline', verticalAlign: 'middle' }} /> {post.likes}
+                        <div style={{ marginTop: 8, fontSize: 12, color: 'var(--c-ink3)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <button
+                            onClick={() => handleLikePost(p.id, post.id)}
+                            disabled={!post.id || likeBusy[post.id]}
+                            style={{
+                              background: 'none', border: 'none', cursor: post.id ? 'pointer' : 'default',
+                              padding: '2px 6px', borderRadius: 6,
+                              display: 'inline-flex', alignItems: 'center', gap: 4,
+                              color: post.liked ? 'var(--c-coral)' : 'var(--c-ink3)',
+                              fontWeight: post.liked ? 700 : 400,
+                              fontSize: 12,
+                              transition: 'all 0.15s',
+                              opacity: likeBusy[post.id] ? 0.5 : 1,
+                            }}>
+                            <Heart size={14} fill={post.liked ? 'var(--c-coral)' : 'none'} stroke={post.liked ? 'var(--c-coral)' : 'currentColor'} />
+                            {post.likes || 0}
+                          </button>
                         </div>
                       </div>
                     ))}
