@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCoachAthletes, getCoachAthlete, coachInviteAthlete, startConversation, getCoachRequests, acceptCoachRequest, rejectCoachRequest } from '../../../shared/api/index.js';
+import { getCoachAthletes, getCoachAthlete, coachInviteAthlete, startConversation, getCoachRequests, acceptCoachRequest, rejectCoachRequest, addCoachAthleteJournal } from '../../../shared/api/index.js';
 import { Toast, useToast } from '../../../shared/ui/helpers.jsx';
 import Drawer from '../../../shared/ui/Drawer.jsx';
 import Modal, { ModalField, ModalInput, ModalSelect, ModalActions } from '../../../shared/ui/Modal.jsx';
@@ -36,6 +36,7 @@ export default function CoachAthletesPage() {
 
   const [loadingPage, setLoadingPage] = useState(true);
   const [requests, setRequests] = useState([]);
+  const [savingJournal, setSavingJournal] = useState(false);
   const load = () => {
     setLoadingPage(true);
     Promise.all([getCoachAthletes(), getCoachRequests().catch(() => ({ data: [] }))])
@@ -165,18 +166,29 @@ export default function CoachAthletesPage() {
               {showJournal && (
                 <div style={{ marginTop: 10 }}>
                   <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
-                    <input id="coachJournalInput" placeholder="Notița nouă..."
-                      style={{ flex: 1, padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: '#fff', fontSize: 12, fontFamily: 'var(--fb)' }} />
-                    <button className="btn btn-lime btn-sm" onClick={() => {
+                    <input id="coachJournalInput" placeholder="Notița nouă..." disabled={savingJournal}
+                      style={{ flex: 1, padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: '#fff', fontSize: 12, fontFamily: 'var(--fb)', opacity: savingJournal ? 0.5 : 1 }} />
+                    <button className="btn btn-lime btn-sm" disabled={savingJournal} onClick={async () => {
                       const input = document.getElementById('coachJournalInput');
-                      if (!input?.value.trim()) return;
-                      if (!selected.journal) selected.journal = [];
-                      selected.journal.push({ text: input.value.trim(), date: new Date().toISOString().slice(0,10) });
-                      selected.notes = input.value.trim();
-                      input.value = '';
-                      showToast('💾 Salvat!');
-                      setDrawerData({ ...drawerData });
-                    }}>💾</button>
+                      const text = (input?.value || '').trim();
+                      if (!text || savingJournal) return; // anti double-submit
+                      setSavingJournal(true);
+                      input.value = ''; // clear ASAP — dispare imediat din UI
+                      try {
+                        const { data } = await addCoachAthleteJournal(selected.id, text);
+                        // Update local state cu jurnalul intors de la backend
+                        const updatedJournal = data.journal || [];
+                        selected.journal = updatedJournal;
+                        selected.notes = updatedJournal[updatedJournal.length - 1]?.text || selected.notes;
+                        setDrawerData({ ...drawerData, journal: updatedJournal, notes: selected.notes });
+                        showToast('💾 Salvat!');
+                      } catch (e) {
+                        showToast(e.response?.data?.error || '❌ Eroare la salvare', '❌');
+                        input.value = text; // restore daca a esuat
+                      } finally {
+                        setSavingJournal(false);
+                      }
+                    }}>{savingJournal ? '...' : '💾'}</button>
                   </div>
                   {selected.journal && [...selected.journal].reverse().map((entry, i) => (
                     <div key={i} style={{ padding: '6px 10px', borderRadius: 6, background: i === 0 ? 'rgba(184,237,0,0.06)' : 'transparent', borderLeft: '2px solid ' + (i === 0 ? 'rgba(184,237,0,0.4)' : 'rgba(255,255,255,0.06)'), marginBottom: 4 }}>

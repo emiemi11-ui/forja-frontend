@@ -20,6 +20,7 @@ export default function FeedPage() {
   const [loading, setLoading] = useState(true);
   const [posting, setPosting] = useState(false);
   const [commentText, setCommentText] = useState({});
+  const [commentSending, setCommentSending] = useState({}); // per-post anti double-submit
   const [showComments, setShowComments] = useState({});
   const [showImageInput, setShowImageInput] = useState(false);
   const confirm = useConfirm();
@@ -30,9 +31,17 @@ export default function FeedPage() {
   useEffect(() => { load(); }, [load]);
 
   const handlePost = async () => {
-    if (!text.trim() && !imageUrl.trim()) return;
+    if ((!text.trim() && !imageUrl.trim()) || posting) return; // anti double-submit
     setPosting(true);
-    try { const { data } = await createPost({ content: text, imageUrl: imageUrl || null }); setPosts(p => [data, ...p]); setText(''); setImageUrl(''); setShowImageInput(false); } catch {}
+    const snapText = text;
+    const snapImg = imageUrl;
+    setText(''); setImageUrl(''); setShowImageInput(false); // clear ASAP
+    try {
+      const { data } = await createPost({ content: snapText, imageUrl: snapImg || null });
+      setPosts(p => [data, ...p]);
+    } catch {
+      setText(snapText); setImageUrl(snapImg); // restore daca a esuat
+    }
     setPosting(false);
   };
 
@@ -42,8 +51,16 @@ export default function FeedPage() {
 
   const handleComment = async (postId) => {
     const c = (commentText[postId] || '').trim();
-    if (!c) return;
-    try { const { data } = await commentPost(postId, c); setPosts(p => p.map(x => x.id === postId ? { ...x, comments: [...x.comments, data], commentsCount: x.commentsCount + 1 } : x)); setCommentText(p => ({ ...p, [postId]: '' })); } catch {}
+    if (!c || commentSending[postId]) return; // anti double-submit
+    setCommentSending(p => ({ ...p, [postId]: true }));
+    setCommentText(p => ({ ...p, [postId]: '' })); // clear ASAP
+    try {
+      const { data } = await commentPost(postId, c);
+      setPosts(p => p.map(x => x.id === postId ? { ...x, comments: [...x.comments, data], commentsCount: x.commentsCount + 1 } : x));
+    } catch {
+      setCommentText(p => ({ ...p, [postId]: c })); // restore daca a esuat
+    }
+    setCommentSending(p => ({ ...p, [postId]: false }));
   };
 
   const handleDelete = (id) => {
@@ -161,9 +178,9 @@ export default function FeedPage() {
                       </div>
                     ))}
                     <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-                      <input value={commentText[post.id] || ''} onChange={e => setCommentText(p => ({ ...p, [post.id]: e.target.value }))} onKeyDown={e => e.key === 'Enter' && handleComment(post.id)} placeholder="Scrie un comentariu..." style={{ ...inputBase, fontSize: 13, padding: '10px 12px', flex: 1 }} />
-                      <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                        onClick={() => handleComment(post.id)} style={{ padding: '0 14px', borderRadius: 'var(--r)', border: 0, background: 'var(--c-ink)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center' }}><Send size={14} /></motion.button>
+                      <input value={commentText[post.id] || ''} onChange={e => setCommentText(p => ({ ...p, [post.id]: e.target.value }))} onKeyDown={e => e.key === 'Enter' && handleComment(post.id)} disabled={commentSending[post.id]} placeholder="Scrie un comentariu..." style={{ ...inputBase, fontSize: 13, padding: '10px 12px', flex: 1, opacity: commentSending[post.id] ? 0.5 : 1 }} />
+                      <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} disabled={commentSending[post.id]}
+                        onClick={() => handleComment(post.id)} style={{ padding: '0 14px', borderRadius: 'var(--r)', border: 0, background: 'var(--c-ink)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: commentSending[post.id] ? 0.5 : 1 }}><Send size={14} /></motion.button>
                     </div>
                   </motion.div>
                 )}

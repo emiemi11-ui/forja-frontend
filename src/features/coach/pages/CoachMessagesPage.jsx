@@ -32,15 +32,17 @@ export default function CoachMessagesPage() {
   };
 
   const handleReply = async () => {
-    if (!reply.trim()) return;
+    if (!reply.trim() || loading) return; // anti double-submit
     setLoading(true);
+    const text = reply.trim();
+    setReply(''); // clear ASAP — dispare imediat
     try {
-      await coachReplyMessage(selected.id, reply);
+      await coachReplyMessage(selected.id, text);
       showToast(`✅ Răspuns trimis lui ${selected.from}`);
-      setReply('');
       load();
     } catch (e) {
       showToast('❌ Eroare', '❌');
+      setReply(text); // restore daca a esuat
     } finally { setLoading(false); }
   };
 

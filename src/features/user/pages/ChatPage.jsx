@@ -39,6 +39,7 @@ export default function ChatPage() {
   const [chatData, setChatData] = useState(null);
   const [messages, setMessages] = useState([]);
   const [msg, setMsg] = useState('');
+  const [sending, setSending] = useState(false); // anti double-submit
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const msgsEndRef = useRef(null);
@@ -116,12 +117,17 @@ export default function ChatPage() {
   }, [activeTeamId, teams, user?.id]);
 
   const handleSend = async () => {
-    if (!msg.trim() || !activeTeamId) return;
+    if (!msg.trim() || !activeTeamId || sending) return; // anti double-submit
+    setSending(true);
+    const text = msg.trim();
+    setMsg(''); // clear ASAP — dispare imediat
     try {
-      const { data } = await sendChat(msg, activeTeamId);
+      const { data } = await sendChat(text, activeTeamId);
       setMessages((prev) => [...prev, normalizeMessage(data, user?.id)]);
-      setMsg('');
-    } catch {}
+    } catch {
+      setMsg(text); // restore daca a esuat
+    }
+    setSending(false);
   };
 
   const teamName = chatData?.teamName || '';
@@ -243,10 +249,10 @@ export default function ChatPage() {
               onChange={(event) => setMsg(event.target.value)}
               onKeyDown={(event) => event.key === 'Enter' && handleSend()}
               placeholder="Scrie un mesaj echipei..."
-              disabled={!activeTeamId}
-              style={{ flex: 1, padding: '12px 16px', borderRadius: 'var(--r)', border: '1.5px solid var(--c-border)', fontSize: 14, fontFamily: 'var(--fb)', background: 'var(--c-bg)', boxSizing: 'border-box' }}
+              disabled={!activeTeamId || sending}
+              style={{ flex: 1, padding: '12px 16px', borderRadius: 'var(--r)', border: '1.5px solid var(--c-border)', fontSize: 14, fontFamily: 'var(--fb)', background: 'var(--c-bg)', boxSizing: 'border-box', opacity: sending ? 0.5 : 1 }}
             />
-            <button onClick={handleSend} disabled={!activeTeamId || !msg.trim()} className="btn btn-black" style={{ padding: '0 20px' }}>↑</button>
+            <button onClick={handleSend} disabled={!activeTeamId || !msg.trim() || sending} className="btn btn-black" style={{ padding: '0 20px' }}>↑</button>
           </div>
         </div>
       </div>

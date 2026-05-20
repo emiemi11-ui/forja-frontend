@@ -24,3 +24,7 @@ export const coachAssignWorkout = (id, athleteIds) =>
 export const getCoachRequests = () => api.get('/coach/requests');
 export const acceptCoachRequest = (linkId) => api.post(`/coach/requests/${linkId}/accept`);
 export const rejectCoachRequest = (linkId) => api.post(`/coach/requests/${linkId}/reject`);
+
+// === JURNAL ATLET — persistent in DB via auditLog ===
+export const addCoachAthleteJournal = (athleteId, text) =>
+  api.post(`${ENDPOINTS.coach.athletes}/${athleteId}/journal`, { text });

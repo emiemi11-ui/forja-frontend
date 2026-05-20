@@ -64,12 +64,14 @@ export default function ProProfilePage() {
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState('');
   const [newPostImg, setNewPostImg] = useState(null);
+  const [postingProfile, setPostingProfile] = useState(false); // anti double-submit
 
   const [teams, setTeams] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [teamDetail, setTeamDetail] = useState(null);
   const [teamPost, setTeamPost] = useState('');
   const [teamPostImg, setTeamPostImg] = useState(null);
+  const [postingTeam, setPostingTeam] = useState(false); // anti double-submit
   const [editingTeam, setEditingTeam] = useState(null);
 
   const [customImages, setCustomImages] = useState([]);
@@ -232,15 +234,20 @@ export default function ProProfilePage() {
   };
 
   const addPost = async () => {
-    if (!newPost.trim()) return;
+    if (!newPost.trim() || postingProfile) return; // anti double-submit
+    setPostingProfile(true);
+    const snapText = newPost.trim();
+    const snapImg = newPostImg;
+    setNewPost(''); setNewPostImg(null); // clear ASAP — dispare imediat
     try {
-      await createPost({ content: newPost.trim(), imageUrl: newPostImg || undefined });
-      setNewPost('');
-      setNewPostImg(null);
+      await createPost({ content: snapText, imageUrl: snapImg || undefined });
       await refreshPosts();
       showToast('✅ Postare publicată!');
     } catch (error) {
       showToast(error.response?.data?.error || '❌ Nu am putut publica postarea.', '❌');
+      setNewPost(snapText); setNewPostImg(snapImg); // restore daca a esuat
+    } finally {
+      setPostingProfile(false);
     }
   };
 
@@ -257,16 +264,21 @@ export default function ProProfilePage() {
   };
 
   const addTeamPost = async () => {
-    if (!teamPost.trim() || !selectedTeam) return;
+    if (!teamPost.trim() || !selectedTeam || postingTeam) return; // anti double-submit
+    setPostingTeam(true);
+    const snapText = teamPost.trim();
+    const snapImg = teamPostImg;
+    setTeamPost(''); setTeamPostImg(null); // clear ASAP
     try {
-      await createPost({ content: teamPost.trim(), imageUrl: teamPostImg || undefined, teamId: selectedTeam });
-      setTeamPost('');
-      setTeamPostImg(null);
+      await createPost({ content: snapText, imageUrl: snapImg || undefined, teamId: selectedTeam });
       await loadSelectedTeam(selectedTeam);
       await refreshTeams(selectedTeam);
       showToast('✅ Postare publicată în echipă!');
     } catch (error) {
       showToast(error.response?.data?.error || '❌ Nu am putut posta în echipă.', '❌');
+      setTeamPost(snapText); setTeamPostImg(snapImg); // restore
+    } finally {
+      setPostingTeam(false);
     }
   };
 
@@ -524,7 +536,7 @@ export default function ProProfilePage() {
               label="Adaugă imagine la postare"
             />
             <div style={{ marginTop: 8 }}>
-              <button className="btn btn-lime" onClick={addPost} disabled={!newPost.trim()}>📢 Publică pe profil</button>
+              <button className="btn btn-lime" onClick={addPost} disabled={!newPost.trim() || postingProfile}>{postingProfile ? '⏳ Se publică...' : '📢 Publică pe profil'}</button>
             </div>
           </div>
           {posts.length === 0 ? (
@@ -662,7 +674,7 @@ export default function ProProfilePage() {
                       compact
                     />
                     <div style={{ marginTop: 8 }}>
-                      <button className="btn btn-black" onClick={addTeamPost} disabled={!teamPost.trim()}>📢 Publică în echipă</button>
+                      <button className="btn btn-black" onClick={addTeamPost} disabled={!teamPost.trim() || postingTeam}>{postingTeam ? '⏳ Se publică...' : '📢 Publică în echipă'}</button>
                     </div>
                   </div>
 

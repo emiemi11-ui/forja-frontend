@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getNutClients, getNutClient, nutInviteClient, nutApplyTemplate, getNutTemplates, startConversation } from '../../../shared/api/index.js';
+import { getNutClients, getNutClient, nutInviteClient, nutApplyTemplate, getNutTemplates, startConversation, addNutClientJournal } from '../../../shared/api/index.js';
 import { pct, Toast, useToast } from '../../../shared/ui/helpers.jsx';
 import Drawer from '../../../shared/ui/Drawer.jsx';
 import Modal, { ModalField, ModalInput, ModalActions } from '../../../shared/ui/Modal.jsx';
@@ -29,6 +29,7 @@ export default function NutClientsPage() {
   const [selected, setSelected] = useState(null);
   const [drawerData, setDrawerData] = useState(null);
   const [showJournal, setShowJournal] = useState(false);
+  const [savingJournal, setSavingJournal] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm]         = useState({ email: '' });
   const [loading, setLoading]   = useState(false);
@@ -102,18 +103,28 @@ export default function NutClientsPage() {
               {showJournal && (
                 <div style={{ marginTop: 10 }}>
                   <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
-                    <input id="nutJournalInput" placeholder="Notița nouă..."
-                      style={{ flex: 1, padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: '#fff', fontSize: 12, fontFamily: 'var(--fb)' }} />
-                    <button className="btn btn-lime btn-sm" onClick={() => {
+                    <input id="nutJournalInput" placeholder="Notița nouă..." disabled={savingJournal}
+                      style={{ flex: 1, padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: '#fff', fontSize: 12, fontFamily: 'var(--fb)', opacity: savingJournal ? 0.5 : 1 }} />
+                    <button className="btn btn-lime btn-sm" disabled={savingJournal} onClick={async () => {
                       const input = document.getElementById('nutJournalInput');
-                      if (!input?.value.trim()) return;
-                      if (!selected.journal) selected.journal = [];
-                      selected.journal.push({ text: input.value.trim(), date: new Date().toISOString().slice(0,10) });
-                      selected.notes = input.value.trim();
-                      input.value = '';
-                      showToast('💾 Salvat!');
-                      setDrawerData({ ...drawerData });
-                    }}>💾</button>
+                      const text = (input?.value || '').trim();
+                      if (!text || savingJournal) return; // anti double-submit
+                      setSavingJournal(true);
+                      input.value = ''; // clear ASAP
+                      try {
+                        const { data } = await addNutClientJournal(selected.id, text);
+                        const updatedJournal = data.journal || [];
+                        selected.journal = updatedJournal;
+                        selected.notes = updatedJournal[updatedJournal.length - 1]?.text || selected.notes;
+                        setDrawerData({ ...drawerData, journal: updatedJournal, notes: selected.notes });
+                        showToast('💾 Salvat!');
+                      } catch (e) {
+                        showToast(e.response?.data?.error || '❌ Eroare la salvare', '❌');
+                        input.value = text; // restore
+                      } finally {
+                        setSavingJournal(false);
+                      }
+                    }}>{savingJournal ? '...' : '💾'}</button>
                   </div>
                   {selected.journal && [...selected.journal].reverse().map((entry, i) => (
                     <div key={i} style={{ padding: '6px 10px', borderRadius: 6, background: i === 0 ? 'rgba(123,47,190,0.06)' : 'transparent', borderLeft: '2px solid ' + (i === 0 ? 'rgba(123,47,190,0.4)' : 'rgba(255,255,255,0.06)'), marginBottom: 4 }}>

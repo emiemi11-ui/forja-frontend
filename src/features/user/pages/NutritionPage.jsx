@@ -40,6 +40,7 @@ export default function Nutrition() {
   const [customOpen, setCustomOpen] = useState(false);
   const [customFood, setCustomFood] = useState(EMPTY_CUSTOM_FOOD);
   const [savingCustom, setSavingCustom] = useState(false);
+  const [addingFoodIds, setAddingFoodIds] = useState(new Set()); // per-food anti double-submit
   const { toast, showToast } = useToast();
 
   const demoMode = isDemoSession() || readStoredUser()?.isDemo === true;
@@ -69,6 +70,12 @@ export default function Nutrition() {
   };
 
   const handleAdd = async (food) => {
+    if (addingFoodIds.has(food.id)) return; // anti double-submit pe acelasi food
+    setAddingFoodIds((prev) => {
+      const next = new Set(prev);
+      next.add(food.id);
+      return next;
+    });
     try {
       await addMeal(food.id, mealCtx);
       showToast(`${food.name} adăugat`);
@@ -77,6 +84,12 @@ export default function Nutrition() {
       await load();
     } catch (error) {
       showToast(error.response?.data?.error || '❌ Nu am putut adăuga alimentul.', '❌');
+    } finally {
+      setAddingFoodIds((prev) => {
+        const next = new Set(prev);
+        next.delete(food.id);
+        return next;
+      });
     }
   };
 
@@ -234,14 +247,17 @@ export default function Nutrition() {
                 <AnimatePresence>
                   {foods.length > 0 && (
                     <motion.div className="food-results" initial={{ opacity: 0, y: -8, maxHeight: 0 }} animate={{ opacity: 1, y: 0, maxHeight: 240 }} exit={{ opacity: 0, y: -8, maxHeight: 0 }}>
-                      {foods.map((food, index) => (
+                      {foods.map((food, index) => {
+                        const isAdding = addingFoodIds.has(food.id);
+                        return (
                         <motion.div
                           key={food.id}
                           className="fr-item"
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.04 }}
-                          onClick={() => handleAdd(food)}
+                          onClick={() => !isAdding && handleAdd(food)}
+                          style={{ pointerEvents: isAdding ? 'none' : 'auto', opacity: isAdding ? 0.5 : 1 }}
                         >
                           <span className="fr-icon" style={{ width: 36, height: 36, borderRadius: 8, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'var(--c-border)' }}>
                             {food.img ? <img src={food.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : food.icon || '🍽️'}
@@ -250,9 +266,10 @@ export default function Nutrition() {
                             <div className="fr-nm" style={{ color: 'var(--c-ink)', fontWeight: 700 }}>{food.name}</div>
                             <div className="fr-macros">P {food.p}g · C {food.c}g · G {food.f}g · Fib {food.fib || 0}g</div>
                           </div>
-                          <span className="fr-kcal">{food.kcal} kcal</span>
+                          <span className="fr-kcal">{isAdding ? '...' : `${food.kcal} kcal`}</span>
                         </motion.div>
-                      ))}
+                        );
+                      })}
                     </motion.div>
                   )}
                 </AnimatePresence>

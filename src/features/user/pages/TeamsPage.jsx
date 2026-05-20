@@ -39,6 +39,7 @@ export default function TeamsPage() {
   const [posting, setPosting] = useState(false);          // anti double-submit
   const [showMembers, setShowMembers] = useState(false);
   const [commentTexts, setCommentTexts] = useState({});
+  const [commentSending, setCommentSending] = useState({}); // per-post anti double-submit
   const [teamDetailPostImg, setTeamDetailPostImg] = useState(null);
   const [postContent, setPostContent] = useState('');
   const socketRef = useRef(null);
@@ -205,7 +206,9 @@ export default function TeamsPage() {
 
   const handleAddComment = async (postId) => {
     const text = (commentTexts[postId] || '').trim();
-    if (!text) return;
+    if (!text || commentSending[postId]) return; // anti double-submit
+    setCommentSending((prev) => ({ ...prev, [postId]: true }));
+    setCommentTexts((prev) => ({ ...prev, [postId]: '' })); // clear ASAP
     try {
       const { data } = await commentPost(postId, text);
       setDetail((cur) => {
@@ -220,9 +223,11 @@ export default function TeamsPage() {
           }),
         };
       });
-      setCommentTexts((prev) => ({ ...prev, [postId]: '' }));
     } catch (e) {
       showToast(e.response?.data?.error || '❌ Eroare la comentariu', '❌');
+      setCommentTexts((prev) => ({ ...prev, [postId]: text })); // restore
+    } finally {
+      setCommentSending((prev) => ({ ...prev, [postId]: false }));
     }
   };
 
@@ -502,9 +507,10 @@ export default function TeamsPage() {
                   <div style={{ display: 'flex', gap: 6, marginTop: 6, paddingLeft: 46 }}>
                     <input value={commentTexts[post.id]||''} onChange={e => setCommentTexts(prev => ({...prev, [post.id]: e.target.value}))}
                       onKeyDown={(e) => e.key === 'Enter' && handleAddComment(post.id)}
-                      placeholder="Scrie un comentariu..." style={{ flex: 1, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--c-border)', fontSize: 12, fontFamily: 'var(--fb)', background: 'var(--c-surface)' }} />
-                    <button onClick={() => handleAddComment(post.id)}
-                      style={{ padding: '6px 12px', borderRadius: 8, border: 'none', background: 'var(--c-lime)', color: '#000', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>→</button>
+                      disabled={commentSending[post.id]}
+                      placeholder="Scrie un comentariu..." style={{ flex: 1, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--c-border)', fontSize: 12, fontFamily: 'var(--fb)', background: 'var(--c-surface)', opacity: commentSending[post.id] ? 0.5 : 1 }} />
+                    <button onClick={() => handleAddComment(post.id)} disabled={commentSending[post.id]}
+                      style={{ padding: '6px 12px', borderRadius: 8, border: 'none', background: 'var(--c-lime)', color: '#000', fontSize: 11, fontWeight: 700, cursor: 'pointer', opacity: commentSending[post.id] ? 0.5 : 1 }}>→</button>
                   </div>
                 </div>
               ))}

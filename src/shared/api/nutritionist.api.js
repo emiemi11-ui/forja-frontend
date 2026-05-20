@@ -19,3 +19,7 @@ export const nutInviteClient = (data) => api.post(ENDPOINTS.nutritionist.clients
 export const getNutritionistRequests = () => api.get('/nutritionist/requests');
 export const acceptNutritionistRequest = (linkId) => api.post(`/nutritionist/requests/${linkId}/accept`);
 export const rejectNutritionistRequest = (linkId) => api.post(`/nutritionist/requests/${linkId}/reject`);
+
+// === JURNAL CLIENT — persistent in DB via auditLog ===
+export const addNutClientJournal = (clientId, text) =>
+  api.post(`${ENDPOINTS.nutritionist.clients}/${clientId}/journal`, { text });
