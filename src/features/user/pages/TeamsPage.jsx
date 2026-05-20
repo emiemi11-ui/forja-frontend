@@ -171,22 +171,24 @@ export default function TeamsPage() {
   const handlePublish = async () => {
     if (!postContent.trim() || posting) return; // anti double-submit
     setPosting(true);
+    const snapText = postContent.trim();
+    const snapImg = teamDetailPostImg;
+    setPostContent(''); setTeamDetailPostImg(null); // clear ASAP — dispar imediat din UI
     try {
       const { data } = await createPost({
-        content: postContent.trim(),
+        content: snapText,
         teamId: detail.id,
-        imageUrl: teamDetailPostImg || undefined,
+        imageUrl: snapImg || undefined,
       });
       setDetail((cur) => {
         if (!cur) return cur;
         if ((cur.posts || []).some((p) => p.id === data.id)) return cur;
         return { ...cur, posts: [data, ...(cur.posts || [])] };
       });
-      setPostContent('');
-      setTeamDetailPostImg(null);
       showToast('✅ Postare publicată');
     } catch (e) {
       showToast(e.response?.data?.error || '❌ Eroare la publicare', '❌');
+      setPostContent(snapText); setTeamDetailPostImg(snapImg); // restore daca a esuat
     } finally {
       setPosting(false);
     }
