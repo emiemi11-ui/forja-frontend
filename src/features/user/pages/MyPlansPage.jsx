@@ -160,6 +160,7 @@ export default function MyPlansPage() {
                   color: plan.active === false ? 'var(--c-ink2)' : '#000',
                   opacity: busyId === plan.id ? 0.5 : 1,
                   transition: 'all 0.2s',
+                  display: tab === 'workout' ? 'inline-block' : 'none', // doar pentru workout — la nutrition nu are sens
                 }}
                 title={plan.active === false ? 'Click pentru a activa' : 'Click pentru a dezactiva'}
               >
